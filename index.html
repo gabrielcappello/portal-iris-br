@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iris — Portal Clínica BR</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#3b82f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Iris">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#050810; --surface:#0d1117; --surface2:#161b27; --surface3:#1e2538;
+  --border:#1f2d45; --border2:#2a3a55;
+  --accent:#3b82f6; --accent2:#60a5fa; --accent3:#93c5fd;
+  --green:#10b981; --red:#ef4444; --amber:#f59e0b;
+  --text:#e2e8f0; --text2:#94a3b8; --text3:#475569;
+  --radius:14px; --radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(59,130,246,.12) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 110%,rgba(16,185,129,.06) 0%,transparent 60%);pointer-events:none;z-index:0;}
+
+/* LOGIN */
+#login-page{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;padding:24px;}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:48px 44px;width:100%;max-width:420px;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(59,130,246,.08);animation:loginIn .5s cubic-bezier(.16,1,.3,1);}
+@keyframes loginIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+.login-card::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
+.login-logo-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#1d4ed8);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 8px 24px rgba(59,130,246,.35);}
+.login-logo h1{font-size:22px;font-weight:700;letter-spacing:-.3px;}
+.login-logo p{font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
+.login-title{font-size:26px;font-weight:700;margin-bottom:6px;}
+.login-sub{font-size:14px;color:var(--text2);margin-bottom:32px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.field input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--accent),#1d4ed8);color:white;border:none;border-radius:var(--radius-sm);padding:14px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;box-shadow:0 4px 16px rgba(59,130,246,.3);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(59,130,246,.4);}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.login-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:#fca5a5;margin-top:12px;display:none;}
+
+/* APP */
+#app{display:none;position:relative;z-index:1;}
+header{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;gap:16px;}
+.header-logo{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;}
+.header-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),#1d4ed8);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.header-clinic{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.header-clinic-name{font-size:13px;font-weight:600;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 14px;}
+.btn-logout{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 14px;color:var(--text2);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.btn-logout:hover{border-color:var(--red);color:var(--red);}
+
+/* NAV TABS */
+.tab-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;display:flex;gap:4px;overflow-x:auto;}
+.tab-btn{padding:16px 20px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;color:var(--text2);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:8px;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent);}
+.tab-badge{background:rgba(59,130,246,.15);color:var(--accent2);border-radius:99px;padding:1px 7px;font-size:10px;font-family:'JetBrains Mono',monospace;}
+
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:32px 24px;}
+.tab-panel{display:none;animation:fadeUp .3s ease;}
+.tab-panel.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ACCORDION */
+.accordion{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden;}
+.accordion-header{padding:18px 24px;background:var(--surface2);display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;transition:background .2s;}
+.accordion-header:hover{background:var(--surface3);}
+.accordion-icon{font-size:18px;}
+.accordion-title{flex:1;}
+.accordion-title h2{font-size:15px;font-weight:600;}
+.accordion-title p{font-size:12px;color:var(--text2);margin-top:2px;}
+.accordion-arrow{color:var(--text3);font-size:18px;transition:transform .3s;}
+.accordion-arrow.open{transform:rotate(180deg);}
+.accordion-body{display:none;border-top:1px solid var(--border);}
+.accordion-body.open{display:block;}
+.accordion-body-inner{padding:24px;}
+
+/* SAVE BAR */
+.save-bar{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:16px 24px;border-top:1px solid var(--border);background:var(--surface2);}
+.btn-save{background:linear-gradient(135deg,var(--accent),#1d4ed8);color:white;border:none;border-radius:var(--radius-sm);padding:10px 24px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 12px rgba(59,130,246,.3);}
+.btn-save:hover{transform:translateY(-1px);}
+.btn-save:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.save-status{font-size:13px;color:var(--text2);}
+.save-status.ok{color:var(--green);}
+.save-status.err{color:var(--red);}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+.form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);}
+.form-group select option{background:var(--surface2);}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:0;}
+.toggle-label{font-size:13px;font-weight:600;flex:1;}
+.toggle{width:44px;height:24px;background:var(--surface3);border:1px solid var(--border);border-radius:99px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--accent);border-color:var(--accent);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:white;border-radius:50%;transition:transform .2s;}
+.toggle.on::after{transform:translateX(20px);}
+
+/* DENTISTA ACCORDION (inside main accordion) */
+.dent-accordion{border:1px solid var(--border2);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.dent-accordion-header{padding:16px 20px;background:var(--surface2);display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;transition:background .15s;}
+.dent-accordion-header:hover{background:var(--surface3);}
+.dent-accordion-header.has-active{border-left:3px solid var(--accent);}
+.dent-name-label{flex:1;font-size:14px;font-weight:600;}
+.dent-accordion-arrow{color:var(--text3);font-size:16px;transition:transform .3s;margin-left:8px;}
+.dent-accordion-arrow.open{transform:rotate(180deg);}
+.dent-accordion-body{display:none;padding:16px;border-top:1px solid var(--border);}
+.dent-accordion-body.open{display:block;}
+
+/* MODE TOGGLE */
+.mode-toggle-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+.mode-toggle-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+.mode-toggle{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;width:100%;}
+.mode-btn{flex:1;padding:9px 6px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;background:transparent;border:none;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap;text-align:center;}
+.mode-btn.active{background:var(--accent);color:white;}
+.mode-btn:not(.active):hover{background:var(--surface3);color:var(--text);}
+
+/* SÁBADO */
+.sabado-horarios{background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.2);border-radius:var(--radius-sm);padding:12px;margin-top:10px;}
+.sabado-horarios-title{font-size:11px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+
+/* SLOTS */
+.slots-preview{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;min-height:42px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.slot-chip{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);color:var(--accent2);border-radius:6px;padding:2px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;}
+.slots-empty{font-size:12px;color:var(--text3);}
+
+/* PROCEDIMENTOS */
+.spec-accordion{border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;margin-left:2px;margin-right:2px;}
+.spec-header{padding:11px 14px;background:var(--surface2);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-size:14px;font-weight:600;transition:background .15s;}
+.spec-header:hover{background:var(--surface3);}
+.spec-header .spec-arrow{margin-left:auto;color:var(--text3);font-size:14px;transition:transform .25s;}
+.spec-header .spec-arrow.open{transform:rotate(180deg);}
+.spec-body{display:none;padding:10px 12px;border-top:1px solid var(--border);}
+.spec-body.open{display:block;}
+.proc-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.proc-row:last-child{border-bottom:none;}
+.proc-check{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+.proc-name{flex:1;font-size:14px;}
+.proc-time-wrap{display:flex;align-items:center;gap:4px;}
+.proc-time{width:44px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 4px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;text-align:center;}
+.proc-time:focus{border-color:var(--accent);}
+.proc-time-label{font-size:11px;color:var(--text3);}
+.proc-time-btn{width:28px;height:28px;background:var(--surface3);border:1px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;transition:all .15s;}
+.proc-time-btn:hover{background:var(--accent);color:white;border-color:var(--accent);}
+
+/* AUTOMAÇÕES */
+.auto-item{display:flex;align-items:flex-start;gap:16px;padding:16px 0;border-bottom:1px solid var(--border);}
+.auto-item:last-child{border-bottom:none;}
+.auto-info{flex:1;}
+.auto-title{font-size:14px;font-weight:600;margin-bottom:3px;}
+.auto-sub{font-size:12px;color:var(--text2);}
+.auto-extra{margin-top:10px;display:flex;align-items:center;gap:8px;}
+.auto-extra input{width:70px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;text-align:center;}
+.auto-extra input:focus{border-color:var(--accent);}
+.auto-extra label{font-size:12px;color:var(--text2);}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--surface2);padding:12px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface2);}
+tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;}
+.badge.confirmado{background:rgba(16,185,129,.12);color:#34d399;}
+.badge.cancelado{background:rgba(239,68,68,.12);color:#fca5a5;}
+.badge.remarcado{background:rgba(245,158,11,.12);color:#fcd34d;}
+.badge.ok{background:rgba(59,130,246,.12);color:#93c5fd;}
+.badge.falto{background:rgba(239,68,68,.12);color:#fca5a5;}
+.status-select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--text);font-family:'Outfit',sans-serif;cursor:pointer;}
+
+/* SEARCH */
+.search-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.search-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 16px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--accent);}
+.empty{text-align:center;padding:60px 24px;color:var(--text2);}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--text2);font-size:14px;gap:10px;}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 20px;font-size:14px;box-shadow:0 16px 40px rgba(0,0,0,.5);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);pointer-events:none;}
+#toast.show{transform:none;opacity:1;}
+#toast.ok{border-color:var(--green);color:#34d399;}
+#toast.err{border-color:var(--red);color:#fca5a5;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:100%;max-width:480px;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:loginIn .3s cubic-bezier(.16,1,.3,1);}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:16px;}
+.modal textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);resize:vertical;min-height:120px;outline:none;}
+.modal textarea:focus{border-color:var(--accent);}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+.btn-cancel{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 20px;color:var(--text2);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;}
+.btn-ok{background:var(--accent);border:none;border-radius:var(--radius-sm);padding:9px 20px;color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+.obs-btn{background:transparent;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;}
+.obs-btn:hover{border-color:var(--accent);color:var(--accent2);}
+
+@media(max-width:640px){
+  .form-grid{grid-template-columns:1fr;}
+  .form-grid.cols-3{grid-template-columns:1fr;}
+  header{padding:0 16px;}
+  .tab-nav{padding:0 16px;}
+  .main{padding:20px 16px;}
+}
+
+/* ══ APP DENTISTA ══ */
+#app-dentista{display:none;position:relative;z-index:1;min-height:100vh;}
+.dapp-header{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 16px;height:60px;display:flex;align-items:center;gap:12px;}
+.dapp-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--green),#059669);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.dapp-name{font-size:15px;font-weight:700;flex:1;}
+.dapp-clinic{font-size:11px;color:var(--text3);}
+.dapp-nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;}
+.dapp-tab{flex:1;min-width:60px;padding:12px 8px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;color:var(--text3);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s;}
+.dapp-tab span{font-size:18px;}
+.dapp-tab.active{color:var(--accent2);border-bottom-color:var(--accent);}
+.dapp-main{max-width:600px;margin:0 auto;padding:16px;}
+.dapp-panel{display:none;}
+.dapp-panel.active{display:block;}
+
+/* Agenda cards */
+.agenda-date-header{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;}
+.agenda-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.agenda-card.status-ok{border-left:3px solid var(--green);}
+.agenda-card.status-falto{border-left:3px solid var(--red);}
+.agenda-card.status-cancelado{opacity:.5;}
+.agenda-time{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--accent2);min-width:48px;}
+.agenda-info{flex:1;}
+.agenda-name{font-size:14px;font-weight:600;}
+.agenda-proc{font-size:12px;color:var(--text2);margin-top:2px;}
+.agenda-actions{display:flex;gap:6px;}
+.btn-ok-sm{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#34d399;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
+.btn-ok-sm:hover,.btn-ok-sm.active{background:var(--green);color:white;border-color:var(--green);}
+.btn-falto-sm{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;}
+.btn-falto-sm:hover,.btn-falto-sm.active{background:var(--red);color:white;border-color:var(--red);}
+.btn-wa{background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25d366;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer;transition:all .2s;}
+.btn-wa:hover{background:#25d366;color:white;}
+
+/* QR Modal */
+.qr-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:100%;max-width:360px;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:loginIn .3s cubic-bezier(.16,1,.3,1);text-align:center;}
+.qr-modal h3{font-size:17px;font-weight:700;margin-bottom:6px;}
+.qr-modal p{font-size:13px;color:var(--text2);margin-bottom:20px;}
+#qr-canvas{border-radius:12px;background:white;padding:12px;}
+.qr-link{font-size:11px;color:var(--text3);margin-top:12px;word-break:break-all;font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon" style="padding:0;overflow:hidden"><svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+  <rect width="44" height="44" rx="12" fill="#0d1117"/>
+  <circle cx="22" cy="22" r="15" fill="none" stroke="#3b82f6" stroke-width="2"/>
+  <circle cx="22" cy="22" r="9" fill="#3b82f6"/>
+  <circle cx="22" cy="22" r="4" fill="#0d1117"/>
+  <circle cx="26" cy="18" r="2.5" fill="#93c5fd" opacity="0.9"/>
+</svg></div>
+      <div><h1>Iris</h1><p>Portal de Gestão</p></div>
+    </div>
+    <div class="login-title">Bem-vindo</div>
+    <div class="login-sub">Entre com os dados da sua clínica</div>
+    <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="clinica@exemplo.com" autocomplete="email"></div>
+    <div class="field"><label>Contraseña</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin(); return false;">Entrar</button>
+    <div class="login-error" id="login-error">Email ou senha incorretos</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="header-logo"><div class="header-logo-icon" style="padding:0;overflow:hidden"><svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="8" fill="#0d1117"/>
+  <circle cx="16" cy="16" r="11" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+  <circle cx="16" cy="16" r="7" fill="#3b82f6"/>
+  <circle cx="16" cy="16" r="3" fill="#0d1117"/>
+  <circle cx="19" cy="13" r="2" fill="#93c5fd" opacity="0.9"/>
+</svg></div>Iris Portal</div>
+    <div class="header-clinic">
+      <div class="header-clinic-name" id="header-clinic-name">—</div>
+      <button class="btn-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('config',this)">⚙️ Configuração</button>
+    <button class="tab-btn" onclick="showTab('pacientes',this)">👤 Pacientes <span class="tab-badge" id="badge-pac">0</span></button>
+    <button class="tab-btn" onclick="showTab('agendamentos',this)">📅 Agendamentos <span class="tab-badge" id="badge-ag">0</span></button>
+    <button class="tab-btn" onclick="showTab('precios',this)">💲 Preços</button>
+  </div>
+
+  <div class="main">
+
+    <!-- CONFIG -->
+    <div class="tab-panel active" id="tab-config">
+
+      <!-- CLÍNICA -->
+      <div class="accordion" id="acc-clinica">
+        <div class="accordion-header" onclick="toggleAcc('clinica')">
+          <span class="accordion-icon">🏥</span>
+          <div class="accordion-title"><h2>Dados da Clínica</h2><p>Informações usadas pelo agente nas conversas</p></div>
+          <span class="accordion-arrow" id="arr-clinica">▼</span>
+        </div>
+        <div class="accordion-body" id="body-clinica">
+          <div class="accordion-body-inner">
+            <div class="form-grid">
+              <div class="form-group"><label>Nome da Clínica</label><input id="c_nome" placeholder="Ex: OdontoBR" oninput="updateWpName()"></div>
+              <div class="form-group"><label>Telefone</label><input id="c_tel" placeholder="Ej: 1112345678"></div>
+              <div class="form-group"><label>Endereço <span style="font-weight:400;color:var(--text3)">(Rua e número)</span></label><input id="c_end" placeholder="Ej: Av. Corrientes 1234"></div>
+              <div class="form-group"><label><b>Sala</b></label><input id="c_sala" placeholder="Ej: Piso 3, Consultorio B"></div>
+              <div class="form-group"><label>Bairro</label><input id="c_bairro" placeholder="Centro"></div>
+              <div class="form-group"><label>Cidade</label><input id="c_cidade" placeholder="São Paulo"></div>
+              <div class="form-group"><label>CEP</label><input id="c_cep" placeholder="01310-100"></div>
+              <div class="form-group"><label>Referência</label><input id="c_referencia" placeholder="Ex: Em frente ao banco, portão azul"></div>
+              <div class="form-group full">
+                <label>Instância WhatsApp <span style="font-weight:400;color:var(--text3)">(automático)</span></label>
+                <input id="c_wp" readonly style="background:var(--surface3);color:rgba(226,232,240,0.85);font-weight:300;cursor:default;" placeholder="Gerado automaticamente">
+                <span style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/[nome da clínica]</span>
+              </div>
+              <div class="form-group full">
+                <label>Link de Localização <span style="font-weight:400;color:var(--text3)">(Google Maps)</span></label>
+                <input id="c_maps" placeholder="https://maps.google.com/?q=...">
+                <span style="font-size:11px;color:var(--text3);margin-top:4px">O agente enviará este link ao paciente quando solicitado ou ao finalizar o agendamento.</span>
+              </div>
+            </div>
+          </div>
+          <div class="save-bar">
+            <span class="save-status" id="cfg-status"></span>
+            <button class="btn-save" onclick="saveConfig()">💾 Salvar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DENTISTAS -->
+      <div class="accordion" id="acc-dentistas">
+        <div class="accordion-header" onclick="toggleAcc('dentistas')">
+          <span class="accordion-icon">👨‍⚕️</span>
+          <div class="accordion-title"><h2>Dentistas</h2><p>Até 10 profissionais com agendas, horários e procedimentos independentes</p></div>
+          <span class="accordion-arrow" id="arr-dentistas">▼</span>
+        </div>
+        <div class="accordion-body" id="body-dentistas">
+          <div class="accordion-body-inner" id="dentistas-body"></div>
+      </div>
+      </div>
+
+      <!-- AUTOMAÇÕES -->
+      <div class="accordion" id="acc-auto">
+        <div class="accordion-header" onclick="toggleAcc('auto')">
+          <span class="accordion-icon">⚡</span>
+          <div class="accordion-title"><h2>Automatizações</h2><p>Mensagens automáticas para pacientes</p></div>
+          <span class="accordion-arrow" id="arr-auto">▼</span>
+        </div>
+        <div class="accordion-body" id="body-auto">
+          <div class="accordion-body-inner" id="auto-body"></div>
+          <div class="save-bar">
+            <span class="save-status" id="auto-status"></span>
+            <button class="btn-save" onclick="saveAuto()">💾 Salvar Automatizações</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PACIENTES -->
+    <div class="tab-panel" id="tab-pacientes">
+      <div class="search-bar">
+        <input class="search-input" id="search-pac" placeholder="🔍 Buscar por nome, telefone ou documento..." oninput="filterPacientes()">
+      </div>
+      <div class="table-wrap" id="pac-table-wrap">
+        <div class="loading"><div class="spinner"></div> Cargando pacientes...</div>
+      </div>
+    </div>
+
+    <!-- AGENDAMENTOS -->
+    <div class="tab-panel" id="tab-agendamentos">
+      <div class="search-bar">
+        <input class="search-input" id="search-ag" placeholder="🔍 Buscar por nome, data ou dentista..." oninput="filterAgendamentos()">
+        <select class="status-select" id="filter-status" onchange="filterAgendamentos()">
+          <option value="">Todos</option>
+          <option value="confirmado">Confirmado</option>
+          <option value="remarcado">Remarcado</option>
+          <option value="cancelado">Cancelado</option>
+          <option value="ok">OK</option>
+          <option value="falto">Falto</option>
+        </select>
+      </div>
+      <div class="table-wrap" id="ag-table-wrap" style="margin:0 -4px">
+        <div class="loading"><div class="spinner"></div> Cargando agendamientos...</div>
+      </div>
+    </div>
+
+    <!-- PRECIOS -->
+    <div class="tab-panel" id="tab-precios">
+      <div class="accordion" id="acc-precios-wrap">
+        <div class="card-header" style="padding:18px 24px;background:var(--surface2);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
+          <span>💲</span>
+          <div><h2 style="font-size:15px;font-weight:600">Precios por Procedimento</h2><p style="font-size:12px;color:var(--text2);margin-top:2px">Valores de referência para cada procedimento. O agente pode informar esses preços ao paciente.</p></div>
+        </div>
+        <div style="padding:20px" id="precios-body"></div>
+        <div class="save-bar">
+          <span class="save-status" id="precios-status"></span>
+          <button class="btn-save" onclick="savePrecios()">💾 Salvar Precios</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL OBSERVACIONES -->
+<div class="modal-bg" id="obs-modal" style="display:none;z-index:300">
+  <div class="modal">
+    <h3>📝 Observações do Paciente</h3>
+    <textarea id="obs-text" placeholder="Escreva aqui notas sobre este paciente..."></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeObs()">Cancelar</button>
+      <button class="btn-ok" onclick="saveObs()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL QR CODE -->
+<div class="modal-bg" id="qr-modal">
+  <div class="qr-modal">
+    <h3>📱 Acesso do Dentista</h3>
+    <p id="qr-dent-name">Escaneie o QR para acessar</p>
+    <canvas id="qr-canvas" width="200" height="200"></canvas>
+    <div class="qr-link" id="qr-link-text"></div>
+    <div class="modal-btns" style="justify-content:center;margin-top:16px">
+      <button class="btn-cancel" onclick="document.getElementById('qr-modal').classList.remove('open')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP DENTISTA -->
+<div id="app-dentista">
+  <div class="dapp-header">
+    <div class="dapp-logo" style="padding:0;overflow:hidden"><svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="8" fill="#0d1117"/>
+  <circle cx="16" cy="16" r="11" fill="none" stroke="#10b981" stroke-width="1.5"/>
+  <circle cx="16" cy="16" r="7" fill="#10b981"/>
+  <circle cx="16" cy="16" r="3" fill="#0d1117"/>
+  <circle cx="19" cy="13" r="2" fill="#6ee7b7" opacity="0.9"/>
+</svg></div>
+    <div>
+      <div class="dapp-name" id="dapp-name">—</div>
+      <div class="dapp-clinic" id="dapp-clinic">—</div>
+    </div>
+    <button class="btn-logout" style="margin-left:auto" onclick="dentLogout()">Sair</button>
+  </div>
+  <div class="dapp-nav">
+    <button class="dapp-tab active" onclick="showDappTab('agenda',this)"><span>📅</span>Agenda</button>
+    <button class="dapp-tab" onclick="showDappTab('pacientes',this)"><span>👤</span>Pacientes</button>
+    <button class="dapp-tab" onclick="showDappTab('config',this)"><span>⚙️</span>Config</button>
+  </div>
+  <div class="dapp-main">
+    <!-- AGENDA -->
+    <div class="dapp-panel active" id="dapp-agenda">
+      <div id="dapp-agenda-body"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+    <!-- PACIENTES -->
+    <div class="dapp-panel" id="dapp-pacientes">
+      <input class="search-input" id="dapp-search-pac" placeholder="🔍 Buscar paciente..." oninput="filterDappPacientes()" style="width:100%;margin-bottom:12px">
+      <div id="dapp-pac-body"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+    <!-- CONFIG DENTISTA -->
+    <div class="dapp-panel" id="dapp-config">
+      <div id="dapp-config-body"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════
+// SUPABASE
+// ══════════════════════════════════
+const SUPABASE_URL='https://udizowyfjnhuhgxkeayk.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkaXpvd3lmam5odWhneGtlYXlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NDQ1NDgsImV4cCI6MjA5NTQyMDU0OH0.EGX17VhE0IBlX5K-aqvJeAQ3GDIiDD-w-hXgTyQiaws';
+const sb={
+  async query(t,p=''){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}${p}`,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'}});if(!r.ok)throw new Error(await r.text());return r.json();},
+  async update(t,id,data){const r=await fetch(`${SUPABASE_URL}/rest/v1/${t}?id=eq.${id}`,{method:'PATCH',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'},body:JSON.stringify(data)});if(!r.ok)throw new Error(await r.text());return r.ok;}
+};
+
+// ══════════════════════════════════
+// PROCEDIMENTOS POR ESPECIALIDADE
+// com tempos padrão (minutos) baseados em média real + 5min margem
+// ══════════════════════════════════
+const ESPECIALIDADES = [
+  { nome:'🦷 Clínico Geral', procs:[
+    {nome:'Consulta / Avaliação', tempo:30},
+    {nome:'Limpeza dental (profilaxia)', tempo:45},
+    {nome:'Restauração / Cárie (1 face)', tempo:40},
+    {nome:'Restauração / Cárie (2+ faces)', tempo:55},
+    {nome:'Extração simples', tempo:35},
+    {nome:'Fluoretação', tempo:25},
+    {nome:'Radiografia', tempo:20},
+  ]},
+  { nome:'🔧 Endodontia', procs:[
+    {nome:'Canal dente anterior (1 raiz)', tempo:65},
+    {nome:'Canal pré-molar (2 raízes)', tempo:80},
+    {nome:'Canal molar (3+ raízes)', tempo:95},
+    {nome:'Retratamento de canal', tempo:90},
+  ]},
+  { nome:'📐 Ortodontia', procs:[
+    {nome:'Consulta ortodontia', tempo:35},
+    {nome:'Colocação de braquetes', tempo:90},
+    {nome:'Ajuste mensal braquetes', tempo:30},
+    {nome:'Alinhadores (entrega/ajuste)', tempo:35},
+    {nome:'Contenção / Retentores', tempo:40},
+  ]},
+  { nome:'🔩 Implantodontia', procs:[
+    {nome:'Consulta / Planejamento', tempo:40},
+    {nome:'Cirurgia de implante', tempo:90},
+    {nome:'Reabertura / 2ª fase', tempo:45},
+    {nome:'Colocação de coroa sobre implante', tempo:55},
+    {nome:'Controle pós-operatório', tempo:25},
+  ]},
+  { nome:'🦴 Prótese', procs:[
+    {nome:'Moldagem', tempo:40},
+    {nome:'Prova de estrutura', tempo:30},
+    {nome:'Entrega de prótese removível', tempo:45},
+    {nome:'Entrega de coroa fixa', tempo:40},
+    {nome:'Ajuste de prótese', tempo:30},
+  ]},
+  { nome:'🩺 Periodontia', procs:[
+    {nome:'Raspagem supra-gengival', tempo:50},
+    {nome:'Raspagem sub-gengival (por quadrante)', tempo:60},
+    {nome:'Cirurgia periodontal', tempo:90},
+    {nome:'Controle periodontal', tempo:30},
+  ]},
+  { nome:'✨ Estética', procs:[
+    {nome:'Clareamento em consultório', tempo:75},
+    {nome:'Facetas de porcelana (prep)', tempo:90},
+    {nome:'Facetas de resina', tempo:60},
+    {nome:'Harmonização do sorriso', tempo:50},
+  ]},
+  { nome:'👶 Odontopediatria', procs:[
+    {nome:'Consulta pediátrica', tempo:35},
+    {nome:'Selantes', tempo:30},
+    {nome:'Extração de dente de leite', tempo:25},
+    {nome:'Fluoretação niños', tempo:20},
+  ]},
+  { nome:'🔪 Cirurgia', procs:[
+    {nome:'Extração complexa / siso', tempo:60},
+    {nome:'Frenectomia', tempo:40},
+    {nome:'Biópsia', tempo:35},
+    {nome:'Cirurgia de cisto', tempo:75},
+  ]},
+];
+
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+let currentClinica=null, allPacientes=[], allAgendamentos=[], obsPatientId=null;
+const dentModo=['auto','auto','auto','auto','auto'];
+
+// ══════════════════════════════════
+// TOAST
+// ══════════════════════════════════
+function toast(msg,type='ok'){const t=document.getElementById('toast');t.textContent=msg;t.className=`show ${type}`;setTimeout(()=>t.className='',3000);}
+
+// ══════════════════════════════════
+// LOGIN
+// ══════════════════════════════════
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-password').value;
+  const btn=document.getElementById('login-btn');
+  const err=document.getElementById('login-error');
+  err.style.display='none';
+  if(!email||!pass){err.textContent='Preencha todos os campos';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{
+    const rows=await sb.query('clinicas',`?email=eq.${encodeURIComponent(email)}&ativo=eq.true&select=*`);
+    if(!rows.length)throw new Error('nf');
+    const c=rows[0];
+    if(c.senha_hash!==pass)throw new Error('wp');
+    currentClinica=c;
+    document.getElementById('login-page').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('header-clinic-name').textContent=c.nome;
+    loadAll();
+  }catch(e){err.textContent='Email ou senha incorretos';err.style.display='block';}
+  btn.disabled=false;btn.textContent='Entrar';
+}
+document.addEventListener('DOMContentLoaded', function(){
+  const pwEl = document.getElementById('login-password');
+  if(pwEl) pwEl.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+});
+function doLogout(){currentClinica=null;document.getElementById('login-page').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('login-email').value='';document.getElementById('login-password').value='';}
+
+// ══════════════════════════════════
+// TABS
+// ══════════════════════════════════
+function showTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ══════════════════════════════════
+// ACCORDION
+// ══════════════════════════════════
+function toggleAcc(id){
+  const body=document.getElementById(`body-${id}`);
+  const arr=document.getElementById(`arr-${id}`);
+  const wasOpen=body.classList.contains('open');
+  body.classList.toggle('open');
+  arr.classList.toggle('open');
+  if(wasOpen){
+    showSaveReminder();
+  }
+}
+
+function showSaveReminder(){
+  const t=document.getElementById('toast');
+  t.textContent='💾 Não esqueça de salvar as alterações';
+  t.className='show';
+  t.style.borderColor='var(--amber)';
+  t.style.color='#fcd34d';
+  setTimeout(()=>{t.className='';t.style.borderColor='';t.style.color='';},3500);
+}
+
+function updateDentName(i){
+  const titulo=document.getElementById(`d${i}_titulo`)?.value||'Dr.';
+  const nome=document.getElementById(`d${i}_nome`)?.value||'';
+  const label=document.getElementById(`dname-label-${i}`);
+  if(label) label.textContent=nome?`— ${titulo} ${nome}`:'';
+}
+
+function renderPrecios(precios){
+  precios=precios||{};
+  const body=document.getElementById('precios-body');
+  if(!body)return;
+  body.innerHTML=ESPECIALIDADES.map(esp=>`
+    <div style="margin-bottom:20px">
+      <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">${esp.nome}</div>
+      ${esp.procs.map(p=>{
+        const key=p.nome.replace(/\s/g,'_');
+        const val=precios[key]||'0';
+        return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+          <span style="flex:1;font-size:13px">${p.nome}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:13px;color:var(--text3)">$</span>
+            <input type="number" id="precio-${key}" value="${val}" min="0" step="100"
+              style="width:90px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;text-align:right"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)';if(this.value)this.value=parseInt(this.value)||0;" oninput="if(this.value.length>1&&this.value[0]==='0')this.value=this.value.replace(/^0+/,'')">
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+async function savePrecios(){
+  const btn=document.querySelector('[onclick="savePrecios()"]');
+  const st=document.getElementById('precios-status');
+  btn.disabled=true;st.textContent='Salvando...';st.className='save-status';
+  const precios={};
+  ESPECIALIDADES.forEach(esp=>{
+    esp.procs.forEach(p=>{
+      const key=p.nome.replace(/\s/g,'_');
+      const el=document.getElementById(`precio-${key}`);
+      if(el)precios[key]=el.value||'0';
+    });
+  });
+  try{
+    await sb.update('clinicas',currentClinica.id,{precios});
+    currentClinica.precios=precios;
+    st.textContent='✓ Salvo';st.className='save-status ok';
+    toast('Preços salvos ✓');
+  }catch(e){
+    st.textContent='✗ Erro';st.className='save-status err';
+    toast('Erro ao salvar','err');
+  }
+  btn.disabled=false;
+}
+
+// ══════════════════════════════════
+// LOAD ALL
+// ══════════════════════════════════
+async function loadAll(){loadConfig();loadPacientes();loadAgendamentos();}
+
+// ══════════════════════════════════
+// CONFIG
+// ══════════════════════════════════
+function updateWpName(){
+  const nome=document.getElementById('c_nome')?.value||'';
+  const wp=document.getElementById('c_wp');
+  if(wp)wp.value=nome?`CAPPIA/${nome}`:'';
+}
+
+function loadConfig(){
+  const c=currentClinica;
+  document.getElementById('c_nome').value=c.nome||'';
+  document.getElementById('c_tel').value=c.telefone||'';
+  document.getElementById('c_end').value=c.endereco||'';
+  document.getElementById('c_sala').value=c.sala||'';
+  document.getElementById('c_referencia').value=c.referencia||'';
+  document.getElementById('c_bairro').value=c.bairro||'';
+  document.getElementById('c_cidade').value=c.cidade||'';
+  document.getElementById('c_cep').value=c.cep||'';
+  document.getElementById('c_wp').value=c.nome?`CAPPIA/${c.nome}`:'';
+  document.getElementById('c_maps').value=c.maps_link||'';
+  renderDentistas(c.dentistas||[]);
+  renderAuto(c.automatizacoes||{});
+  renderPrecios(c.precios||{});
+}
+
+async function saveConfig(){
+  const btn=document.querySelector('[onclick="saveConfig()"]');
+  const st=document.getElementById('cfg-status');
+  btn.disabled=true;st.textContent='Salvando...';st.className='save-status';
+  try{
+    await sb.update('clinicas',currentClinica.id,{
+      nome:document.getElementById('c_nome').value,
+      telefone:document.getElementById('c_tel').value,
+      endereco:document.getElementById('c_end').value,
+      sala:document.getElementById('c_sala').value,
+      referencia:document.getElementById('c_referencia').value,
+      bairro:document.getElementById('c_bairro').value,
+      cidade:document.getElementById('c_cidade').value,
+      cep:document.getElementById('c_cep').value,
+      whatsapp_instancia:document.getElementById('c_wp').value,
+      maps_link:document.getElementById('c_maps').value,
+    });
+    st.textContent='✓ Salvo';st.className='save-status ok';toast('Configuração salva ✓');
+  }catch(e){st.textContent='✗ Erro';st.className='save-status err';toast('Erro ao salvar','err');}
+  btn.disabled=false;
+}
+
+// ══════════════════════════════════
+// DENTISTAS
+// ══════════════════════════════════
+function calcSlots(ini,fim,dur,almIni,almFim){
+  if(!ini||!fim||!dur)return[];
+  const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+m;};
+  const toStr=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+  const start=toMin(ini),end=toMin(fim),d=parseInt(dur);
+  const aI=almIni?toMin(almIni):-1,aF=almFim?toMin(almFim):-1;
+  if(isNaN(d)||d<=0||start>=end)return[];
+  const slots=[];
+  for(let t=start;t+d<=end;t+=d){
+    if(aI>0&&t<aF&&t+d>aI){t=aF-d;continue;}
+    slots.push(toStr(t));
+  }
+  return slots;
+}
+
+function renderDentistas(dents){
+  const body=document.getElementById('dentistas-body');
+  const list=Array.isArray(dents)?dents:[];
+  const slots=Array.from({length:10},(_,i)=>list[i]||{nome:'',calendar_id:'',ativo:false,inicio:'08:00',fim:'18:00',dur:60,alm_ini:'12:00',alm_fim:'13:00',sabado:false,horarios:'',modo:'auto',procedimentos:[]});
+  body.innerHTML=slots.map((d,i)=>{
+    const modo=d.modo||'auto';
+    dentModo[i]=modo;
+    const procsMap={};
+    if(Array.isArray(d.procedimentos)){
+      d.procedimentos.forEach(p=>{if(p&&p.nome)procsMap[p.nome]={ativo:p.ativo!==false,tempo:p.tempo||30};});
+    }
+    const autoSlots=calcSlots(d.inicio||'08:00',d.fim||'18:00',d.dur||60,d.alm_ini||'12:00',d.alm_fim||'13:00');
+    const slotsHtml=autoSlots.length?autoSlots.map(s=>`<span class="slot-chip">${s}</span>`).join(''):`<span class="slots-empty">Preencha os campos de horário</span>`;
+    const specHtml=ESPECIALIDADES.map((esp,ei)=>`
+      <div class="spec-accordion">
+        <div class="spec-header" onclick="toggleSpec(${i},${ei})">
+          ${esp.nome}
+          <span class="spec-arrow" id="specarr-${i}-${ei}">▼</span>
+        </div>
+        <div class="spec-body" id="specbody-${i}-${ei}">
+          ${esp.procs.map(p=>{
+            const saved=procsMap[p.nome];
+            const ativo=saved?saved.ativo:false;
+            const tempo=saved?saved.tempo:p.tempo;
+            return `<div class="proc-row">
+              <input type="checkbox" class="proc-check" id="pc-${i}-${p.nome.replace(/\s/g,'_')}" ${ativo?'checked':''}>
+              <span class="proc-name">${p.nome}</span>
+              <div class="proc-time-wrap">
+                <button class="proc-time-btn" onclick="adjTime(this,-5)">−</button>
+                <input type="number" class="proc-time" id="pt-${i}-${p.nome.replace(/\s/g,'_')}" value="${tempo}" min="5" step="5">
+                <button class="proc-time-btn" onclick="adjTime(this,5)">+</button>
+                <span class="proc-time-label">min</span>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`).join('');
+    return `
+    <div class="dent-accordion" id="dacc-${i}">
+      <div class="dent-accordion-header ${d.ativo?'has-active':''}" onclick="toggleDentAcc(${i})">
+        <span style="font-size:18px">👨‍⚕️</span>
+        <span style="font-size:13px;font-weight:700;color:var(--text)">Dentista ${i+1}</span>
+        <span style="font-size:12px;font-weight:400;color:var(--text2);margin-left:6px" id="dname-label-${i}">${d.nome?`— ${d.titulo||'Dr.'} ${d.nome}`:''}</span>
+        <div style="flex:1"></div>
+        <div class="toggle ${d.ativo?'on':''}" id="dent-toggle-${i}" onclick="event.stopPropagation();toggleDentista(${i})"></div>
+        <span class="dent-accordion-arrow" id="darr-${i}">▼</span>
+      </div>
+      <div class="dent-accordion-body" id="dbody-${i}">
+        <div class="form-grid" style="margin-bottom:12px">
+          <div class="form-group full">
+            <label style="color:var(--text)">Nome do Dentista <span style="color:var(--red)">*</span></label>
+            <div style="display:flex;gap:8px">
+              <select id="d${i}_titulo" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none;flex:0 0 90px">
+                <option value="Dr." ${(d.titulo||'Dr.')==='Dr.'?'selected':''}>Dr.</option>
+                <option value="Dra." ${d.titulo==='Dra.'?'selected':''}>Dra.</option>
+              </select>
+              <input id="d${i}_nome" value="${d.nome||''}" placeholder="Sobrenome e nome" style="flex:1" oninput="updateDentName(${i})">
+            </div>
+          </div>
+          <div class="form-group full"><label>Calendar ID</label><input id="d${i}_cal" value="${d.calendar_id||''}" placeholder="xxx@group.calendar.google.com"></div>
+          <div class="form-group"><label>Contraseña acceso</label><input type="password" id="d${i}_senha" value="${d.senha||''}" placeholder="Clave para el dentista"></div>
+          <div class="form-group"><label>Abertura</label><input type="time" id="d${i}_ini" value="${d.inicio||'08:00'}" oninput="updateSlots(${i})"></div>
+          <div class="form-group"><label>Datamento</label><input type="time" id="d${i}_fim" value="${d.fim||'18:00'}" oninput="updateSlots(${i})"></div>
+          <div class="form-group"><label>Almoço início</label><input type="time" id="d${i}_alm_ini" value="${d.alm_ini||'12:00'}" oninput="updateSlots(${i})"></div>
+          <div class="form-group"><label>Almoço fim</label><input type="time" id="d${i}_alm_fim" value="${d.alm_fim||'13:00'}" oninput="updateSlots(${i})"></div>
+        </div>
+
+        <!-- SÁBADO -->
+        <div style="margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);">
+            <span style="font-size:13px;font-weight:600;">Atende sábado</span>
+            <select id="d${i}_sab" onchange="toggleSabado(${i})" style="background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:13px;color:var(--text);outline:none;">
+              <option value="no" ${!d.sabado?'selected':''}>Não</option>
+              <option value="si" ${d.sabado?'selected':''}>Sim</option>
+            </select>
+          </div>
+          <div class="sabado-horarios" id="sabado-box-${i}" style="${d.sabado?'':'display:none'}">
+            <div class="sabado-horarios-title">🗓️ Horário do sábado</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Início sábado</label><input type="time" id="d${i}_sab_ini" value="${d.sab_ini||'08:00'}"></div>
+              <div class="form-group"><label>Fim sábado</label><input type="time" id="d${i}_sab_fim" value="${d.sab_fim||'13:00'}"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODO HORARIOS -->
+        <div style="margin-bottom:14px">
+          <div class="mode-toggle-wrap">
+            <span class="mode-toggle-label">Modo de horários</span>
+            <div class="mode-toggle" id="modetog-${i}">
+              <button class="mode-btn ${modo==='auto'?'active':''}" onclick="setModo(${i},'auto')">Automático</button>
+              <button class="mode-btn ${modo==='manual'?'active':''}" onclick="setModo(${i},'manual')">Manual</button>
+              <button class="mode-btn ${modo==='proc'?'active':''}" onclick="setModo(${i},'proc')">Por procedimento</button>
+            </div>
+          </div>
+          <div id="mode-auto-${i}" style="${modo==='auto'?'':'display:none'};margin-top:8px">
+            <div class="form-group" style="max-width:160px;margin-bottom:8px"><label>Duração (min)</label><input type="number" id="d${i}_dur" value="${d.dur||60}" min="5" step="5" oninput="updateSlots(${i})"></div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Slots gerados:</div>
+            <div class="slots-preview" id="slots-preview-${i}">${slotsHtml}</div>
+          </div>
+          <div id="mode-manual-${i}" style="${modo==='manual'?'':'display:none'};margin-top:8px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Escreva os horários separados por vírgula:</div>
+            <input id="d${i}_horarios" value="${d.horarios||''}" placeholder="08:00,09:00,10:00,11:00,14:00,15:00" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;">
+          </div>
+          <div id="mode-proc-${i}" style="${modo==='proc'?'':'display:none'};margin-top:8px">
+            <div style="font-size:11px;color:var(--text3)">Os horários serão calculados conforme a duração de cada procedimento selecionado.</div>
+          </div>
+        </div>
+
+        <!-- PROCEDIMENTOS — fechados por padrão -->
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Procedimentos que atende</label>
+          <div id="specs-${i}">${specHtml}</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+          <button style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:var(--accent2);border-radius:var(--radius-sm);padding:9px 16px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;" onclick="showQR(${i})">📱 QR Code</button>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="save-status" id="dent-status-${i}"></span>
+            <button class="btn-save" onclick="saveDentista(${i})">💾 Salvar Dentista ${i+1}</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDentAcc(i){
+  const b=document.getElementById(`dbody-${i}`);
+  const a=document.getElementById(`darr-${i}`);
+  const wasOpen=b.classList.contains('open');
+  b.classList.toggle('open');
+  a.classList.toggle('open');
+  if(wasOpen) showSaveReminder();
+}
+
+function toggleDentista(i){
+  const t=document.getElementById(`dent-toggle-${i}`);
+  const h=document.getElementById(`dacc-${i}`).querySelector('.dent-accordion-header');
+  t.classList.toggle('on');
+  h.classList.toggle('has-active',t.classList.contains('on'));
+}
+
+function toggleSabado(i){
+  const val=document.getElementById(`d${i}_sab`).value;
+  const box=document.getElementById(`sabado-box-${i}`);
+  box.style.display=val==='si'?'':'none';
+}
+
+function toggleSpec(di,ei){
+  const b=document.getElementById(`specbody-${di}-${ei}`);
+  const a=document.getElementById(`specarr-${di}-${ei}`);
+  b.classList.toggle('open');
+  a.classList.toggle('open');
+}
+
+function setModo(i,modo){
+  dentModo[i]=modo;
+  ['auto','manual','proc'].forEach(m=>{
+    document.getElementById(`mode-${m}-${i}`).style.display=m===modo?'':'none';
+  });
+  document.getElementById(`modetog-${i}`).querySelectorAll('.mode-btn').forEach((b,j)=>{
+    b.classList.toggle('active',['auto','manual','proc'][j]===modo);
+  });
+  if(modo==='auto')updateSlots(i);
+}
+
+function updateSlots(i){
+  if(dentModo[i]!=='auto')return;
+  const ini=document.getElementById(`d${i}_ini`)?.value;
+  const fim=document.getElementById(`d${i}_fim`)?.value;
+  const dur=document.getElementById(`d${i}_dur`)?.value;
+  const aI=document.getElementById(`d${i}_alm_ini`)?.value;
+  const aF=document.getElementById(`d${i}_alm_fim`)?.value;
+  const slots=calcSlots(ini,fim,dur,aI,aF);
+  const p=document.getElementById(`slots-preview-${i}`);
+  if(!p)return;
+  p.innerHTML=slots.length?slots.map(s=>`<span class="slot-chip">${s}</span>`).join(''):`<span class="slots-empty">Preencha os campos de horário</span>`;
+}
+
+function adjTime(btn,delta){
+  const input=btn.parentElement.querySelector('.proc-time');
+  const v=parseInt(input.value)||5;
+  input.value=Math.max(5,v+delta);
+}
+
+function getProcs(i){
+  const procs=[];
+  ESPECIALIDADES.forEach(esp=>{
+    esp.procs.forEach(p=>{
+      const key=p.nome.replace(/\s/g,'_');
+      const cb=document.getElementById(`pc-${i}-${key}`);
+      const ti=document.getElementById(`pt-${i}-${key}`);
+      if(cb)procs.push({nome:p.nome,ativo:cb.checked,tempo:parseInt(ti?.value)||p.tempo});
+    });
+  });
+  return procs;
+}
+
+async function saveDentista(i){
+  const btn=document.querySelector(`[onclick="saveDentista(${i})"]`);
+  const st=document.getElementById(`dent-status-${i}`);
+  if(btn)btn.disabled=true;
+  if(st){st.textContent='Salvando...';st.className='save-status';}
+  const modo=dentModo[i];
+  let horarios='';
+  if(modo==='auto'){
+    horarios=calcSlots(document.getElementById(`d${i}_ini`)?.value,document.getElementById(`d${i}_fim`)?.value,document.getElementById(`d${i}_dur`)?.value,document.getElementById(`d${i}_alm_ini`)?.value,document.getElementById(`d${i}_alm_fim`)?.value).join(',');
+  }else if(modo==='manual'){
+    horarios=document.getElementById(`d${i}_horarios`)?.value||'';
+  }
+  const dentData={
+    nome:document.getElementById(`d${i}_nome`)?.value||'',
+    titulo:document.getElementById(`d${i}_titulo`)?.value||'Dr.',
+    calendar_id:document.getElementById(`d${i}_cal`)?.value||'',
+    senha:document.getElementById(`d${i}_senha`)?.value||'',
+    ativo:document.getElementById(`dent-toggle-${i}`)?.classList.contains('on')||false,
+    inicio:document.getElementById(`d${i}_ini`)?.value||'08:00',
+    fim:document.getElementById(`d${i}_fim`)?.value||'18:00',
+    dur:parseInt(document.getElementById(`d${i}_dur`)?.value)||60,
+    alm_ini:document.getElementById(`d${i}_alm_ini`)?.value||'12:00',
+    alm_fim:document.getElementById(`d${i}_alm_fim`)?.value||'13:00',
+    sabado:document.getElementById(`d${i}_sab`)?.value==='si',
+    sab_ini:document.getElementById(`d${i}_sab_ini`)?.value||'08:00',
+    sab_fim:document.getElementById(`d${i}_sab_fim`)?.value||'13:00',
+    horarios,modo,
+    procedimentos:getProcs(i),
+  };
+  const allDents=Array.from({length:10},(_,j)=>{
+    if(j===i)return dentData;
+    const saved=currentClinica.dentistas?.[j];
+    return saved||{nome:'',calendar_id:'',ativo:false,inicio:'08:00',fim:'18:00',dur:60,alm_ini:'12:00',alm_fim:'13:00',sabado:false,horarios:'',modo:'auto',procedimentos:[]};
+  });
+  try{
+    await sb.update('clinicas',currentClinica.id,{dentistas:allDents});
+    if(!currentClinica.dentistas)currentClinica.dentistas=[];
+    currentClinica.dentistas[i]=dentData;
+    if(st){st.textContent='✓ Salvo';st.className='save-status ok';}
+    toast(`Dentista ${i+1} salvo ✓`);
+  }catch(e){
+    if(st){st.textContent='✗ Erro';st.className='save-status err';}
+    toast('Erro ao salvar','err');
+  }
+  if(btn)btn.disabled=false;
+}
+
+async function saveDentistas(){
+  // mantido para compatibilidade mas não usado no UI
+  for(let i=0;i<10;i++) await saveDentista(i);
+}
+
+// ══════════════════════════════════
+// AUTOMAÇÕES
+// ══════════════════════════════════
+function renderAuto(a){
+  document.getElementById('auto-body').innerHTML=`
+  <div class="accordion-body-inner" style="padding-top:8px">
+    <div class="auto-item">
+      <div class="auto-info">
+        <div class="auto-title">🔔 Lembrete 2 horas antes</div>
+        <div class="auto-sub">Envia uma mensagem automática 2 horas antes de cada consulta</div>
+      </div>
+      <div class="toggle ${a.lembrete_2h!==false?'on':''}" id="auto-lembrete_2h" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="auto-item">
+      <div class="auto-info">
+        <div class="auto-title">🔔 Lembrete 24 horas antes</div>
+        <div class="auto-sub">Envia uma mensagem automática 1 dia antes da consulta</div>
+      </div>
+      <div class="toggle ${a.lembrete_24h?'on':''}" id="auto-lembrete_24h" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="auto-item">
+      <div class="auto-info">
+        <div class="auto-title">⭐ Pós-consulta</div>
+        <div class="auto-sub">Pergunta como foi a consulta no dia seguinte</div>
+      </div>
+      <div class="toggle ${a.pos_consulta?'on':''}" id="auto-pos_consulta" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="auto-item">
+      <div class="auto-info">
+        <div class="auto-title">🔄 Retorno automático</div>
+        <div class="auto-sub">Lembra o paciente de agendar retorno após X meses</div>
+        <div class="auto-extra">
+          <input type="number" id="auto-retorno_meses" value="${a.retorno_meses||6}" min="1" max="24">
+          <label>meses</label>
+        </div>
+      </div>
+      <div class="toggle ${a.retorno?'on':''}" id="auto-retorno" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="auto-item">
+      <div class="auto-info">
+        <div class="auto-title">⏳ Lista de espera</div>
+        <div class="auto-sub">Avisa o paciente quando um horário cancelado fica disponível</div>
+      </div>
+      <div class="toggle ${a.lista_espera?'on':''}" id="auto-lista_espera" onclick="this.classList.toggle('on')"></div>
+    </div>
+  </div>`;
+}
+
+async function saveAuto(){
+  const btn=document.querySelector('[onclick="saveAuto()"]');
+  const st=document.getElementById('auto-status');
+  btn.disabled=true;st.textContent='Salvando...';st.className='save-status';
+  const data={
+    lembrete_2h:document.getElementById('auto-lembrete_2h')?.classList.contains('on')||false,
+    lembrete_24h:document.getElementById('auto-lembrete_24h')?.classList.contains('on')||false,
+    pos_consulta:document.getElementById('auto-pos_consulta')?.classList.contains('on')||false,
+    retorno:document.getElementById('auto-retorno')?.classList.contains('on')||false,
+    retorno_meses:parseInt(document.getElementById('auto-retorno_meses')?.value)||6,
+    lista_espera:document.getElementById('auto-lista_espera')?.classList.contains('on')||false,
+  };
+  try{
+    await sb.update('clinicas',currentClinica.id,{automatizacoes:data});
+    currentClinica.automatizacoes=data;
+    st.textContent='✓ Salvo';st.className='save-status ok';toast('Automatizações guardadas ✓');
+  }catch(e){st.textContent='✗ Erro';st.className='save-status err';toast('Erro ao salvar','err');}
+  btn.disabled=false;
+}
+
+// ══════════════════════════════════
+// PACIENTES
+// ══════════════════════════════════
+async function loadPacientes(){
+  try{
+    allPacientes=await sb.query('pacientes',`?clinica_id=eq.${currentClinica.id}`);
+    document.getElementById('badge-pac').textContent=allPacientes.length;
+    renderPacientes(allPacientes);
+  }catch(e){document.getElementById('pac-table-wrap').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar pacientes</p></div>';}
+}
+function renderPacientes(list){
+  const wrap=document.getElementById('pac-table-wrap');
+  if(!list.length){wrap.innerHTML='<div class="empty"><div class="empty-icon">👤</div><p>Nenhum paciente registrado ainda</p></div>';return;}
+  wrap.innerHTML=`<table><thead><tr><th>Nome</th><th>Telefone</th><th>Documento</th><th>Última Consulta</th><th>Total</th><th>Procedimento</th><th>Obs.</th></tr></thead><tbody>${list.map(p=>`<tr>
+    <td><b>${p.nome||'—'}</b></td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${p.telefone||'—'}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${p.documento||'—'}</td>
+    <td>${p.ultima_consulta||'—'}</td>
+    <td><span class="badge confirmado">${p.total_consultas||0}</span></td>
+    <td>${p.procedimento||'—'}</td>
+    <td><button class="obs-btn" onclick="openObs('${p.id}','${(p.observacoes||'').replace(/'/g,"\\'")}')">
+      ${p.observacoes?'📝':'➕'} Notas</button></td>
+  </tr>`).join('')}</tbody></table>`;
+}
+function filterPacientes(){
+  const q=document.getElementById('search-pac').value.toLowerCase();
+  renderPacientes(allPacientes.filter(p=>(p.nome||'').toLowerCase().includes(q)||(p.telefone||'').includes(q)||(p.documento||'').includes(q)));
+}
+
+// ══════════════════════════════════
+// AGENDAMENTOS
+// ══════════════════════════════════
+async function loadAgendamentos(){
+  try{
+    allAgendamentos=await sb.query('agendamentos',`?clinica_id=eq.${currentClinica.id}`);
+    document.getElementById('badge-ag').textContent=allAgendamentos.length;
+    renderAgendamentos(allAgendamentos);
+  }catch(e){document.getElementById('ag-table-wrap').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar agendamentos</p></div>';}
+}
+function renderAgendamentos(list){
+  const wrap=document.getElementById('ag-table-wrap');
+  if(!list.length){wrap.innerHTML='<div class="empty"><div class="empty-icon">📅</div><p>Nenhum agendamento registrado ainda</p></div>';return;}
+  wrap.innerHTML=`<table><thead><tr><th>Data</th><th>Hora</th><th>Paciente</th><th>Procedimento</th><th>Dentista</th><th>Status</th><th>Ação</th></tr></thead><tbody>${list.map(a=>`<tr>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${(a['horario']||'').substring(0,10)||'—'}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${(a['horario']||'').substring(11,16)||'—'}</td>
+    <td><b>${a.nome||'—'}</b><br><span style="color:var(--text2);font-size:11px">${a.telefone||''}</span></td>
+    <td>${a.procedimento||'—'}</td>
+    <td>${a.dentista||'—'}</td>
+    <td><span class="badge ${a.status||'confirmado'}">${a.status||'confirmado'}</span></td>
+    <td><select class="status-select" onchange="updateStatus('${a.id}',this.value)">
+      <option value="">Alterar...</option>
+      <option value="confirmado">Confirmado</option>
+      <option value="ok">✓ OK</option>
+      <option value="falto">✗ Faltou</option>
+      <option value="cancelado">Cancelado</option>
+      <option value="remarcado">Remarcado</option>
+    </select></td>
+  </tr>`).join('')}</tbody></table>`;
+}
+function filterAgendamentos(){
+  const q=document.getElementById('search-ag').value.toLowerCase();
+  const st=document.getElementById('filter-status').value;
+  renderAgendamentos(allAgendamentos.filter(a=>(!q||(a.nome||'').toLowerCase().includes(q)||(a.data||'').includes(q)||(a.dentista||'').toLowerCase().includes(q))&&(!st||a.status===st)));
+}
+async function updateStatus(id,status){
+  if(!status)return;
+  try{
+    await sb.update('agendamentos',id,{status});
+    const idx=allAgendamentos.findIndex(a=>a.id===id);
+    if(idx!==-1)allAgendamentos[idx].status=status;
+    toast(`Status actualizado: ${status} ✓`);
+    filterAgendamentos();
+  }catch(e){toast('Error al actualizar estado','err');}
+}
+
+// ══════════════════════════════════
+// APP DENTISTA
+// ══════════════════════════════════
+let currentDentista=null;
+let dappAgendamentos=[], dappPacientes=[];
+
+// Auto-login from URL params
+document.addEventListener('DOMContentLoaded',function(){
+  const pwEl=document.getElementById('login-password');
+  if(pwEl)pwEl.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  
+  const params=new URLSearchParams(window.location.search);
+  const clinicaId=params.get('c');
+  const dentIdx=params.get('d');
+  const token=params.get('t');
+  if(clinicaId&&dentIdx!==null&&token){
+    autoDentLogin(clinicaId,parseInt(dentIdx),token);
+  }
+});
+
+async function autoDentLogin(clinicaId,dentIdx,token){
+  try{
+    const rows=await sb.query('clinicas',`?id=eq.${clinicaId}&ativo=eq.true&select=*`);
+    if(!rows.length)return;
+    const clinica=rows[0];
+    const dents=clinica.dentistas||[];
+    const dent=dents[dentIdx];
+    if(!dent)return;
+    // token = simple hash of senha
+    const expectedToken=btoa(`${clinicaId}:${dentIdx}:${dent.senha||''}`).replace(/=/g,'');
+    if(token!==expectedToken)return;
+    currentDentista={...dent,idx:dentIdx,clinicaId,clinica};
+    showDentApp();
+  }catch(e){console.error(e);}
+}
+
+function showDentApp(){
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('app').style.display='none';
+  document.getElementById('app-dentista').style.display='block';
+  const d=currentDentista;
+  document.getElementById('dapp-name').textContent=`${d.titulo||'Dr.'} ${d.nome||''}`;
+  document.getElementById('dapp-clinic').textContent=d.clinica?.nome||'';
+  loadDappAgenda();
+  loadDappPacientes();
+  renderDappConfig();
+}
+
+function dentLogout(){
+  currentDentista=null;
+  document.getElementById('app-dentista').style.display='none';
+  document.getElementById('login-page').style.display='flex';
+  // Clear URL params
+  window.history.replaceState({},'',window.location.pathname);
+}
+
+function showDappTab(name,btn){
+  document.querySelectorAll('.dapp-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.dapp-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`dapp-${name}`).classList.add('active');
+  btn.classList.add('active');
+}
+
+async function loadDappAgenda(){
+  try{
+    const dentNome=`${currentDentista.titulo||'Dr.'} ${currentDentista.nome||''}`.trim();
+    const all=await sb.query('agendamentos',`?clinica_id=eq.${currentDentista.clinicaId}`);
+    dappAgendamentos=all.filter(a=>(a.dentista||'').toLowerCase().includes((currentDentista.nome||'').toLowerCase()));
+    renderDappAgenda();
+  }catch(e){document.getElementById('dapp-agenda-body').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar</p></div>';}
+}
+
+function renderDappAgenda(){
+  const body=document.getElementById('dapp-agenda-body');
+  if(!dappAgendamentos.length){body.innerHTML='<div class="empty"><div class="empty-icon">📅</div><p>Nenhum agendamento</p></div>';return;}
+  const today=new Date().toISOString().split('T')[0];
+  const groups={};
+  dappAgendamentos.filter(a=>a.data>=today&&a.status!=='cancelado').forEach(a=>{
+    if(!groups[a.data])groups[a.data]=[];
+    groups[a.data].push(a);
+  });
+  if(!Object.keys(groups).length){body.innerHTML='<div class="empty"><div class="empty-icon">✅</div><p>Nenhum turno próximo</p></div>';return;}
+  body.innerHTML=Object.keys(groups).sort().map(date=>{
+    const label=date===today?'Hoy':formatDate(date);
+    return `<div class="agenda-date-header">${label}</div>
+    ${groups[date].map(a=>`
+      <div class="agenda-card status-${a.status||''}" id="acard-${a.id}">
+        <div class="agenda-time">${a.horario||'--:--'}</div>
+        <div class="agenda-info">
+          <div class="agenda-name">${a.nome||'—'}</div>
+          <div class="agenda-proc">${a.procedimento||'—'}</div>
+        </div>
+        <div class="agenda-actions">
+          <button class="btn-wa" onclick="openWA('${a.telefone||''}')" title="WhatsApp">💬</button>
+          <button class="btn-ok-sm ${a.status==='ok'?'active':''}" onclick="dappStatus('${a.id}','ok',this)">✓</button>
+          <button class="btn-falto-sm ${a.status==='falto'?'active':''}" onclick="dappStatus('${a.id}','falto',this)">✗</button>
+        </div>
+      </div>`).join('')}`;
+  }).join('');
+}
+
+function formatDate(d){
+  const [y,m,day]=d.split('-');
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return `${day} ${months[parseInt(m)-1]}`;
+}
+
+function openWA(tel){
+  if(!tel)return;
+  const clean=tel.replace(/\D/g,'');
+  window.open(`https://wa.me/${clean}`,'_blank');
+}
+
+async function dappStatus(id,status,btn){
+  try{
+    await sb.update('agendamentos',id,{status});
+    const idx=dappAgendamentos.findIndex(a=>a.id===id);
+    if(idx!==-1)dappAgendamentos[idx].status=status;
+    renderDappAgenda();
+    toast(`${status==='ok'?'✓ Presente':'✗ Faltou'} marcado`);
+  }catch(e){toast('Error','err');}
+}
+
+async function loadDappPacientes(){
+  try{
+    const all=await sb.query('pacientes',`?clinica_id=eq.${currentDentista.clinicaId}`);
+    dappPacientes=all;
+    renderDappPacientes(dappPacientes);
+  }catch(e){}
+}
+
+function renderDappPacientes(list){
+  const body=document.getElementById('dapp-pac-body');
+  if(!list.length){body.innerHTML='<div class="empty"><div class="empty-icon">👤</div><p>Nenhum paciente</p></div>';return;}
+  body.innerHTML=list.map(p=>`
+    <div class="agenda-card" style="margin-bottom:8px;flex-wrap:wrap;gap:8px">
+      <div style="flex:1;min-width:0">
+        <div class="agenda-name">${p.nome||'—'}</div>
+        <div class="agenda-proc">${p.documento||''} · ${p.ultima_consulta||'Sin consultas'}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn-wa" onclick="openWA('${p.telefone||''}')" title="WhatsApp">💬</button>
+        <button class="obs-btn" onclick="openDappObs('${p.id}','${(p.observacoes||'').replace(/'/g,"\\'")}')">📝</button>
+      </div>
+    </div>`).join('');
+}
+
+function filterDappPacientes(){
+  const q=document.getElementById('dapp-search-pac').value.toLowerCase();
+  renderDappPacientes(dappPacientes.filter(p=>(p.nome||'').toLowerCase().includes(q)||(p.documento||'').includes(q)));
+}
+
+function openDappObs(id,obs){
+  obsPatientId=id;
+  document.getElementById('obs-text').value=obs||'';
+  document.getElementById('obs-modal').classList.add('open');
+}
+
+function renderDappConfig(){
+  const d=currentDentista;
+  const body=document.getElementById('dapp-config-body');
+  body.innerHTML=`
+    <div style="margin-top:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+      <div style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Minha Configuração</div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Calendar ID <span style="font-weight:400;color:var(--text3)">(Google Calendar)</span></label>
+        <input id="dc_cal" value="${d.calendar_id||''}" placeholder="xxx@group.calendar.google.com">
+        <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Google Calendar → Configurações → ID da agenda</span>
+      </div>
+      <button class="btn-save" style="width:100%" onclick="saveDappConfig()">💾 Salvar</button>
+    </div>`;}
+
+async function saveDappConfig(){
+  const d=currentDentista;
+  d.calendar_id=document.getElementById('dc_cal').value;
+  try{
+    const rows=await sb.query('clinicas',`?id=eq.${d.clinicaId}&select=dentistas`);
+    const dents=rows[0]?.dentistas||[];
+    dents[d.idx]={...dents[d.idx],calendar_id:d.calendar_id};
+    await sb.update('clinicas',d.clinicaId,{dentistas:dents});
+    toast('Calendar ID salvo ✓');
+  }catch(e){toast('Erro ao salvar','err');}
+}
+
+// ══════════════════════════════════
+// OBSERVACIONES
+// ══════════════════════════════════
+function openObs(id,obs){obsPatientId=id;document.getElementById('obs-text').value=obs||'';const m=document.getElementById('obs-modal');m.style.display='flex';m.classList.add('open');}
+function closeObs(){const m=document.getElementById('obs-modal');m.style.display='none';m.classList.remove('open');obsPatientId=null;}
+async function saveObs(){
+  const obs=document.getElementById('obs-text').value;
+  try{
+    await sb.update('pacientes',obsPatientId,{observacoes:obs});
+    const idx=allPacientes.findIndex(p=>p.id===obsPatientId);
+    if(idx!==-1)allPacientes[idx].observacoes=obs;
+    toast('Observação salva ✓');closeObs();renderPacientes(allPacientes);
+    // also update dapp if open
+    const di=dappPacientes.findIndex(p=>p.id===obsPatientId);
+    if(di!==-1)dappPacientes[di].observacoes=obs;
+  }catch(e){toast('Erro ao salvar','err');}
+}
+
+// ══ QR CODE GENERATOR ══
+function showQR(i){
+  const c=currentClinica;
+  // Lê direto do formulário — não precisa salvar antes
+  const nome=document.getElementById(`d${i}_nome`)?.value||'';
+  const titulo=document.getElementById(`d${i}_titulo`)?.value||'Dr.';
+  const senha=document.getElementById(`d${i}_senha`)?.value||'';
+  if(!nome){toast('Preenche o nome do dentista primeiro','err');return;}
+  if(!senha){toast('Defina uma senha para o dentista','err');return;}
+  const token=btoa(`${c.id}:${i}:${senha}`).replace(/=/g,'');
+  const url=`${window.location.origin}${window.location.pathname}?c=${c.id}&d=${i}&t=${token}`;
+  document.getElementById('qr-dent-name').textContent=`${titulo} ${nome}`;
+  document.getElementById('qr-link-text').textContent=url;
+  // Remove old QR if exists
+  const old=document.getElementById('qr-render');
+  if(old)old.remove();
+  const canvas=document.getElementById('qr-canvas');
+  canvas.style.display='';
+  document.getElementById('qr-modal').classList.add('open');
+  drawQR(url);
+}
+
+function drawQR(text){
+  const canvas=document.getElementById('qr-canvas');
+  const ctx=canvas.getContext('2d');
+  const size=200;
+  canvas.width=size;canvas.height=size;
+  // Simple QR placeholder — use qrcode.js
+  ctx.fillStyle='white';ctx.fillRect(0,0,size,size);
+  ctx.fillStyle='#1a1a2e';
+  ctx.font='11px monospace';
+  ctx.textAlign='center';
+  ctx.fillText('Cargando QR...',size/2,size/2);
+  // Load QRCode library dynamically
+  if(!window.QRCode){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    s.onload=()=>renderQRCode(text,canvas);
+    document.head.appendChild(s);
+  }else{
+    renderQRCode(text,canvas);
+  }
+}
+
+function renderQRCode(text,canvas){
+  canvas.innerHTML='';
+  const div=document.createElement('div');
+  canvas.parentNode.insertBefore(div,canvas);
+  canvas.style.display='none';
+  div.id='qr-render';
+  new QRCode(div,{text,width:200,height:200,colorDark:'#050810',colorLight:'#ffffff'});
+}
+</script>
+
+<!-- PWA INSTALL PROMPT -->
+<div id="pwa-prompt" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:500;width:calc(100% - 48px);max-width:380px">
+  <div style="background:#0d1117;border:1px solid #3b82f6;border-radius:16px;padding:20px;box-shadow:0 16px 48px rgba(0,0,0,.6)">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+      <div style="width:48px;height:48px;background:#1e2538;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="32" height="32" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="14" fill="none" stroke="#3b82f6" stroke-width="2"/>
+          <circle cx="20" cy="20" r="9" fill="#3b82f6"/>
+          <circle cx="20" cy="20" r="4" fill="#0d1117"/>
+          <circle cx="24" cy="16" r="2" fill="#93c5fd" opacity="0.9"/>
+        </svg>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#e2e8f0">Instalar Iris</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:2px">Adicione o atalho na sua tela inicial</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="dismissPWA()" style="flex:1;background:#1e2538;border:1px solid #1f2d45;border-radius:8px;padding:10px;color:#94a3b8;font-family:Outfit,sans-serif;font-size:13px;font-weight:600;cursor:pointer">Agora não</button>
+      <button onclick="installPWA()" id="pwa-install-btn" style="flex:2;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border:none;border-radius:8px;padding:10px;color:white;font-family:Outfit,sans-serif;font-size:13px;font-weight:600;cursor:pointer">📲 Adicionar à tela inicial</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show prompt after 3 seconds
+  setTimeout(() => {
+    if (!localStorage.getItem('pwa-dismissed')) {
+      document.getElementById('pwa-prompt').style.display = 'block';
+    }
+  }, 3000);
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((r) => {
+      if (r.outcome === 'accepted') {
+        document.getElementById('pwa-prompt').style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  }
+}
+
+function dismissPWA() {
+  document.getElementById('pwa-prompt').style.display = 'none';
+  localStorage.setItem('pwa-dismissed', '1');
+}
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('pwa-prompt').style.display = 'none';
+});
+</script>
+</body>
+</html>
+<!-- build: 1780052060 -->
