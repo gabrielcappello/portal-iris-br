@@ -277,7 +277,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
     <div class="login-title">Bem-vindo</div>
     <div class="login-sub">Entre com os dados da sua clínica</div>
     <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="clinica@exemplo.com" autocomplete="email"></div>
-    <div class="field"><label>Contraseña</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="btn-primary" id="login-btn" onclick="doLogin(); return false;">Entrar</button>
     <div class="login-error" id="login-error">Email ou senha incorretos</div>
   </div>
@@ -322,9 +322,9 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
           <div class="accordion-body-inner">
             <div class="form-grid">
               <div class="form-group"><label>Nome da Clínica</label><input id="c_nome" placeholder="Ex: OdontoBR" oninput="updateWpName()"></div>
-              <div class="form-group"><label>Telefone</label><input id="c_tel" placeholder="Ej: 1112345678"></div>
-              <div class="form-group"><label>Endereço <span style="font-weight:400;color:var(--text3)">(Rua e número)</span></label><input id="c_end" placeholder="Ej: Av. Corrientes 1234"></div>
-              <div class="form-group"><label><b>Sala</b></label><input id="c_sala" placeholder="Ej: Piso 3, Consultorio B"></div>
+              <div class="form-group"><label>Telefone</label><input id="c_tel" placeholder="Ex: (21) 99999-9999"></div>
+              <div class="form-group"><label>Endereço <span style="font-weight:400;color:var(--text3)">(Rua e número)</span></label><input id="c_end" placeholder="Ex: Av. Paulista, 1234"></div>
+              <div class="form-group"><label><b>Sala</b></label><input id="c_sala" placeholder="Ex: 3º andar, Sala 302"></div>
               <div class="form-group"><label>Bairro</label><input id="c_bairro" placeholder="Centro"></div>
               <div class="form-group"><label>Cidade</label><input id="c_cidade" placeholder="São Paulo"></div>
               <div class="form-group"><label>CEP</label><input id="c_cep" placeholder="01310-100"></div>
@@ -411,12 +411,12 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
       <div class="accordion" id="acc-precios-wrap">
         <div class="card-header" style="padding:18px 24px;background:var(--surface2);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
           <span>💲</span>
-          <div><h2 style="font-size:15px;font-weight:600">Precios por Procedimento</h2><p style="font-size:12px;color:var(--text2);margin-top:2px">Valores de referência para cada procedimento. O agente pode informar esses preços ao paciente.</p></div>
+          <div><h2 style="font-size:15px;font-weight:600">Valores por Procedimento</h2><p style="font-size:12px;color:var(--text2);margin-top:2px">Valores de referência para cada procedimento. O agente pode informar esses preços ao paciente.</p></div>
         </div>
         <div style="padding:20px" id="precios-body"></div>
         <div class="save-bar">
           <span class="save-status" id="precios-status"></span>
-          <button class="btn-save" onclick="savePrecios()">💾 Salvar Precios</button>
+          <button class="btn-save" onclick="savePrecios()">💾 Salvar Valores</button>
         </div>
       </div>
     </div>
@@ -827,9 +827,9 @@ function renderDentistas(dents){
             </div>
           </div>
           <div class="form-group full"><label>Calendar ID</label><input id="d${i}_cal" value="${d.calendar_id||''}" placeholder="xxx@group.calendar.google.com"></div>
-          <div class="form-group"><label>Contraseña acceso</label><input type="password" id="d${i}_senha" value="${d.senha||''}" placeholder="Clave para el dentista"></div>
+          <div class="form-group"><label>Senha de acesso</label><input type="password" id="d${i}_senha" value="${d.senha||''}" placeholder="Senha do dentista"></div>
           <div class="form-group"><label>Abertura</label><input type="time" id="d${i}_ini" value="${d.inicio||'08:00'}" oninput="updateSlots(${i})"></div>
-          <div class="form-group"><label>Datamento</label><input type="time" id="d${i}_fim" value="${d.fim||'18:00'}" oninput="updateSlots(${i})"></div>
+          <div class="form-group"><label>Encerramento</label><input type="time" id="d${i}_fim" value="${d.fim||'18:00'}" oninput="updateSlots(${i})"></div>
           <div class="form-group"><label>Almoço início</label><input type="time" id="d${i}_alm_ini" value="${d.alm_ini||'12:00'}" oninput="updateSlots(${i})"></div>
           <div class="form-group"><label>Almoço fim</label><input type="time" id="d${i}_alm_fim" value="${d.alm_fim||'13:00'}" oninput="updateSlots(${i})"></div>
         </div>
@@ -840,7 +840,7 @@ function renderDentistas(dents){
             <span style="font-size:13px;font-weight:600;">Atende sábado</span>
             <select id="d${i}_sab" onchange="toggleSabado(${i})" style="background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:13px;color:var(--text);outline:none;">
               <option value="no" ${!d.sabado?'selected':''}>Não</option>
-              <option value="si" ${d.sabado?'selected':''}>Sim</option>
+              <option value="sim" ${d.sabado?'selected':''}>Sim</option>
             </select>
           </div>
           <div class="sabado-horarios" id="sabado-box-${i}" style="${d.sabado?'':'display:none'}">
