@@ -138,6 +138,7 @@ header{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.85);backdrop-fil
 
 /* PROCEDIMENTOS */
 .spec-accordion{border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;margin-left:2px;margin-right:2px;}
+.spec-cat-check{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
 .spec-header{padding:11px 14px;background:var(--surface2);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-size:14px;font-weight:600;transition:background .15s;}
 .spec-header:hover{background:var(--surface3);}
 .spec-header .spec-arrow{margin-left:auto;color:var(--text3);font-size:14px;transition:transform .25s;}
@@ -833,9 +834,10 @@ function renderDentistas(dents){
     const slotsHtml=autoSlots.length?autoSlots.map(s=>`<span class="slot-chip">${s}</span>`).join(''):`<span class="slots-empty">Preencha os campos de horário</span>`;
     const specHtml=ESPECIALIDADES.map((esp,ei)=>`
       <div class="spec-accordion">
-        <div class="spec-header" onclick="toggleSpec(${i},${ei})">
-          ${esp.nome}
-          <span class="spec-arrow" id="specarr-${i}-${ei}">▼</span>
+        <div class="spec-header">
+          <input type="checkbox" class="spec-cat-check" id="catcheck-${i}-${ei}" onclick="event.stopPropagation();toggleCategory(${i},${ei},this)">
+          <span style="flex:1;cursor:pointer" onclick="toggleSpec(${i},${ei})">${esp.nome}</span>
+          <span class="spec-arrow" id="specarr-${i}-${ei}" onclick="toggleSpec(${i},${ei})" style="cursor:pointer">▼</span>
         </div>
         <div class="spec-body" id="specbody-${i}-${ei}">
           ${esp.procs.map(p=>{
@@ -843,7 +845,7 @@ function renderDentistas(dents){
             const ativo=saved?saved.ativo:false;
             const tempo=saved?saved.tempo:p.tempo;
             return `<div class="proc-row">
-              <input type="checkbox" class="proc-check" id="pc-${i}-${p.nome.replace(/\s/g,'_')}" ${ativo?'checked':''}>
+              <input type="checkbox" class="proc-check" id="pc-${i}-${p.nome.replace(/\s/g,'_')}" ${ativo?'checked':''} onchange="updateCatCheckbox(${i},${ei})">
               <span class="proc-name">${p.nome}</span>
               <div class="proc-time-wrap">
                 <button class="proc-time-btn" onclick="adjTime(this,-5)">−</button>
@@ -984,6 +986,31 @@ function toggleSpec(di,ei){
   const a=document.getElementById(`specarr-${di}-${ei}`);
   b.classList.toggle('open');
   a.classList.toggle('open');
+}
+
+function toggleCategory(di,ei,catCb){
+  const esp=ESPECIALIDADES[ei];
+  if(!esp)return;
+  const checked=catCb.checked;
+  esp.procs.forEach(p=>{
+    const key=p.nome.replace(/\s/g,'_');
+    const cb=document.getElementById(`pc-${di}-${key}`);
+    if(cb)cb.checked=checked;
+  });
+}
+
+function updateCatCheckbox(di,ei){
+  const esp=ESPECIALIDADES[ei];
+  if(!esp)return;
+  const catCb=document.getElementById(`catcheck-${di}-${ei}`);
+  if(!catCb)return;
+  const total=esp.procs.length;
+  const checked=esp.procs.filter(p=>{
+    const cb=document.getElementById(`pc-${di}-${p.nome.replace(/\s/g,'_')}`);
+    return cb&&cb.checked;
+  }).length;
+  catCb.checked=checked===total;
+  catCb.indeterminate=checked>0&&checked<total;
 }
 
 function setModo(i,modo){
