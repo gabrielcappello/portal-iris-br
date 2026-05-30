@@ -2041,6 +2041,7 @@ async function saveDentista(i){
     sab_fim:document.getElementById(`d${i}_sab_fim`)?.value||'13:00',
     horarios,modo,
     whatsapp:document.getElementById(`d${i}_whatsapp`)?.value||'',
+    token_acesso:currentClinica.dentistas?.[i]?.token_acesso||generateTokenAcesso(),
     procedimentos:getProcs(i),
   };
   const allDents=Array.from({length:10},(_,j)=>{
@@ -2295,11 +2296,12 @@ async function updateStatus(id,status){
 let currentDentista=null;
 let dappAgendamentos=[], dappPacientes=[];
 
-// ── Token curto para QR ─────────────────────────────────────────
-async function generateDentToken(clinicaId,dentIdx){
-  const msg=`${clinicaId}:${dentIdx}:iris`;
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').substring(0,8);
+// ── Token de acesso do dentista (12 chars alfanuméricos) ─────────
+function generateTokenAcesso(){
+  const chars='abcdefghjkmnpqrstuvwxyz23456789';
+  const arr=new Uint8Array(12);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(b=>chars[b%chars.length]).join('');
 }
 
 // Auto-login from URL params
@@ -2307,8 +2309,8 @@ document.addEventListener('DOMContentLoaded',function(){
   const pwEl=document.getElementById('login-password');
   if(pwEl)pwEl.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
-  // Novo formato: /d/TOKEN
-  const pathMatch=window.location.pathname.match(/\/d\/([a-f0-9]{8})/i);
+  // Novo formato: /d/TOKEN (12 chars alfanuméricos)
+  const pathMatch=window.location.pathname.match(/\/d\/([a-z0-9]{12})/i);
   if(pathMatch){autoDentLoginByToken(pathMatch[1]);return;}
 
   // Formato legado: ?c=...&d=...&t=...
@@ -2323,12 +2325,12 @@ document.addEventListener('DOMContentLoaded',function(){
 
 async function autoDentLoginByToken(token){
   try{
-    const enc=encodeURIComponent(`[{"token":"${token}"}]`);
+    const enc=encodeURIComponent(`[{"token_acesso":"${token}"}]`);
     const rows=await sb.query('clinicas',`?dentistas=cs.${enc}&ativo=eq.true&select=*`);
     if(!rows.length)return;
     const clinica=rows[0];
     const dents=clinica.dentistas||[];
-    const dentIdx=dents.findIndex(d=>d.token===token);
+    const dentIdx=dents.findIndex(d=>d.token_acesso===token);
     if(dentIdx===-1)return;
     currentDentista={...dents[dentIdx],idx:dentIdx,clinicaId:clinica.id,clinica};
     showDentApp();
@@ -2519,26 +2521,11 @@ async function saveObs(){
 
 // ══ QR CODE GENERATOR ══
 async function showQR(i){
-  const c=currentClinica;
   const nome=document.getElementById(`d${i}_nome`)?.value||'';
   const titulo=document.getElementById(`d${i}_titulo`)?.value||'Dr.';
-  const senha=document.getElementById(`d${i}_senha`)?.value||'';
   if(!nome){toast(T.err_preenche_nome_dent,'err');return;}
-  if(!senha){toast(T.err_define_senha_dent,'err');return;}
-
-  // Obtém ou gera token curto (8 hex chars)
-  let dentToken=currentClinica.dentistas?.[i]?.token;
-  if(!dentToken){
-    dentToken=await generateDentToken(c.id,i);
-    const allDents=[...(currentClinica.dentistas||[])];
-    if(!allDents[i])allDents[i]={};
-    allDents[i]={...allDents[i],token:dentToken};
-    try{
-      await sb.update('clinicas',c.id,{dentistas:allDents});
-      currentClinica.dentistas=allDents;
-    }catch(e){console.error('Erro ao salvar token:',e);}
-  }
-
+  const dentToken=currentClinica.dentistas?.[i]?.token_acesso;
+  if(!dentToken){toast(T.err_salvar+' — salve o dentista primeiro','err');return;}
   const url=`https://painel.cappia.app/d/${dentToken}`;
   document.getElementById('qr-dent-name').textContent=`${titulo} ${nome}`;
   document.getElementById('qr-link-text').textContent=url;
