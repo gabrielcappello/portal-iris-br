@@ -219,6 +219,12 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
   .tab-nav{padding:0 16px;}
   .main{padding:20px 16px;}
 }
+/* ══ SUPORTE CHAT ══ */
+#suporte-btn{position:fixed;bottom:24px;right:24px;z-index:900;width:52px;height:52px;border-radius:50%;background:var(--accent);color:white;border:none;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,.45);display:none;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s;}
+#suporte-btn:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(59,130,246,.55);}
+#suporte-chat{display:none;position:fixed;bottom:88px;right:16px;z-index:899;width:340px;max-width:calc(100vw - 32px);height:480px;max-height:calc(100vh - 120px);background:var(--surface);border:1px solid var(--border);border-radius:16px;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.55);overflow:hidden;animation:fadeUp .2s ease;}
+#suporte-msgs::-webkit-scrollbar{width:4px;}
+#suporte-msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 
 /* ══ APP DENTISTA ══ */
 #app-dentista{display:none;position:relative;z-index:1;min-height:100vh;}
@@ -1188,6 +1194,9 @@ const TRADUCOES={
   slots_gerados:'Slots gerados:',manual_separado:'Escreva os horários separados por vírgula:',
   info_doc:'Documento:',info_dig:'dígitos',info_tel:'Telefone:',dent_numero:'Dentista',
   err_txt:'✗ Erro',salvando:'Salvando...',
+  suporte_titulo:'Suporte Iris',suporte_ph:'Digite sua mensagem...',suporte_enviar:'Enviar',
+  suporte_digitar:'Iris está digitando...',suporte_erro:'Erro ao conectar. Tente novamente.',
+  suporte_bem_vindo:'Olá! Sou o assistente de suporte do Iris. Como posso ajudar?',
   label_fuso:'Fuso horário',ph_fuso:'Ex: America/Sao_Paulo',fuso_aviso:'Altere apenas se houver problema de horário.',
   mod_dados_h2:'Dados que o agente solicita',mod_dados_p:'Escolha quais informações o agente irá coletar do paciente',
   dados_fixos:'Campos obrigatórios (fixos)',dados_opcionais:'Campos opcionais',
@@ -1302,6 +1311,9 @@ const TRADUCOES={
   slots_gerados:'Slots generados:',manual_separado:'Escribe los horarios separados por coma:',
   info_doc:'Documento:',info_dig:'dígitos',info_tel:'Teléfono:',dent_numero:'Dentista',
   err_txt:'✗ Error',salvando:'Guardando...',
+  suporte_titulo:'Soporte Iris',suporte_ph:'Escribe tu mensaje...',suporte_enviar:'Enviar',
+  suporte_digitar:'Iris está escribiendo...',suporte_erro:'Error al conectar. Intenta de nuevo.',
+  suporte_bem_vindo:'¡Hola! Soy el asistente de soporte de Iris. ¿Cómo puedo ayudarte?',
   label_fuso:'Huso horario',ph_fuso:'Ej: America/Argentina/Buenos_Aires',fuso_aviso:'Modificar solo si hay un problema de horario.',
   mod_dados_h2:'Datos que el agente solicita',mod_dados_p:'Elige qué información el agente recopilará del paciente',
   dados_fixos:'Campos obligatorios (fijos)',dados_opcionais:'Campos opcionales',
@@ -1416,6 +1428,9 @@ const TRADUCOES={
   slots_gerados:'Generated slots:',manual_separado:'Type schedules separated by comma:',
   info_doc:'Document:',info_dig:'digits',info_tel:'Phone:',dent_numero:'Dentist',
   err_txt:'✗ Error',salvando:'Saving...',
+  suporte_titulo:'Iris Support',suporte_ph:'Type your message...',suporte_enviar:'Send',
+  suporte_digitar:'Iris is typing...',suporte_erro:'Connection error. Please try again.',
+  suporte_bem_vindo:'Hello! I\'m the Iris support assistant. How can I help you?',
   label_fuso:'Time zone',ph_fuso:'Ex: America/New_York',fuso_aviso:'Change only if there is a time issue.',
   mod_dados_h2:'Data the agent collects',mod_dados_p:'Choose what information the agent will collect from the patient',
   dados_fixos:'Required fields (fixed)',dados_opcionais:'Optional fields',
@@ -1504,6 +1519,7 @@ function aplicarTraducoes(lang){
   // data-i18n fallback
   $$('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(T[k]!==undefined)el.textContent=T[k];});
   $$('[data-i18n-ph]').forEach(el=>{const k=el.dataset.i18nPh;if(T[k]!==undefined)el.placeholder=T[k];});
+  if(typeof _atualizarTraducaoChat==='function')_atualizarTraducaoChat();
   // Re-renderiza módulos dinâmicos para refletir idioma atualizado
   if(currentClinica){
     renderAuto(currentClinica.automatizacoes||{});
@@ -2708,7 +2724,123 @@ function renderQRCode(text,canvas){
   </div>
 </div>
 
+<!-- ══ SUPORTE CHAT WIDGET ══ -->
+<button id="suporte-btn" onclick="toggleSuporteChat()" title="Suporte">💬</button>
+<div id="suporte-chat" style="flex-direction:column">
+  <div style="padding:14px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <div style="width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">💬</div>
+    <div style="flex:1;min-width:0">
+      <div id="suporte-titulo-h" style="font-size:13px;font-weight:700">Suporte Iris</div>
+      <div style="font-size:11px;color:var(--green)">● Online</div>
+    </div>
+    <button onclick="toggleSuporteChat()" style="background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:20px;line-height:1;padding:4px;flex-shrink:0">×</button>
+  </div>
+  <div id="suporte-msgs" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:4px"></div>
+  <div style="padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;background:var(--surface)">
+    <input id="suporte-input" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none;min-width:0"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSuporte();}"
+      onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+    <button id="suporte-enviar-btn" onclick="sendSuporte()" style="background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">Enviar</button>
+  </div>
+</div>
+
 <script>
+// ══ SUPORTE CHAT ══
+let chatHistory=[];
+let chatTyping=false;
+let chatOpen=false;
+
+// Mostra botão quando app ou app-dentista estiver visível
+new MutationObserver(()=>{
+  const vis=document.getElementById('app')?.style.display==='block'||document.getElementById('app-dentista')?.style.display==='block';
+  const btn=document.getElementById('suporte-btn');
+  if(btn)btn.style.display=vis?'flex':'none';
+  if(!vis){const p=document.getElementById('suporte-chat');if(p)p.style.display='none';chatOpen=false;chatHistory=[];}
+}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['style']});
+
+function toggleSuporteChat(){
+  const panel=document.getElementById('suporte-chat');
+  chatOpen=!chatOpen;
+  panel.style.display=chatOpen?'flex':'none';
+  if(chatOpen){
+    if(chatHistory.length===0)_suporteWelcome();
+    setTimeout(()=>document.getElementById('suporte-input')?.focus(),80);
+  }
+}
+
+function _suporteWelcome(){
+  _suporteAppend('assistant',T.suporte_bem_vindo||'Olá! Como posso ajudar?');
+}
+
+function _suporteAppend(role,text){
+  const msgs=document.getElementById('suporte-msgs');
+  if(!msgs)return;
+  const wrap=document.createElement('div');
+  wrap.style.cssText=`display:flex;justify-content:${role==='user'?'flex-end':'flex-start'};margin-bottom:8px;`;
+  const bubble=document.createElement('div');
+  bubble.style.cssText=`max-width:82%;padding:9px 13px;border-radius:${role==='user'?'16px 16px 4px 16px':'16px 16px 16px 4px'};font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;${role==='user'?'background:var(--accent);color:#fff':'background:var(--surface2);color:var(--text);border:1px solid var(--border)'}`;
+  bubble.textContent=text;
+  wrap.appendChild(bubble);
+  msgs.appendChild(wrap);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function _suporteTyping(show){
+  const msgs=document.getElementById('suporte-msgs');
+  if(show){
+    const d=document.createElement('div');
+    d.id='suporte-typing-ind';
+    d.style.cssText='display:flex;justify-content:flex-start;margin-bottom:8px;';
+    const b=document.createElement('div');
+    b.style.cssText='padding:9px 13px;border-radius:16px 16px 16px 4px;font-size:13px;background:var(--surface2);color:var(--text2);border:1px solid var(--border)';
+    b.textContent=T.suporte_digitar||'Digitando...';
+    d.appendChild(b);
+    msgs?.appendChild(d);
+    msgs&&(msgs.scrollTop=msgs.scrollHeight);
+  }else{
+    document.getElementById('suporte-typing-ind')?.remove();
+  }
+}
+
+async function sendSuporte(){
+  const inp=document.getElementById('suporte-input');
+  const text=inp?.value?.trim();
+  if(!text||chatTyping)return;
+  inp.value='';
+  _suporteAppend('user',text);
+  chatHistory.push({role:'user',content:text});
+  chatTyping=true;
+  _suporteTyping(true);
+  const envBtn=document.getElementById('suporte-enviar-btn');
+  if(envBtn)envBtn.disabled=true;
+  try{
+    const res=await fetch(`${SUPABASE_URL}/functions/v1/suporte-chat`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`},
+      body:JSON.stringify({messages:chatHistory,idioma:currentLang||'português'}),
+    });
+    const data=await res.json();
+    const reply=data?.content?.[0]?.text||(T.suporte_erro||'Erro ao obter resposta.');
+    chatHistory.push({role:'assistant',content:reply});
+    _suporteTyping(false);
+    _suporteAppend('assistant',reply);
+  }catch(e){
+    chatHistory.pop();
+    _suporteTyping(false);
+    _suporteAppend('assistant',T.suporte_erro||'Erro ao conectar. Tente novamente.');
+  }
+  chatTyping=false;
+  if(envBtn)envBtn.disabled=false;
+  document.getElementById('suporte-input')?.focus();
+}
+
+// Traduz elementos do chat ao trocar idioma
+function _atualizarTraducaoChat(){
+  const t=document.getElementById('suporte-titulo-h');if(t)t.textContent=T.suporte_titulo||'Suporte Iris';
+  const i=document.getElementById('suporte-input');if(i)i.placeholder=T.suporte_ph||'Digite sua mensagem...';
+  const e=document.getElementById('suporte-enviar-btn');if(e)e.textContent=T.suporte_enviar||'Enviar';
+}
+
 let deferredPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
