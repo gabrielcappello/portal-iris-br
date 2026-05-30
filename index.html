@@ -332,7 +332,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               </div>
               <div class="form-group">
                 <label>País</label>
-                <select id="c_idioma_pais"></select>
+                <select id="c_idioma_pais" onchange="updateDDI(this.value)"></select>
               </div>
             </div>
           </div>
@@ -354,7 +354,13 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
           <div class="accordion-body-inner">
             <div class="form-grid">
               <div class="form-group"><label>Nome da Clínica</label><input id="c_nome" placeholder="Ex: OdontoBR" oninput="updateWpName()"></div>
-              <div class="form-group"><label>Telefone</label><input id="c_tel" placeholder="Ex: (21) 99999-9999"></div>
+              <div class="form-group">
+                <label>Telefone</label>
+                <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface2)" onfocusin="this.style.borderColor='var(--accent)'" onfocusout="this.style.borderColor='var(--border)'">
+                  <span id="c_tel_ddi" style="padding:10px 10px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2);white-space:nowrap;display:flex;align-items:center;min-width:48px;justify-content:center">+55</span>
+                  <input id="c_tel" placeholder="(21) 99999-9999" style="flex:1;min-width:0;background:transparent;border:none;border-radius:0;padding:10px 10px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none">
+                </div>
+              </div>
               <div class="form-group"><label>Endereço <span style="font-weight:400;color:var(--text3)">(Rua e número)</span></label><input id="c_end" placeholder="Ex: Av. Paulista, 1234"></div>
               <div class="form-group"><label><b>Sala</b></label><input id="c_sala" placeholder="Ex: 3º andar, Sala 302"></div>
               <div class="form-group"><label>Bairro</label><input id="c_bairro" placeholder="Centro"></div>
@@ -648,11 +654,27 @@ const PAIS_OPTIONS={
     {v:'sz',l:'Eswatini'},{v:'pg',l:'Papua New Guinea'},{v:'fj',l:'Fiji'},
   ],
 };
+const DDI_MAP={
+  'br':'+55','pt':'+351','ao':'+244','mz':'+258','cv':'+238','gw':'+245','st':'+239','tl':'+670',
+  'mx':'+52','co':'+57','ar':'+54','es':'+34','pe':'+51','ve':'+58','cl':'+56','ec':'+593',
+  'gt':'+502','cu':'+53','bo':'+591','do':'+1','hn':'+504','py':'+595','sv':'+503','ni':'+505',
+  'cr':'+506','pa':'+507','uy':'+598','gq':'+240','pr':'+1',
+  'us':'+1','uk':'+44','au':'+61','ca':'+1','ng':'+234','za':'+27','gh':'+233','ke':'+254',
+  'ug':'+256','tz':'+255','in':'+91','pk':'+92','ph':'+63','sg':'+65','nz':'+64','ie':'+353',
+  'jm':'+1','tt':'+1','bz':'+501','gy':'+592','bb':'+1','zw':'+263','zm':'+260','rw':'+250',
+  'mt':'+356','cm':'+237','sl':'+232','lr':'+231','gm':'+220','bw':'+267','na':'+264',
+  'mw':'+265','ls':'+266','sz':'+268','pg':'+675','fj':'+679',
+};
+function updateDDI(paisCode){
+  const span=document.getElementById('c_tel_ddi');
+  if(span)span.textContent=DDI_MAP[paisCode]||'+';
+}
 function updatePaisOptions(lang,selected){
   const sel=document.getElementById('c_idioma_pais');
   if(!sel)return;
   const opts=PAIS_OPTIONS[lang]||[];
   sel.innerHTML=opts.map(o=>`<option value="${o.v}"${o.v===selected?' selected':''}>${o.l}</option>`).join('');
+  updateDDI(selected||opts[0]?.v||'');
 }
 async function saveIdioma(){
   const btn=document.querySelector('[onclick="saveIdioma()"]');
