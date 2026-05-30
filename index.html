@@ -727,9 +727,10 @@ async function saveIdioma(){
     currentClinica.idioma=idioma;
     currentClinica.pais_codigo=pais_codigo;
     currentClinica.estado=estado;
-    st.textContent='✓ Salvo';st.className='save-status ok';toast('Idioma salvo ✓');
+    st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_idioma_ok);
+    aplicarTraducoes(lang);
     checkIdiomaConfigured();
-  }catch(e){st.textContent='✗ Erro';st.className='save-status err';toast('Erro ao salvar','err');}
+  }catch(e){st.textContent=T.err_txt||'✗ Erro';st.className='save-status err';toast(T.err_salvar,'err');}
   btn.disabled=false;
 }
 
@@ -805,7 +806,7 @@ function checkIdiomaConfigured(){
       const b=document.createElement('div');
       b.id='idioma-banner';
       b.style.cssText='background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;font-size:13px;color:#fcd34d;';
-      b.innerHTML='⚠️ <b>Configure o Idioma primeiro.</b> Selecione idioma, país e estado/província, depois clique em "Salvar Idioma" para desbloquear os demais módulos.';
+      b.innerHTML=T.banner_idioma;
       const cfg=document.getElementById('tab-config');
       if(cfg)cfg.insertBefore(b,cfg.firstChild);
     }
@@ -814,6 +815,345 @@ function checkIdiomaConfigured(){
     if(banner)banner.remove();
     tabs.forEach(t=>{t.style.opacity='';t.style.pointerEvents='';});
   }
+}
+
+// ══════════════════════════════════
+// I18N
+// ══════════════════════════════════
+const TRADUCOES={
+'português':{
+  page_title:'Iris — Portal Clínica BR',
+  bem_vindo:'Bem-vindo',login_sub:'Entre com os dados da sua clínica',
+  label_email:'Email',ph_email:'clinica@exemplo.com',label_senha:'Senha',
+  btn_entrar:'Entrar',btn_entrando:'Entrando...',
+  err_preencha:'Preencha todos os campos',err_login:'Email ou senha incorretos',
+  modal_senha_h3:'🔑 Crie sua senha',
+  modal_senha_desc:'É o seu primeiro acesso. Por segurança, defina uma senha pessoal antes de continuar.',
+  label_nova_senha:'Nova senha',ph_nova_senha:'Mínimo 6 caracteres',
+  label_confirma:'Confirmar senha',ph_confirma:'Repita a senha',
+  btn_salvar_senha:'Salvar senha',btn_salvando_senha:'Salvando...',
+  err_senha_min:'A senha deve ter pelo menos 6 caracteres',
+  err_senha_diff:'As senhas não coincidem',
+  err_salvar_tente:'Erro ao salvar. Tente novamente.',
+  toast_senha_ok:'Senha atualizada com sucesso!',
+  btn_sair:'Sair',
+  tab_config:'⚙️ Configuração',tab_pac:'👤 Pacientes',
+  tab_ag:'📅 Agendamentos',tab_precos:'💲 Preços',
+  mod_idioma_h2:'Idioma',mod_idioma_p:'Idioma e país da clínica para o agente de atendimento',
+  label_idioma:'Idioma',label_pais:'País',label_estado:'Estado / Província',
+  select_selecione:'Selecione...',
+  btn_salvar_idioma:'💾 Salvar Idioma',toast_idioma_ok:'Idioma salvo ✓',
+  err_falta_idioma:'Falta completar: Idioma',err_falta_pais:'Falta completar: País',
+  toast_bloqueio_tab:'Configure e salve o Idioma antes de acessar outras seções',
+  toast_bloqueio_mod:'Configure e salve o Idioma antes de acessar os demais módulos',
+  banner_idioma:'⚠️ <b>Configure o Idioma primeiro.</b> Selecione idioma, país e estado/província, depois clique em "Salvar Idioma" para desbloquear os demais módulos.',
+  mod_clinica_h2:'Dados da Clínica',mod_clinica_p:'Informações usadas pelo agente nas conversas',
+  label_nome_clinica:'Nome da Clínica',ph_nome_clinica:'Ex: OdontoBR',
+  label_telefone:'Telefone',ph_telefone:'(21) 99999-9999',
+  label_end:'Endereço',end_sub:'(Rua e número)',ph_end:'Ex: Av. Paulista, 1234',
+  label_sala:'Sala',ph_sala:'Ex: 3º andar, Sala 302',
+  label_bairro:'Bairro',ph_bairro:'Centro',
+  label_cidade:'Cidade',ph_cidade:'São Paulo',
+  label_cep:'CEP',ph_cep:'01310-100',
+  label_ref:'Referência',ph_ref:'Ex: Em frente ao banco, portão azul',
+  label_wp:'Instância WhatsApp',wp_sub:'(automático)',ph_wp:'Gerado automaticamente',
+  wp_formato:'Formato: CAPPIA/[nome da clínica]',
+  label_maps:'Link de Localização',maps_sub:'(Google Maps)',ph_maps:'https://maps.google.com/?q=...',
+  maps_nota:'O agente enviará este link ao paciente quando solicitado ou ao finalizar o agendamento.',
+  btn_salvar:'💾 Salvar',toast_config_ok:'Configuração salva ✓',
+  mod_dent_h2:'Dentistas',mod_dent_p:'Até 10 profissionais com agendas, horários e procedimentos independentes',
+  label_nome_dent:'Nome do Dentista',ph_nome_dent:'Sobrenome e nome',
+  label_cal:'Calendar ID',ph_cal:'xxx@group.calendar.google.com',
+  label_senha_dent:'Senha de acesso',ph_senha_dent:'Senha do dentista',
+  label_abertura:'Abertura',label_encerramento:'Encerramento',
+  label_alm_ini:'Almoço início',label_alm_fim:'Almoço fim',
+  label_sabado:'Atende sábado',opt_nao:'Não',opt_sim:'Sim',
+  sabado_h:'🗓️ Horário do sábado',label_sab_ini:'Início sábado',label_sab_fim:'Fim sábado',
+  label_modo:'Modo de horários',btn_auto:'Automático',btn_manual:'Manual',btn_proc:'Por procedimento',
+  label_dur:'Duração (min)',slots_vazio:'Preencha os campos de horário',
+  ph_horarios:'08:00,09:00,10:00,11:00,14:00,15:00',
+  proc_modo_desc:'Os horários serão calculados conforme a duração de cada procedimento selecionado.',
+  label_procs:'Procedimentos que atende',
+  btn_qr:'📱 QR Code',btn_salvar_dent:'💾 Salvar Dentista',
+  toast_dent_ok:'Dentista {n} salvo ✓',toast_limite_dent:'Limite de {n} dentista(s) ativo(s) atingido',
+  err_preenche_nome_dent:'Preenche o nome do dentista primeiro',
+  err_define_senha_dent:'Defina uma senha para o dentista',
+  mod_auto_h2:'Automatizações',mod_auto_p:'Mensagens automáticas para pacientes',
+  auto_lem2h:'🔔 Lembrete 2 horas antes',auto_lem2h_sub:'Envia uma mensagem automática 2 horas antes de cada consulta',
+  auto_lem24h:'🔔 Lembrete 24 horas antes',auto_lem24h_sub:'Envia uma mensagem automática 1 dia antes da consulta',
+  auto_pos:'⭐ Pós-consulta',auto_pos_sub:'Pergunta como foi a consulta no dia seguinte',
+  auto_ret:'🔄 Retorno automático',auto_ret_sub:'Lembra o paciente de agendar retorno após X meses',
+  label_meses:'meses',auto_espera:'⏳ Lista de espera',auto_espera_sub:'Avisa o paciente quando um horário cancelado fica disponível',
+  btn_salvar_auto:'💾 Salvar Automatizações',toast_auto_ok:'Automatizações salvas ✓',
+  mod_precos_h2:'Valores por Procedimento',
+  mod_precos_p:'Valores de referência para cada procedimento. O agente pode informar esses preços ao paciente.',
+  btn_salvar_precos:'💾 Salvar Valores',toast_precos_ok:'Preços salvos ✓',
+  ph_buscar_pac:'🔍 Buscar por nome, telefone ou documento...',
+  loading_pac:'Carregando pacientes...',vazio_pac:'Nenhum paciente registrado ainda',err_pac:'Erro ao carregar pacientes',
+  col_nome:'Nome',col_tel:'Telefone',col_doc:'Documento',col_ult:'Última Consulta',col_total:'Total',col_proc:'Procedimento',col_obs:'Obs.',btn_notas:'Notas',
+  ph_buscar_ag:'🔍 Buscar por nome, data ou dentista...',
+  opt_todos:'Todos',opt_confirmado:'Confirmado',opt_remarcado:'Remarcado',opt_cancelado:'Cancelado',opt_ok:'OK',opt_falto:'Falto',
+  loading_ag:'Carregando agendamentos...',vazio_ag:'Nenhum agendamento registrado ainda',err_ag:'Erro ao carregar agendamentos',
+  col_data:'Data',col_hora:'Hora',col_pac:'Paciente',col_dent:'Dentista',col_status:'Status',col_acao:'Ação',
+  opt_alterar:'Alterar...',opt_ok2:'✓ OK',opt_faltou:'✗ Faltou',
+  toast_status_ok:'Status atualizado: {s} ✓',err_status:'Erro ao atualizar status',
+  obs_h3:'📝 Observações do Paciente',ph_obs:'Escreva aqui notas sobre este paciente...',btn_cancelar:'Cancelar',btn_salvar_obs:'Salvar',toast_obs_ok:'Observação salva ✓',
+  qr_h3:'📱 Acesso do Dentista',qr_sub:'Escaneie o QR para acessar',btn_fechar:'Fechar',loading_qr:'Carregando QR...',
+  dapp_agenda:'📅',dapp_pac:'👤',dapp_config:'⚙️',
+  hoje:'Hoje',vazio_turno:'Nenhum turno próximo',vazio_ag_dent:'Nenhum agendamento',vazio_pac_dent:'Nenhum paciente',
+  cal_label:'Calendar ID',cal_nota:'Google Calendar → Configurações → ID da agenda',
+  btn_salvar_cal:'💾 Salvar',toast_cal_ok:'Calendar ID salvo ✓',
+  toast_presente:'✓ Presente marcado',toast_faltou:'✗ Faltou marcado',toast_erro:'Erro',
+  pwa_titulo:'Instalar Iris',pwa_sub:'Adicione o atalho na sua tela inicial',
+  btn_agora_nao:'Agora não',btn_instalar:'📲 Adicionar à tela inicial',
+  toast_salvo:'✓ Salvo',err_salvar:'Erro ao salvar',toast_nao_esquecer:'💾 Não esqueça de salvar as alterações',
+},
+'español':{
+  page_title:'Iris — Portal Clínica',
+  bem_vindo:'Bienvenido',login_sub:'Ingresa con los datos de tu clínica',
+  label_email:'Email',ph_email:'clinica@ejemplo.com',label_senha:'Contraseña',
+  btn_entrar:'Ingresar',btn_entrando:'Ingresando...',
+  err_preencha:'Completa todos los campos',err_login:'Email o contraseña incorrectos',
+  modal_senha_h3:'🔑 Crea tu contraseña',
+  modal_senha_desc:'Es tu primer acceso. Por seguridad, define una contraseña personal antes de continuar.',
+  label_nova_senha:'Nueva contraseña',ph_nova_senha:'Mínimo 6 caracteres',
+  label_confirma:'Confirmar contraseña',ph_confirma:'Repite la contraseña',
+  btn_salvar_senha:'Guardar contraseña',btn_salvando_senha:'Guardando...',
+  err_senha_min:'La contraseña debe tener al menos 6 caracteres',
+  err_senha_diff:'Las contraseñas no coinciden',
+  err_salvar_tente:'Error al guardar. Intenta de nuevo.',
+  toast_senha_ok:'¡Contraseña actualizada!',
+  btn_sair:'Salir',
+  tab_config:'⚙️ Configuración',tab_pac:'👤 Pacientes',
+  tab_ag:'📅 Agendamientos',tab_precos:'💲 Precios',
+  mod_idioma_h2:'Idioma',mod_idioma_p:'Idioma y país de la clínica para el agente de atención',
+  label_idioma:'Idioma',label_pais:'País',label_estado:'Provincia / Estado',
+  select_selecione:'Seleccionar...',
+  btn_salvar_idioma:'💾 Guardar Idioma',toast_idioma_ok:'Idioma guardado ✓',
+  err_falta_idioma:'Falta completar: Idioma',err_falta_pais:'Falta completar: País',
+  toast_bloqueio_tab:'Configura y guarda el Idioma antes de acceder a otras secciones',
+  toast_bloqueio_mod:'Configura y guarda el Idioma antes de acceder a los demás módulos',
+  banner_idioma:'⚠️ <b>Configura el Idioma primero.</b> Selecciona idioma, país y provincia/estado, luego haz clic en "Guardar Idioma" para desbloquear los demás módulos.',
+  mod_clinica_h2:'Datos de la Clínica',mod_clinica_p:'Información usada por el agente en las conversaciones',
+  label_nome_clinica:'Nombre de la Clínica',ph_nome_clinica:'Ej: OdontoAR',
+  label_telefone:'Teléfono',ph_telefone:'11 9999-9999',
+  label_end:'Dirección',end_sub:'(Calle y número)',ph_end:'Ej: Av. Corrientes 1234',
+  label_sala:'Sala / Piso',ph_sala:'Ej: Piso 3, Oficina 302',
+  label_bairro:'Barrio',ph_bairro:'Centro',
+  label_cidade:'Ciudad',ph_cidade:'Buenos Aires',
+  label_cep:'Código Postal',ph_cep:'C1000',
+  label_ref:'Referencia',ph_ref:'Ej: Frente al banco, portón azul',
+  label_wp:'Instancia WhatsApp',wp_sub:'(automático)',ph_wp:'Generado automáticamente',
+  wp_formato:'Formato: CAPPIA/[nombre de la clínica]',
+  label_maps:'Link de Ubicación',maps_sub:'(Google Maps)',ph_maps:'https://maps.google.com/?q=...',
+  maps_nota:'El agente enviará este link al paciente cuando lo solicite o al finalizar el turno.',
+  btn_salvar:'💾 Guardar',toast_config_ok:'Configuración guardada ✓',
+  mod_dent_h2:'Dentistas',mod_dent_p:'Hasta 10 profesionales con agendas, horarios y procedimientos independientes',
+  label_nome_dent:'Nombre del Dentista',ph_nome_dent:'Apellido y nombre',
+  label_cal:'Calendar ID',ph_cal:'xxx@group.calendar.google.com',
+  label_senha_dent:'Contraseña de acceso',ph_senha_dent:'Contraseña del dentista',
+  label_abertura:'Apertura',label_encerramento:'Cierre',
+  label_alm_ini:'Inicio almuerzo',label_alm_fim:'Fin almuerzo',
+  label_sabado:'Atiende sábado',opt_nao:'No',opt_sim:'Sí',
+  sabado_h:'🗓️ Horario del sábado',label_sab_ini:'Inicio sábado',label_sab_fim:'Fin sábado',
+  label_modo:'Modo de horarios',btn_auto:'Automático',btn_manual:'Manual',btn_proc:'Por procedimiento',
+  label_dur:'Duración (min)',slots_vazio:'Completa los campos de horario',
+  ph_horarios:'08:00,09:00,10:00,11:00,14:00,15:00',
+  proc_modo_desc:'Los horarios se calcularán según la duración de cada procedimiento seleccionado.',
+  label_procs:'Procedimientos que atiende',
+  btn_qr:'📱 QR Code',btn_salvar_dent:'💾 Guardar Dentista',
+  toast_dent_ok:'Dentista {n} guardado ✓',toast_limite_dent:'Límite de {n} dentista(s) activo(s) alcanzado',
+  err_preenche_nome_dent:'Completa el nombre del dentista primero',
+  err_define_senha_dent:'Define una contraseña para el dentista',
+  mod_auto_h2:'Automatizaciones',mod_auto_p:'Mensajes automáticos para pacientes',
+  auto_lem2h:'🔔 Recordatorio 2 horas antes',auto_lem2h_sub:'Envía un mensaje automático 2 horas antes de cada consulta',
+  auto_lem24h:'🔔 Recordatorio 24 horas antes',auto_lem24h_sub:'Envía un mensaje automático 1 día antes de la consulta',
+  auto_pos:'⭐ Post-consulta',auto_pos_sub:'Pregunta cómo fue la consulta al día siguiente',
+  auto_ret:'🔄 Retorno automático',auto_ret_sub:'Recuerda al paciente agendar retorno después de X meses',
+  label_meses:'meses',auto_espera:'⏳ Lista de espera',auto_espera_sub:'Avisa al paciente cuando un horario cancelado queda disponible',
+  btn_salvar_auto:'💾 Guardar Automatizaciones',toast_auto_ok:'Automatizaciones guardadas ✓',
+  mod_precos_h2:'Valores por Procedimiento',
+  mod_precos_p:'Valores de referencia para cada procedimiento. El agente puede informar estos precios al paciente.',
+  btn_salvar_precos:'💾 Guardar Valores',toast_precos_ok:'Precios guardados ✓',
+  ph_buscar_pac:'🔍 Buscar por nombre, teléfono o documento...',
+  loading_pac:'Cargando pacientes...',vazio_pac:'No hay pacientes registrados aún',err_pac:'Error al cargar pacientes',
+  col_nome:'Nombre',col_tel:'Teléfono',col_doc:'Documento',col_ult:'Última Consulta',col_total:'Total',col_proc:'Procedimiento',col_obs:'Obs.',btn_notas:'Notas',
+  ph_buscar_ag:'🔍 Buscar por nombre, fecha o dentista...',
+  opt_todos:'Todos',opt_confirmado:'Confirmado',opt_remarcado:'Remarcado',opt_cancelado:'Cancelado',opt_ok:'OK',opt_falto:'Falto',
+  loading_ag:'Cargando agendamientos...',vazio_ag:'No hay agendamientos registrados aún',err_ag:'Error al cargar agendamientos',
+  col_data:'Fecha',col_hora:'Hora',col_pac:'Paciente',col_dent:'Dentista',col_status:'Estado',col_acao:'Acción',
+  opt_alterar:'Cambiar...',opt_ok2:'✓ OK',opt_faltou:'✗ Faltó',
+  toast_status_ok:'Estado actualizado: {s} ✓',err_status:'Error al actualizar estado',
+  obs_h3:'📝 Observaciones del Paciente',ph_obs:'Escribe aquí notas sobre este paciente...',btn_cancelar:'Cancelar',btn_salvar_obs:'Guardar',toast_obs_ok:'Observación guardada ✓',
+  qr_h3:'📱 Acceso del Dentista',qr_sub:'Escanea el QR para acceder',btn_fechar:'Cerrar',loading_qr:'Cargando QR...',
+  dapp_agenda:'📅',dapp_pac:'👤',dapp_config:'⚙️',
+  hoje:'Hoy',vazio_turno:'Ningún turno próximo',vazio_ag_dent:'Ningún agendamiento',vazio_pac_dent:'Ningún paciente',
+  cal_label:'Calendar ID',cal_nota:'Google Calendar → Configuración → ID de la agenda',
+  btn_salvar_cal:'💾 Guardar',toast_cal_ok:'Calendar ID guardado ✓',
+  toast_presente:'✓ Presente marcado',toast_faltou:'✗ Faltó marcado',toast_erro:'Error',
+  pwa_titulo:'Instalar Iris',pwa_sub:'Agrega el acceso directo en tu pantalla de inicio',
+  btn_agora_nao:'Ahora no',btn_instalar:'📲 Agregar a inicio',
+  toast_salvo:'✓ Guardado',err_salvar:'Error al guardar',toast_nao_esquecer:'💾 No olvides guardar los cambios',
+},
+'english':{
+  page_title:'Iris — Clinic Portal',
+  bem_vindo:'Welcome',login_sub:'Sign in with your clinic credentials',
+  label_email:'Email',ph_email:'clinic@example.com',label_senha:'Password',
+  btn_entrar:'Sign In',btn_entrando:'Signing in...',
+  err_preencha:'Please fill in all fields',err_login:'Email or password incorrect',
+  modal_senha_h3:'🔑 Create your password',
+  modal_senha_desc:'This is your first access. For security, please set a personal password before continuing.',
+  label_nova_senha:'New password',ph_nova_senha:'At least 6 characters',
+  label_confirma:'Confirm password',ph_confirma:'Repeat the password',
+  btn_salvar_senha:'Save password',btn_salvando_senha:'Saving...',
+  err_senha_min:'Password must be at least 6 characters',
+  err_senha_diff:'Passwords do not match',
+  err_salvar_tente:'Error saving. Please try again.',
+  toast_senha_ok:'Password updated successfully!',
+  btn_sair:'Logout',
+  tab_config:'⚙️ Settings',tab_pac:'👤 Patients',
+  tab_ag:'📅 Appointments',tab_precos:'💲 Prices',
+  mod_idioma_h2:'Language',mod_idioma_p:'Language and country of the clinic for the attendance agent',
+  label_idioma:'Language',label_pais:'Country',label_estado:'State / Province',
+  select_selecione:'Select...',
+  btn_salvar_idioma:'💾 Save Language',toast_idioma_ok:'Language saved ✓',
+  err_falta_idioma:'Missing: Language',err_falta_pais:'Missing: Country',
+  toast_bloqueio_tab:'Set up Language before accessing other sections',
+  toast_bloqueio_mod:'Set up Language before accessing other modules',
+  banner_idioma:'⚠️ <b>Set up Language first.</b> Select language, country and state/province, then click "Save Language" to unlock the other modules.',
+  mod_clinica_h2:'Clinic Details',mod_clinica_p:'Information used by the agent in conversations',
+  label_nome_clinica:'Clinic Name',ph_nome_clinica:'Ex: Smile Clinic',
+  label_telefone:'Phone',ph_telefone:'555-9999-9999',
+  label_end:'Address',end_sub:'(Street and number)',ph_end:'Ex: 123 Main St',
+  label_sala:'Suite / Floor',ph_sala:'Ex: Floor 3, Suite 302',
+  label_bairro:'Neighborhood',ph_bairro:'Downtown',
+  label_cidade:'City',ph_cidade:'New York',
+  label_cep:'ZIP Code',ph_cep:'10001',
+  label_ref:'Reference',ph_ref:'Ex: Next to the bank, blue gate',
+  label_wp:'WhatsApp Instance',wp_sub:'(automatic)',ph_wp:'Auto-generated',
+  wp_formato:'Format: CAPPIA/[clinic name]',
+  label_maps:'Location Link',maps_sub:'(Google Maps)',ph_maps:'https://maps.google.com/?q=...',
+  maps_nota:'The agent will send this link to the patient when requested or when finalizing the appointment.',
+  btn_salvar:'💾 Save',toast_config_ok:'Settings saved ✓',
+  mod_dent_h2:'Dentists',mod_dent_p:'Up to 10 professionals with independent schedules and procedures',
+  label_nome_dent:'Dentist Name',ph_nome_dent:'Last name and first name',
+  label_cal:'Calendar ID',ph_cal:'xxx@group.calendar.google.com',
+  label_senha_dent:'Access password',ph_senha_dent:'Dentist password',
+  label_abertura:'Opening',label_encerramento:'Closing',
+  label_alm_ini:'Lunch start',label_alm_fim:'Lunch end',
+  label_sabado:'Works Saturday',opt_nao:'No',opt_sim:'Yes',
+  sabado_h:'🗓️ Saturday schedule',label_sab_ini:'Saturday start',label_sab_fim:'Saturday end',
+  label_modo:'Schedule mode',btn_auto:'Automatic',btn_manual:'Manual',btn_proc:'By procedure',
+  label_dur:'Duration (min)',slots_vazio:'Fill in the schedule fields',
+  ph_horarios:'08:00,09:00,10:00,11:00,14:00,15:00',
+  proc_modo_desc:'Schedules will be calculated based on the duration of each selected procedure.',
+  label_procs:'Procedures offered',
+  btn_qr:'📱 QR Code',btn_salvar_dent:'💾 Save Dentist',
+  toast_dent_ok:'Dentist {n} saved ✓',toast_limite_dent:'Limit of {n} active dentist(s) reached',
+  err_preenche_nome_dent:'Fill in the dentist name first',
+  err_define_senha_dent:'Set a password for the dentist',
+  mod_auto_h2:'Automations',mod_auto_p:'Automatic messages for patients',
+  auto_lem2h:'🔔 Reminder 2 hours before',auto_lem2h_sub:'Sends an automatic message 2 hours before each appointment',
+  auto_lem24h:'🔔 Reminder 24 hours before',auto_lem24h_sub:'Sends an automatic message 1 day before the appointment',
+  auto_pos:'⭐ Post-appointment',auto_pos_sub:'Asks how the appointment went the next day',
+  auto_ret:'🔄 Automatic return',auto_ret_sub:'Reminds the patient to schedule a return after X months',
+  label_meses:'months',auto_espera:'⏳ Waiting list',auto_espera_sub:'Notifies the patient when a cancelled slot becomes available',
+  btn_salvar_auto:'💾 Save Automations',toast_auto_ok:'Automations saved ✓',
+  mod_precos_h2:'Procedure Prices',
+  mod_precos_p:'Reference prices for each procedure. The agent can inform these prices to patients.',
+  btn_salvar_precos:'💾 Save Prices',toast_precos_ok:'Prices saved ✓',
+  ph_buscar_pac:'🔍 Search by name, phone or document...',
+  loading_pac:'Loading patients...',vazio_pac:'No patients registered yet',err_pac:'Error loading patients',
+  col_nome:'Name',col_tel:'Phone',col_doc:'Document',col_ult:'Last Visit',col_total:'Total',col_proc:'Procedure',col_obs:'Notes',btn_notas:'Notes',
+  ph_buscar_ag:'🔍 Search by name, date or dentist...',
+  opt_todos:'All',opt_confirmado:'Confirmed',opt_remarcado:'Rescheduled',opt_cancelado:'Cancelled',opt_ok:'OK',opt_falto:'No-show',
+  loading_ag:'Loading appointments...',vazio_ag:'No appointments registered yet',err_ag:'Error loading appointments',
+  col_data:'Date',col_hora:'Time',col_pac:'Patient',col_dent:'Dentist',col_status:'Status',col_acao:'Action',
+  opt_alterar:'Change...',opt_ok2:'✓ OK',opt_faltou:'✗ No-show',
+  toast_status_ok:'Status updated: {s} ✓',err_status:'Error updating status',
+  obs_h3:'📝 Patient Notes',ph_obs:'Write notes about this patient here...',btn_cancelar:'Cancel',btn_salvar_obs:'Save',toast_obs_ok:'Note saved ✓',
+  qr_h3:'📱 Dentist Access',qr_sub:'Scan QR to access',btn_fechar:'Close',loading_qr:'Loading QR...',
+  dapp_agenda:'📅',dapp_pac:'👤',dapp_config:'⚙️',
+  hoje:'Today',vazio_turno:'No upcoming appointments',vazio_ag_dent:'No appointments',vazio_pac_dent:'No patients',
+  cal_label:'Calendar ID',cal_nota:'Google Calendar → Settings → Calendar ID',
+  btn_salvar_cal:'💾 Save',toast_cal_ok:'Calendar ID saved ✓',
+  toast_presente:'✓ Present marked',toast_faltou:'✗ No-show marked',toast_erro:'Error',
+  pwa_titulo:'Install Iris',pwa_sub:'Add the shortcut to your home screen',
+  btn_agora_nao:'Not now',btn_instalar:'📲 Add to home screen',
+  toast_salvo:'✓ Saved',err_salvar:'Error saving',toast_nao_esquecer:'💾 Don\'t forget to save changes',
+},
+};
+let T=TRADUCOES['português'];
+
+function aplicarTraducoes(lang){
+  T=TRADUCOES[lang]||TRADUCOES['português'];
+  const $=(s)=>document.querySelector(s);
+  const $$=(s)=>document.querySelectorAll(s);
+  const s=(el,v,a='textContent')=>{if(el)el[a]=v;};
+  const sp=(id,v)=>{const e=document.getElementById(id);if(e)e.placeholder=v;};
+  const st=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+
+  document.title=T.page_title;
+  // Login
+  s($('.login-title'),T.bem_vindo);
+  s($('.login-sub'),T.login_sub);
+  sp('login-email',T.ph_email);
+  sp('login-password','••••••••');
+  s($('#login-btn'),T.btn_entrar);
+  // Modal primeiro acesso
+  s($('#primeiro-acesso-modal h3'),T.modal_senha_h3);
+  s($('#primeiro-acesso-modal p'),T.modal_senha_desc);
+  sp('nova-senha',T.ph_nova_senha);
+  sp('confirma-senha',T.ph_confirma);
+  st('btn-salvar-senha',T.btn_salvar_senha);
+  // Logout buttons
+  $$('.btn-logout').forEach(e=>e.textContent=T.btn_sair);
+  // Tabs (preserve badge spans)
+  const tabs=$$('.tab-btn');
+  if(tabs[0])tabs[0].firstChild.nodeValue&&(tabs[0].firstChild.nodeValue=T.tab_config);
+  // Modulo idioma
+  const idH2=$('#acc-idioma h2');if(idH2)idH2.textContent=T.mod_idioma_h2;
+  const idP=$('#acc-idioma .accordion-title p');if(idP)idP.textContent=T.mod_idioma_p;
+  $('[onclick="saveIdioma()"]')&&($('[onclick="saveIdioma()"]').textContent=T.btn_salvar_idioma);
+  // Modulo clinica
+  const clH2=$('#acc-clinica h2');if(clH2)clH2.textContent=T.mod_clinica_h2;
+  const clP=$('#acc-clinica .accordion-title p');if(clP)clP.textContent=T.mod_clinica_p;
+  sp('c_nome',T.ph_nome_clinica);sp('c_tel',T.ph_telefone);
+  sp('c_end',T.ph_end);sp('c_sala',T.ph_sala);sp('c_bairro',T.ph_bairro);
+  sp('c_cidade',T.ph_cidade);sp('c_cep',T.ph_cep);sp('c_referencia',T.ph_ref);
+  sp('c_maps',T.ph_maps);
+  $('[onclick="saveConfig()"]')&&($('[onclick="saveConfig()"]').textContent=T.btn_salvar);
+  // Modulo dentistas
+  const dH2=$('#acc-dentistas h2');if(dH2)dH2.textContent=T.mod_dent_h2;
+  const dP=$('#acc-dentistas .accordion-title p');if(dP)dP.textContent=T.mod_dent_p;
+  // Modulo automatizacoes
+  const aH2=$('#acc-auto h2');if(aH2)aH2.textContent=T.mod_auto_h2;
+  const aP=$('#acc-auto .accordion-title p');if(aP)aP.textContent=T.mod_auto_p;
+  $('[onclick="saveAuto()"]')&&($('[onclick="saveAuto()"]').textContent=T.btn_salvar_auto);
+  // Modulo precos
+  const prH2=$('#acc-precos-wrap h2');if(prH2)prH2.textContent=T.mod_precos_h2;
+  const prP=$('#acc-precos-wrap p');if(prP)prP.textContent=T.mod_precos_p;
+  $('[onclick="savePrecios()"]')&&($('[onclick="savePrecios()"]').textContent=T.btn_salvar_precos);
+  // Pacientes search
+  sp('search-pac',T.ph_buscar_pac);
+  // Agendamentos search
+  sp('search-ag',T.ph_buscar_ag);
+  // App dentista
+  sp('dapp-search-pac',$('.dapp-tab.active')?.textContent||T.ph_buscar_pac);
+  // Modal obs
+  s($('#obs-modal h3'),T.obs_h3);
+  sp('obs-text',T.ph_obs);
+  s($('#obs-modal .btn-cancel'),T.btn_cancelar);
+  s($('#obs-modal .btn-ok'),T.btn_salvar_obs);
+  // Modal QR
+  s($('#qr-modal h3'),T.qr_h3);
+  s($('#qr-modal .btn-cancel'),T.btn_fechar);
+  // PWA
+  s($('#pwa-prompt [onclick="dismissPWA()"]'),T.btn_agora_nao);
+  s($('#pwa-install-btn'),T.btn_instalar);
+  // data-i18n fallback
+  $$('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(T[k]!==undefined)el.textContent=T[k];});
+  $$('[data-i18n-ph]').forEach(el=>{const k=el.dataset.i18nPh;if(T[k]!==undefined)el.placeholder=T[k];});
 }
 
 // ══════════════════════════════════
@@ -840,8 +1180,8 @@ async function doLogin(){
   const btn=document.getElementById('login-btn');
   const err=document.getElementById('login-error');
   err.style.display='none';
-  if(!email||!pass){err.textContent='Preencha todos os campos';err.style.display='block';return;}
-  btn.disabled=true;btn.textContent='Entrando...';
+  if(!email||!pass){err.textContent=T.err_preencha;err.style.display='block';return;}
+  btn.disabled=true;btn.textContent=T.btn_entrando;
   try{
     const hash=await sha256(pass);
     const users=await sb.query('usuarios',`?email=eq.${encodeURIComponent(email)}&select=*`);
@@ -855,25 +1195,25 @@ async function doLogin(){
     if(u.primeiro_acesso){
       document.getElementById('login-page').style.display='none';
       document.getElementById('primeiro-acesso-modal').style.display='flex';
-      btn.disabled=false;btn.textContent='Entrar';
+      btn.disabled=false;btn.textContent=T.btn_entrar;
       return;
     }
     document.getElementById('login-page').style.display='none';
     document.getElementById('app').style.display='block';
     document.getElementById('header-clinic-name').textContent=currentClinica.nome;
     loadAll();
-  }catch(e){err.textContent='Email ou senha incorretos';err.style.display='block';}
-  btn.disabled=false;btn.textContent='Entrar';
+  }catch(e){err.textContent=T.err_login;err.style.display='block';}
+  btn.disabled=false;btn.textContent=T.btn_entrar;
 }
 async function salvarNovaSenha(){
   const nova=document.getElementById('nova-senha').value;
   const confirma=document.getElementById('confirma-senha').value;
   const err=document.getElementById('primeiro-acesso-error');
   err.style.display='none';
-  if(!nova||nova.length<6){err.textContent='A senha deve ter pelo menos 6 caracteres';err.style.display='block';return;}
-  if(nova!==confirma){err.textContent='As senhas não coincidem';err.style.display='block';return;}
+  if(!nova||nova.length<6){err.textContent=T.err_senha_min;err.style.display='block';return;}
+  if(nova!==confirma){err.textContent=T.err_senha_diff;err.style.display='block';return;}
   const btn=document.getElementById('btn-salvar-senha');
-  btn.disabled=true;btn.textContent='Salvando...';
+  btn.disabled=true;btn.textContent=T.btn_salvando_senha;
   try{
     const hash=await sha256(nova);
     await sb.update('usuarios',currentUsuario.id,{senha_hash:hash,primeiro_acesso:false});
@@ -882,9 +1222,9 @@ async function salvarNovaSenha(){
     document.getElementById('app').style.display='block';
     document.getElementById('header-clinic-name').textContent=currentClinica.nome;
     loadAll();
-    toast('Senha atualizada com sucesso!');
-  }catch(e){err.textContent='Erro ao salvar. Tente novamente.';err.style.display='block';}
-  btn.disabled=false;btn.textContent='Salvar senha';
+    toast(T.toast_senha_ok);
+  }catch(e){err.textContent=T.err_salvar_tente;err.style.display='block';}
+  btn.disabled=false;btn.textContent=T.btn_salvar_senha;
 }
 document.addEventListener('DOMContentLoaded', function(){
   const pwEl = document.getElementById('login-password');
@@ -896,7 +1236,7 @@ function doLogout(){currentClinica=null;currentUsuario=null;document.getElementB
 // TABS
 // ══════════════════════════════════
 function showTab(name,btn){
-  if(name!=='config'&&!isIdiomaConfigured()){toast('Configure e salve o Idioma antes de acessar outras seções','err');return;}
+  if(name!=='config'&&!isIdiomaConfigured()){toast(T.toast_bloqueio_tab,'err');return;}
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(`tab-${name}`).classList.add('active');
@@ -907,7 +1247,7 @@ function showTab(name,btn){
 // ACCORDION
 // ══════════════════════════════════
 function toggleAcc(id){
-  if(id!=='idioma'&&!isIdiomaConfigured()){toast('Configure e salve o Idioma antes de acessar os demais módulos','err');return;}
+  if(id!=='idioma'&&!isIdiomaConfigured()){toast(T.toast_bloqueio_mod,'err');return;}
   const body=document.getElementById(`body-${id}`);
   const arr=document.getElementById(`arr-${id}`);
   const wasOpen=body.classList.contains('open');
@@ -918,7 +1258,7 @@ function toggleAcc(id){
 
 function showSaveReminder(){
   const t=document.getElementById('toast');
-  t.textContent='💾 Não esqueça de salvar as alterações';
+  t.textContent=T.toast_nao_esquecer;
   t.className='show';
   t.style.borderColor='var(--amber)';
   t.style.color='#fcd34d';
@@ -970,11 +1310,11 @@ async function savePrecios(){
   try{
     await sb.update('clinicas',currentClinica.id,{precios});
     currentClinica.precios=precios;
-    st.textContent='✓ Salvo';st.className='save-status ok';
-    toast('Preços salvos ✓');
+    st.textContent=T.toast_salvo;st.className='save-status ok';
+    toast(T.toast_precos_ok);
   }catch(e){
-    st.textContent='✗ Erro';st.className='save-status err';
-    toast('Erro ao salvar','err');
+    st.textContent=T.err_txt||'✗ Erro';st.className='save-status err';
+    toast(T.err_salvar,'err');
   }
   btn.disabled=false;
 }
@@ -1011,6 +1351,7 @@ function loadConfig(){
   const idiomaPais=dashIdx>0?idiomaVal.substring(dashIdx+1):'br';
   const langSel=document.getElementById('c_idioma_lang');
   if(langSel){langSel.value=idiomaLang;updatePaisOptions(idiomaLang,idiomaPais,c.estado||'');}
+  aplicarTraducoes(idiomaLang);
   checkIdiomaConfigured();
   renderDentistas(c.dentistas||[]);
   setTimeout(atualizarBadgeDentistas,0);
@@ -1035,8 +1376,8 @@ async function saveConfig(){
       whatsapp_instancia:document.getElementById('c_wp').value,
       maps_link:document.getElementById('c_maps').value,
     });
-    st.textContent='✓ Salvo';st.className='save-status ok';toast('Configuração salva ✓');
-  }catch(e){st.textContent='✗ Erro';st.className='save-status err';toast('Erro ao salvar','err');}
+    st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_config_ok);
+  }catch(e){st.textContent=T.err_txt||'✗ Erro';st.className='save-status err';toast(T.err_salvar,'err');}
   btn.disabled=false;
 }
 
@@ -1207,7 +1548,7 @@ function toggleDentista(i){
   if(querendo_ativar){
     const ativos=document.querySelectorAll('.dent-toggle.on').length;
     const max=currentClinica?.max_dentistas||10;
-    if(ativos>=max){toast(`Limite de ${max} dentista${max>1?'s':''} ativo${max>1?'s':''} atingido`,'err');return;}
+    if(ativos>=max){toast(T.toast_limite_dent.replace('{n}',max),'err');return;}
   }
   t.classList.toggle('on');
   h.classList.toggle('has-active',t.classList.contains('on'));
@@ -1273,7 +1614,7 @@ function updateSlots(i){
   const slots=calcSlots(ini,fim,dur,aI,aF);
   const p=document.getElementById(`slots-preview-${i}`);
   if(!p)return;
-  p.innerHTML=slots.length?slots.map(s=>`<span class="slot-chip">${s}</span>`).join(''):`<span class="slots-empty">Preencha os campos de horário</span>`;
+  p.innerHTML=slots.length?slots.map(s=>`<span class="slot-chip">${s}</span>`).join(''):`<span class="slots-empty">${T.slots_vazio}</span>`;
 }
 
 function adjTime(btn,delta){
@@ -1333,11 +1674,11 @@ async function saveDentista(i){
     await sb.update('clinicas',currentClinica.id,{dentistas:allDents});
     if(!currentClinica.dentistas)currentClinica.dentistas=[];
     currentClinica.dentistas[i]=dentData;
-    if(st){st.textContent='✓ Salvo';st.className='save-status ok';}
-    toast(`Dentista ${i+1} salvo ✓`);
+    if(st){st.textContent=T.toast_salvo;st.className='save-status ok';}
+    toast(T.toast_dent_ok.replace('{n}',i+1));
   }catch(e){
-    if(st){st.textContent='✗ Erro';st.className='save-status err';}
-    toast('Erro ao salvar','err');
+    if(st){st.textContent=T.err_txt||'✗ Erro';st.className='save-status err';}
+    toast(T.err_salvar,'err');
   }
   if(btn)btn.disabled=false;
 }
@@ -1410,8 +1751,8 @@ async function saveAuto(){
   try{
     await sb.update('clinicas',currentClinica.id,{automatizacoes:data});
     currentClinica.automatizacoes=data;
-    st.textContent='✓ Salvo';st.className='save-status ok';toast('Automatizações guardadas ✓');
-  }catch(e){st.textContent='✗ Erro';st.className='save-status err';toast('Erro ao salvar','err');}
+    st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_auto_ok);
+  }catch(e){st.textContent=T.err_txt||'✗ Erro';st.className='save-status err';toast(T.err_salvar,'err');}
   btn.disabled=false;
 }
 
@@ -1427,8 +1768,8 @@ async function loadPacientes(){
 }
 function renderPacientes(list){
   const wrap=document.getElementById('pac-table-wrap');
-  if(!list.length){wrap.innerHTML='<div class="empty"><div class="empty-icon">👤</div><p>Nenhum paciente registrado ainda</p></div>';return;}
-  wrap.innerHTML=`<table><thead><tr><th>Nome</th><th>Telefone</th><th>Documento</th><th>Última Consulta</th><th>Total</th><th>Procedimento</th><th>Obs.</th></tr></thead><tbody>${list.map(p=>`<tr>
+  if(!list.length){wrap.innerHTML=`<div class="empty"><div class="empty-icon">👤</div><p>${T.vazio_pac}</p></div>`;return;}
+  wrap.innerHTML=`<table><thead><tr><th>${T.col_nome}</th><th>${T.col_tel}</th><th>${T.col_doc}</th><th>${T.col_ult}</th><th>${T.col_total}</th><th>${T.col_proc}</th><th>${T.col_obs}</th></tr></thead><tbody>${list.map(p=>`<tr>
     <td><b>${p.nome||'—'}</b></td>
     <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${p.telefone||'—'}</td>
     <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${p.documento||'—'}</td>
@@ -1456,8 +1797,8 @@ async function loadAgendamentos(){
 }
 function renderAgendamentos(list){
   const wrap=document.getElementById('ag-table-wrap');
-  if(!list.length){wrap.innerHTML='<div class="empty"><div class="empty-icon">📅</div><p>Nenhum agendamento registrado ainda</p></div>';return;}
-  wrap.innerHTML=`<table><thead><tr><th>Data</th><th>Hora</th><th>Paciente</th><th>Procedimento</th><th>Dentista</th><th>Status</th><th>Ação</th></tr></thead><tbody>${list.map(a=>`<tr>
+  if(!list.length){wrap.innerHTML=`<div class="empty"><div class="empty-icon">📅</div><p>${T.vazio_ag}</p></div>`;return;}
+  wrap.innerHTML=`<table><thead><tr><th>${T.col_data}</th><th>${T.col_hora}</th><th>${T.col_pac}</th><th>${T.col_proc}</th><th>${T.col_dent}</th><th>${T.col_status}</th><th>${T.col_acao}</th></tr></thead><tbody>${list.map(a=>`<tr>
     <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${(a['horario']||'').substring(0,10)||'—'}</td>
     <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${(a['horario']||'').substring(11,16)||'—'}</td>
     <td><b>${a.nome||'—'}</b><br><span style="color:var(--text2);font-size:11px">${a.telefone||''}</span></td>
@@ -1465,12 +1806,12 @@ function renderAgendamentos(list){
     <td>${a.dentista||'—'}</td>
     <td><span class="badge ${a.status||'confirmado'}">${a.status||'confirmado'}</span></td>
     <td><select class="status-select" onchange="updateStatus('${a.id}',this.value)">
-      <option value="">Alterar...</option>
-      <option value="confirmado">Confirmado</option>
-      <option value="ok">✓ OK</option>
-      <option value="falto">✗ Faltou</option>
-      <option value="cancelado">Cancelado</option>
-      <option value="remarcado">Remarcado</option>
+      <option value="">${T.opt_alterar}</option>
+      <option value="confirmado">${T.opt_confirmado}</option>
+      <option value="ok">${T.opt_ok2}</option>
+      <option value="falto">${T.opt_faltou}</option>
+      <option value="cancelado">${T.opt_cancelado}</option>
+      <option value="remarcado">${T.opt_remarcado}</option>
     </select></td>
   </tr>`).join('')}</tbody></table>`;
 }
@@ -1485,9 +1826,9 @@ async function updateStatus(id,status){
     await sb.update('agendamentos',id,{status});
     const idx=allAgendamentos.findIndex(a=>a.id===id);
     if(idx!==-1)allAgendamentos[idx].status=status;
-    toast(`Status atualizado: ${status} ✓`);
+    toast(T.toast_status_ok.replace('{s}',status));
     filterAgendamentos();
-  }catch(e){toast('Erro ao atualizar status','err');}
+  }catch(e){toast(T.err_status,'err');}
 }
 
 // ══════════════════════════════════
@@ -1609,7 +1950,7 @@ async function dappStatus(id,status,btn){
     const idx=dappAgendamentos.findIndex(a=>a.id===id);
     if(idx!==-1)dappAgendamentos[idx].status=status;
     renderDappAgenda();
-    toast(`${status==='ok'?'✓ Presente':'✗ Faltou'} marcado`);
+    toast(status==='ok'?T.toast_presente:T.toast_faltou);
   }catch(e){toast('Erro','err');}
 }
 
@@ -1670,8 +2011,8 @@ async function saveDappConfig(){
     const dents=rows[0]?.dentistas||[];
     dents[d.idx]={...dents[d.idx],calendar_id:d.calendar_id};
     await sb.update('clinicas',d.clinicaId,{dentistas:dents});
-    toast('Calendar ID salvo ✓');
-  }catch(e){toast('Erro ao salvar','err');}
+    toast(T.toast_cal_ok);
+  }catch(e){toast(T.err_salvar,'err');}
 }
 
 // ══════════════════════════════════
@@ -1685,11 +2026,11 @@ async function saveObs(){
     await sb.update('pacientes',obsPatientId,{observacoes:obs});
     const idx=allPacientes.findIndex(p=>p.id===obsPatientId);
     if(idx!==-1)allPacientes[idx].observacoes=obs;
-    toast('Observação salva ✓');closeObs();renderPacientes(allPacientes);
+    toast(T.toast_obs_ok);closeObs();renderPacientes(allPacientes);
     // also update dapp if open
     const di=dappPacientes.findIndex(p=>p.id===obsPatientId);
     if(di!==-1)dappPacientes[di].observacoes=obs;
-  }catch(e){toast('Erro ao salvar','err');}
+  }catch(e){toast(T.toast_erro,'err');}
 }
 
 // ══ QR CODE GENERATOR ══
@@ -1699,8 +2040,8 @@ function showQR(i){
   const nome=document.getElementById(`d${i}_nome`)?.value||'';
   const titulo=document.getElementById(`d${i}_titulo`)?.value||'Dr.';
   const senha=document.getElementById(`d${i}_senha`)?.value||'';
-  if(!nome){toast('Preenche o nome do dentista primeiro','err');return;}
-  if(!senha){toast('Defina uma senha para o dentista','err');return;}
+  if(!nome){toast(T.err_preenche_nome_dent,'err');return;}
+  if(!senha){toast(T.err_define_senha_dent,'err');return;}
   const token=btoa(`${c.id}:${i}:${senha}`).replace(/=/g,'');
   const url=`${window.location.origin}${window.location.pathname}?c=${c.id}&d=${i}&t=${token}`;
   document.getElementById('qr-dent-name').textContent=`${titulo} ${nome}`;
@@ -1724,7 +2065,7 @@ function drawQR(text){
   ctx.fillStyle='#1a1a2e';
   ctx.font='11px monospace';
   ctx.textAlign='center';
-  ctx.fillText('Carregando QR...',size/2,size/2);
+  ctx.fillText(T.loading_qr,size/2,size/2);
   // Load QRCode library dynamically
   if(!window.QRCode){
     const s=document.createElement('script');
