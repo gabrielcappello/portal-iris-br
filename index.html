@@ -1886,14 +1886,14 @@ function renderDentistas(dents){
             </div>
           </div>
           <div class="form-group full"><label>${T.label_cal}</label><input id="d${i}_cal" value="${d.calendar_id||''}" placeholder="${T.ph_cal}"></div>
-          <div class="form-group"><label>${T.label_senha_dent}</label><input type="password" id="d${i}_senha" value="${d.senha||''}" placeholder="${T.ph_senha_dent}"></div>
-          <div class="form-group">
+          <div class="form-group full">
             <label>${T.label_wp_dent}</label>
             <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface2)">
-              <span style="padding:10px 10px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2);white-space:nowrap;display:flex;align-items:center">${DDI_MAP[currentClinica?.pais_codigo||'br']||'+55'}</span>
-              <input id="d${i}_whatsapp" value="${d.whatsapp||''}" placeholder="${T.ph_wp_dent}" style="flex:1;min-width:0;background:transparent;border:none;border-radius:0;padding:10px 10px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none">
+              <span style="padding:10px 12px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2);white-space:nowrap;display:flex;align-items:center">${DDI_MAP[currentClinica?.pais_codigo||'br']||'+55'}</span>
+              <input id="d${i}_whatsapp" value="${d.whatsapp||''}" placeholder="${T.ph_wp_dent}" style="flex:1;min-width:0;background:transparent;border:none;border-radius:0;padding:10px 12px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none">
             </div>
           </div>
+          <div class="form-group"><label>${T.label_senha_dent}</label><input type="password" id="d${i}_senha" value="${d.senha||''}" placeholder="${T.ph_senha_dent}"></div>
           <div class="form-group"><label>${T.label_abertura}</label><input type="time" id="d${i}_ini" value="${d.inicio||'08:00'}" oninput="updateSlots(${i})"></div>
           <div class="form-group"><label>${T.label_encerramento}</label><input type="time" id="d${i}_fim" value="${d.fim||'18:00'}" oninput="updateSlots(${i})"></div>
           <div class="form-group"><label>${T.label_alm_ini}</label><input type="time" id="d${i}_alm_ini" value="${d.alm_ini||'12:00'}" oninput="updateSlots(${i})"></div>
