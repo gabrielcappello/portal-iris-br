@@ -336,6 +336,13 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               </div>
             </div>
             <div id="c_pais_info" style="display:none;margin-top:12px;padding:10px 14px;background:var(--surface3);border-radius:var(--radius-sm);font-size:12px;color:var(--text2);display:flex;gap:16px;flex-wrap:wrap"></div>
+            <div class="form-group full" style="margin-top:14px">
+              <label data-i18n="label_fuso">Fuso horário</label>
+              <div style="display:flex;align-items:center;gap:10px">
+                <input id="c_fuso" placeholder="Ex: America/Sao_Paulo" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none">
+                <span style="font-size:11px;color:var(--amber);white-space:nowrap;flex-shrink:0">⚠️ <span data-i18n="fuso_aviso">Altere apenas se houver problema de horário.</span></span>
+              </div>
+            </div>
           </div>
           <div class="save-bar">
             <span class="save-status" id="idioma-status"></span>
@@ -724,6 +731,7 @@ async function onPaisChange(paisCode,estadoValue=''){
       estadoSel.innerHTML=`<option value="">${T.select_selecione||'Selecione...'}</option>`;
     }
     onEstadoChange(estadoValue||'');
+    updateFuso();
   }catch(e){console.error('onPaisChange:',e);}
 }
 async function saveIdioma(){
@@ -736,9 +744,11 @@ async function saveIdioma(){
   btn.disabled=true;st.textContent=T.salvando||'Salvando...';st.className='save-status';
   const idioma=lang+'-'+pais_codigo;
   try{
-    await sb.update('clinicas',currentClinica.id,{idioma,pais_codigo});
+    const fuso_horario=document.getElementById('c_fuso')?.value||'';
+    await sb.update('clinicas',currentClinica.id,{idioma,pais_codigo,fuso_horario});
     currentClinica.idioma=idioma;
     currentClinica.pais_codigo=pais_codigo;
+    currentClinica.fuso_horario=fuso_horario;
     st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_idioma_ok);
     aplicarTraducoes(lang);
     checkIdiomaConfigured();
@@ -825,6 +835,152 @@ const DOCUMENTO_MAP={
 };
 
 // ══════════════════════════════════
+// FUSO HORÁRIO IANA POR PAÍS / ESTADO
+// ══════════════════════════════════
+const FUSO_MAP={
+  // ── Países sem divisão de fuso ──────────────────────────────────
+  'ao':'Africa/Luanda','mz':'Africa/Maputo','cv':'Atlantic/Cape_Verde',
+  'gw':'Africa/Bissau','st':'Africa/Sao_Tome','tl':'Asia/Dili',
+  'co':'America/Bogota','pe':'America/Lima','ve':'America/Caracas',
+  'ec':'America/Guayaquil','gt':'America/Guatemala','cu':'America/Havana',
+  'bo':'America/La_Paz','do':'America/Santo_Domingo','hn':'America/Tegucigalpa',
+  'py':'America/Asuncion','sv':'America/El_Salvador','ni':'America/Managua',
+  'cr':'America/Costa_Rica','pa':'America/Panama','uy':'America/Montevideo',
+  'gq':'Africa/Malabo','pr':'America/Puerto_Rico',
+  'ie':'Europe/Dublin','jm':'America/Jamaica','tt':'America/Port_of_Spain',
+  'bz':'America/Belize','gy':'America/Guyana','bb':'America/Barbados',
+  'ng':'Africa/Lagos','za':'Africa/Johannesburg','gh':'Africa/Accra',
+  'ke':'Africa/Nairobi','ug':'Africa/Kampala','tz':'Africa/Dar_es_Salaam',
+  'in':'Asia/Kolkata','pk':'Asia/Karachi','ph':'Asia/Manila','sg':'Asia/Singapore',
+  'nz':'Pacific/Auckland','zw':'Africa/Harare','zm':'Africa/Lusaka',
+  'rw':'Africa/Kigali','mt':'Europe/Malta','cm':'Africa/Douala',
+  'sl':'Africa/Freetown','lr':'Africa/Monrovia','gm':'Africa/Banjul',
+  'bw':'Africa/Gaborone','na':'Africa/Windhoek','mw':'Africa/Blantyre',
+  'ls':'Africa/Maseru','sz':'Africa/Mbabane','pg':'Pacific/Port_Moresby',
+  'fj':'Pacific/Fiji',
+  // ── Brasil ──────────────────────────────────────────────────────
+  'br':'America/Sao_Paulo',
+  'br|Acre':'America/Rio_Branco','br|Alagoas':'America/Maceio',
+  'br|Amapá':'America/Belem','br|Amazonas':'America/Manaus',
+  'br|Bahia':'America/Bahia','br|Ceará':'America/Fortaleza',
+  'br|Distrito Federal':'America/Sao_Paulo','br|Espírito Santo':'America/Sao_Paulo',
+  'br|Goiás':'America/Sao_Paulo','br|Maranhão':'America/Fortaleza',
+  'br|Mato Grosso':'America/Cuiaba','br|Mato Grosso do Sul':'America/Campo_Grande',
+  'br|Minas Gerais':'America/Sao_Paulo','br|Pará':'America/Belem',
+  'br|Paraíba':'America/Fortaleza','br|Paraná':'America/Sao_Paulo',
+  'br|Pernambuco':'America/Recife','br|Piauí':'America/Fortaleza',
+  'br|Rio de Janeiro':'America/Sao_Paulo','br|Rio Grande do Norte':'America/Fortaleza',
+  'br|Rio Grande do Sul':'America/Sao_Paulo','br|Rondônia':'America/Porto_Velho',
+  'br|Roraima':'America/Boa_Vista','br|Santa Catarina':'America/Sao_Paulo',
+  'br|São Paulo':'America/Sao_Paulo','br|Sergipe':'America/Maceio',
+  'br|Tocantins':'America/Araguaina',
+  // ── Portugal ────────────────────────────────────────────────────
+  'pt':'Europe/Lisbon','pt|Açores':'Atlantic/Azores','pt|Madeira':'Atlantic/Madeira',
+  // ── Argentina ───────────────────────────────────────────────────
+  'ar':'America/Argentina/Buenos_Aires',
+  'ar|Buenos Aires':'America/Argentina/Buenos_Aires',
+  'ar|Ciudad Autónoma de Buenos Aires':'America/Argentina/Buenos_Aires',
+  'ar|Catamarca':'America/Argentina/Catamarca','ar|Chaco':'America/Argentina/Buenos_Aires',
+  'ar|Chubut':'America/Argentina/Buenos_Aires',
+  'ar|Córdoba':'America/Argentina/Cordoba',
+  'ar|Corrientes':'America/Argentina/Buenos_Aires',
+  'ar|Entre Ríos':'America/Argentina/Buenos_Aires',
+  'ar|Formosa':'America/Argentina/Buenos_Aires',
+  'ar|Jujuy':'America/Argentina/Jujuy',
+  'ar|La Pampa':'America/Argentina/Buenos_Aires',
+  'ar|La Rioja':'America/Argentina/La_Rioja',
+  'ar|Mendoza':'America/Argentina/Mendoza',
+  'ar|Misiones':'America/Argentina/Buenos_Aires',
+  'ar|Neuquén':'America/Argentina/Salta',
+  'ar|Río Negro':'America/Argentina/Buenos_Aires',
+  'ar|Salta':'America/Argentina/Salta',
+  'ar|San Juan':'America/Argentina/San_Juan',
+  'ar|San Luis':'America/Argentina/San_Luis',
+  'ar|Santa Cruz':'America/Argentina/Rio_Gallegos',
+  'ar|Santa Fe':'America/Argentina/Buenos_Aires',
+  'ar|Santiago del Estero':'America/Argentina/Buenos_Aires',
+  'ar|Tierra del Fuego':'America/Argentina/Ushuaia',
+  'ar|Tucumán':'America/Argentina/Tucuman',
+  // ── México ──────────────────────────────────────────────────────
+  'mx':'America/Mexico_City',
+  'mx|Baja California':'America/Tijuana',
+  'mx|Baja California Sur':'America/Mazatlan',
+  'mx|Chihuahua':'America/Chihuahua',
+  'mx|Nayarit':'America/Mazatlan','mx|Sinaloa':'America/Mazatlan',
+  'mx|Sonora':'America/Hermosillo',
+  // ── España ──────────────────────────────────────────────────────
+  'es':'Europe/Madrid','es|Islas Canarias':'Atlantic/Canary',
+  'es|Ceuta':'Africa/Ceuta','es|Melilla':'Africa/Ceuta',
+  // ── Colombia ────────────────────────────────────────────────────
+  'co|Bogotá D.C.':'America/Bogota',
+  // ── Chile ───────────────────────────────────────────────────────
+  'cl':'America/Santiago','cl|Magallanes':'America/Punta_Arenas',
+  // ── Ecuador ─────────────────────────────────────────────────────
+  'ec|Galápagos':'Pacific/Galapagos',
+  // ── Estados Unidos ──────────────────────────────────────────────
+  'us':'America/New_York',
+  'us|Alabama':'America/Chicago','us|Alaska':'America/Anchorage',
+  'us|Arizona':'America/Phoenix','us|Arkansas':'America/Chicago',
+  'us|California':'America/Los_Angeles','us|Colorado':'America/Denver',
+  'us|Connecticut':'America/New_York','us|Delaware':'America/New_York',
+  'us|Florida':'America/New_York','us|Georgia':'America/New_York',
+  'us|Hawaii':'Pacific/Honolulu','us|Idaho':'America/Denver',
+  'us|Illinois':'America/Chicago','us|Indiana':'America/Indiana/Indianapolis',
+  'us|Iowa':'America/Chicago','us|Kansas':'America/Chicago',
+  'us|Kentucky':'America/Kentucky/Louisville','us|Louisiana':'America/Chicago',
+  'us|Maine':'America/New_York','us|Maryland':'America/New_York',
+  'us|Massachusetts':'America/New_York','us|Michigan':'America/Detroit',
+  'us|Minnesota':'America/Chicago','us|Mississippi':'America/Chicago',
+  'us|Missouri':'America/Chicago','us|Montana':'America/Denver',
+  'us|Nebraska':'America/Chicago','us|Nevada':'America/Los_Angeles',
+  'us|New Hampshire':'America/New_York','us|New Jersey':'America/New_York',
+  'us|New Mexico':'America/Denver','us|New York':'America/New_York',
+  'us|North Carolina':'America/New_York','us|North Dakota':'America/Chicago',
+  'us|Ohio':'America/New_York','us|Oklahoma':'America/Chicago',
+  'us|Oregon':'America/Los_Angeles','us|Pennsylvania':'America/New_York',
+  'us|Rhode Island':'America/New_York','us|South Carolina':'America/New_York',
+  'us|South Dakota':'America/Chicago','us|Tennessee':'America/Chicago',
+  'us|Texas':'America/Chicago','us|Utah':'America/Denver',
+  'us|Vermont':'America/New_York','us|Virginia':'America/New_York',
+  'us|Washington':'America/Los_Angeles','us|Washington D.C.':'America/New_York',
+  'us|West Virginia':'America/New_York','us|Wisconsin':'America/Chicago',
+  'us|Wyoming':'America/Denver',
+  // ── Reino Unido ─────────────────────────────────────────────────
+  'uk':'Europe/London',
+  // ── Austrália ───────────────────────────────────────────────────
+  'au':'Australia/Sydney',
+  'au|New South Wales':'Australia/Sydney','au|Victoria':'Australia/Melbourne',
+  'au|Queensland':'Australia/Brisbane','au|South Australia':'Australia/Adelaide',
+  'au|Western Australia':'Australia/Perth','au|Tasmania':'Australia/Hobart',
+  'au|Northern Territory':'Australia/Darwin',
+  'au|Australian Capital Territory':'Australia/Sydney',
+  // ── Canadá ──────────────────────────────────────────────────────
+  'ca':'America/Toronto',
+  'ca|Ontario':'America/Toronto','ca|Quebec':'America/Toronto',
+  'ca|British Columbia':'America/Vancouver','ca|Alberta':'America/Edmonton',
+  'ca|Manitoba':'America/Winnipeg','ca|Saskatchewan':'America/Regina',
+  'ca|Nova Scotia':'America/Halifax','ca|New Brunswick':'America/Halifax',
+  'ca|Prince Edward Island':'America/Halifax',
+  'ca|Newfoundland and Labrador':'America/St_Johns',
+  'ca|Yukon':'America/Whitehorse','ca|Northwest Territories':'America/Yellowknife',
+  'ca|Nunavut':'America/Iqaluit',
+  // ── Índia ───────────────────────────────────────────────────────
+  'in|Delhi (NCT)':'Asia/Kolkata',
+  // ── Nova Zelândia ───────────────────────────────────────────────
+  'nz|Chatham Islands':'Pacific/Chatham',
+};
+function getFuso(pais,estado){
+  if(estado){const k=`${pais}|${estado}`;if(FUSO_MAP[k])return FUSO_MAP[k];}
+  return FUSO_MAP[pais]||'';
+}
+function updateFuso(){
+  const pais=document.getElementById('c_idioma_pais')?.value||'';
+  const estado=document.getElementById('c_estado')?.value||'';
+  const el=document.getElementById('c_fuso');
+  if(el){const f=getFuso(pais,estado);if(f)el.value=f;}
+}
+
+// ══════════════════════════════════
 // ÁREA / DDD POR ESTADO
 // ══════════════════════════════════
 const ESTADO_DDD={
@@ -840,6 +996,7 @@ function onEstadoChange(estado){
   const ddd=ESTADO_DDD[estado]||'';
   const span=document.getElementById('c_tel_ddd');
   if(span){span.textContent=ddd?`(${ddd})`:'';span.style.display=ddd?'':'none';}
+  updateFuso();
 }
 
 // ══════════════════════════════════
@@ -1020,6 +1177,7 @@ const TRADUCOES={
   slots_gerados:'Slots gerados:',manual_separado:'Escreva os horários separados por vírgula:',
   info_doc:'Documento:',info_dig:'dígitos',info_tel:'Telefone:',dent_numero:'Dentista',
   err_txt:'✗ Erro',salvando:'Salvando...',
+  label_fuso:'Fuso horário',ph_fuso:'Ex: America/Sao_Paulo',fuso_aviso:'Altere apenas se houver problema de horário.',
   mod_dados_h2:'Dados que o agente solicita',mod_dados_p:'Escolha quais informações o agente irá coletar do paciente',
   dados_fixos:'Campos obrigatórios (fixos)',dados_opcionais:'Campos opcionais',
   dados_obrigatorio:'obrigatório',
@@ -1124,6 +1282,7 @@ const TRADUCOES={
   slots_gerados:'Slots generados:',manual_separado:'Escribe los horarios separados por coma:',
   info_doc:'Documento:',info_dig:'dígitos',info_tel:'Teléfono:',dent_numero:'Dentista',
   err_txt:'✗ Error',salvando:'Guardando...',
+  label_fuso:'Huso horario',ph_fuso:'Ej: America/Argentina/Buenos_Aires',fuso_aviso:'Modificar solo si hay un problema de horario.',
   mod_dados_h2:'Datos que el agente solicita',mod_dados_p:'Elige qué información el agente recopilará del paciente',
   dados_fixos:'Campos obligatorios (fijos)',dados_opcionais:'Campos opcionales',
   dados_obrigatorio:'obligatorio',
@@ -1228,6 +1387,7 @@ const TRADUCOES={
   slots_gerados:'Generated slots:',manual_separado:'Type schedules separated by comma:',
   info_doc:'Document:',info_dig:'digits',info_tel:'Phone:',dent_numero:'Dentist',
   err_txt:'✗ Error',salvando:'Saving...',
+  label_fuso:'Time zone',ph_fuso:'Ex: America/New_York',fuso_aviso:'Change only if there is a time issue.',
   mod_dados_h2:'Data the agent collects',mod_dados_p:'Choose what information the agent will collect from the patient',
   dados_fixos:'Required fields (fixed)',dados_opcionais:'Optional fields',
   dados_obrigatorio:'required',
@@ -1520,7 +1680,7 @@ function loadConfig(){
   const idiomaPais=dashIdx>0?idiomaVal.substring(dashIdx+1):'br';
   const langSel=document.getElementById('c_idioma_lang');
   if(langSel){langSel.value=idiomaLang;updatePaisOptions(idiomaLang,idiomaPais,c.estado||'');}
-  setTimeout(()=>onEstadoChange(c.estado||''),300);
+  setTimeout(()=>{onEstadoChange(c.estado||'');const fe=document.getElementById('c_fuso');if(fe&&c.fuso_horario)fe.value=c.fuso_horario;else if(fe)updateFuso();},300);
   aplicarTraducoes(idiomaLang);
   checkIdiomaConfigured();
   renderDentistas(c.dentistas||[]);
