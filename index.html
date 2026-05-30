@@ -323,7 +323,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
           <div class="accordion-body-inner">
             <div class="form-grid">
               <div class="form-group">
-                <label>Idioma</label>
+                <label data-i18n="label_idioma">Idioma</label>
                 <select id="c_idioma_lang" onchange="updatePaisOptions(this.value)">
                   <option value="português">Português</option>
                   <option value="español">Español</option>
@@ -331,7 +331,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
                 </select>
               </div>
               <div class="form-group">
-                <label>País</label>
+                <label data-i18n="label_pais">País</label>
                 <select id="c_idioma_pais" onchange="onPaisChange(this.value)"></select>
               </div>
             </div>
@@ -354,34 +354,34 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
         <div class="accordion-body" id="body-clinica">
           <div class="accordion-body-inner">
             <div class="form-grid">
-              <div class="form-group"><label>Nome da Clínica</label><input id="c_nome" placeholder="Ex: OdontoBR" oninput="updateWpName()"></div>
+              <div class="form-group"><label data-i18n="label_nome_clinica">Nome da Clínica</label><input id="c_nome" placeholder="Ex: OdontoBR" oninput="updateWpName()"></div>
               <div class="form-group">
-                <label>Telefone</label>
+                <label data-i18n="label_telefone">Telefone</label>
                 <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface2)" onfocusin="this.style.borderColor='var(--accent)'" onfocusout="this.style.borderColor='var(--border)'">
                   <span id="c_tel_ddi" style="padding:10px 10px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2);white-space:nowrap;display:flex;align-items:center;min-width:48px;justify-content:center">+55</span>
                   <span id="c_tel_ddd" style="padding:10px 6px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);white-space:nowrap;display:none;align-items:center"></span>
                   <input id="c_tel" placeholder="(21) 99999-9999" style="flex:1;min-width:0;background:transparent;border:none;border-radius:0;padding:10px 10px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none">
                 </div>
               </div>
-              <div class="form-group"><label>Endereço <span style="font-weight:400;color:var(--text3)">(Rua e número)</span></label><input id="c_end" placeholder="Ex: Av. Paulista, 1234"></div>
-              <div class="form-group"><label><b>Sala</b></label><input id="c_sala" placeholder="Ex: 3º andar, Sala 302"></div>
-              <div class="form-group"><label>Bairro</label><input id="c_bairro" placeholder="Centro"></div>
-              <div class="form-group"><label>Cidade</label><input id="c_cidade" placeholder="São Paulo"></div>
+              <div class="form-group"><label><span data-i18n="label_end">Endereço</span> <span data-i18n="end_sub" style="font-weight:400;color:var(--text3)">(Rua e número)</span></label><input id="c_end" placeholder="Ex: Av. Paulista, 1234"></div>
+              <div class="form-group"><label data-i18n="label_sala">Sala</label><input id="c_sala" placeholder="Ex: 3º andar, Sala 302"></div>
+              <div class="form-group"><label data-i18n="label_bairro">Bairro</label><input id="c_bairro" placeholder="Centro"></div>
+              <div class="form-group"><label data-i18n="label_cidade">Cidade</label><input id="c_cidade" placeholder="São Paulo"></div>
               <div class="form-group full" id="c_estado_wrap" style="display:none">
                 <label id="c_estado_label">Estado / Província</label>
                 <select id="c_estado" onchange="onEstadoChange(this.value)"><option value="">Selecione...</option></select>
               </div>
-              <div class="form-group"><label>CEP</label><input id="c_cep" placeholder="01310-100"></div>
-              <div class="form-group"><label>Referência</label><input id="c_referencia" placeholder="Ex: Em frente ao banco, portão azul"></div>
+              <div class="form-group"><label data-i18n="label_cep">CEP</label><input id="c_cep" placeholder="01310-100"></div>
+              <div class="form-group"><label data-i18n="label_ref">Referência</label><input id="c_referencia" placeholder="Ex: Em frente ao banco, portão azul"></div>
               <div class="form-group full">
-                <label>Instância WhatsApp <span style="font-weight:400;color:var(--text3)">(automático)</span></label>
+                <label><span data-i18n="label_wp">Instância WhatsApp</span> <span data-i18n="wp_sub" style="font-weight:400;color:var(--text3)">(automático)</span></label>
                 <input id="c_wp" readonly style="background:var(--surface3);color:rgba(226,232,240,0.85);font-weight:300;cursor:default;" placeholder="Gerado automaticamente">
-                <span style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/[nome da clínica]</span>
+                <span data-i18n="wp_formato" style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/[nome da clínica]</span>
               </div>
               <div class="form-group full">
-                <label>Link de Localização <span style="font-weight:400;color:var(--text3)">(Google Maps)</span></label>
+                <label><span data-i18n="label_maps">Link de Localização</span> <span data-i18n="maps_sub" style="font-weight:400;color:var(--text3)">(Google Maps)</span></label>
                 <input id="c_maps" placeholder="https://maps.google.com/?q=...">
-                <span style="font-size:11px;color:var(--text3);margin-top:4px">O agente enviará este link ao paciente quando solicitado ou ao finalizar o agendamento.</span>
+                <span data-i18n="maps_nota" style="font-size:11px;color:var(--text3);margin-top:4px">O agente enviará este link ao paciente quando solicitado ou ao finalizar o agendamento.</span>
               </div>
             </div>
           </div>
@@ -691,7 +691,7 @@ async function onPaisChange(paisCode,estadoValue=''){
     const info=document.getElementById('c_pais_info');
     if(info){
       info.style.display='flex';
-      info.innerHTML=`<span>📄 Documento: <b>${p.tipo_documento}</b> (${p.digitos_documento} dígitos)</span><span>📱 Telefone: <b>${p.digitos_telefone} dígitos</b></span>`;
+      info.innerHTML=`<span>📄 ${T.info_doc||'Documento:'} <b>${p.tipo_documento}</b> (${p.digitos_documento} ${T.info_dig||'dígitos'})</span><span>📱 ${T.info_tel||'Telefone:'} <b>${p.digitos_telefone} ${T.info_dig||'dígitos'}</b></span>`;
     }
     const wrap=document.getElementById('c_estado_wrap');
     const label=document.getElementById('c_estado_label');
@@ -729,6 +729,69 @@ async function saveIdioma(){
   }catch(e){st.textContent=T.err_txt||'✗ Erro';st.className='save-status err';toast(T.err_salvar,'err');}
   btn.disabled=false;
 }
+
+// ══════════════════════════════════
+// TRADUÇÃO DE ESPECIALIDADES E PROCEDIMENTOS
+// ══════════════════════════════════
+const PROC_TRAD={
+'español':{
+  '🦷 Clínico Geral':'🦷 Clínico General','🔧 Endodontia':'🔧 Endodoncia',
+  '📐 Ortodontia':'📐 Ortodoncia','🔩 Implantodontia':'🔩 Implantología',
+  '🦴 Prótese':'🦴 Prótesis','🩺 Periodontia':'🩺 Periodoncia',
+  '✨ Estética':'✨ Estética','👶 Odontopediatria':'👶 Odontopediatría',
+  '🔪 Cirurgia':'🔪 Cirugía',
+  'Consulta / Avaliação':'Consulta / Evaluación','Limpeza dental (profilaxia)':'Limpieza dental (profilaxis)',
+  'Restauração / Cárie (1 face)':'Obturación / Caries (1 cara)','Restauração / Cárie (2+ faces)':'Obturación / Caries (2+ caras)',
+  'Extração simples':'Extracción simple','Fluoretação':'Fluorización','Radiografia':'Radiografía',
+  'Canal dente anterior (1 raiz)':'Canal diente anterior (1 raíz)','Canal pré-molar (2 raízes)':'Canal premolar (2 raíces)',
+  'Canal molar (3+ raízes)':'Canal molar (3+ raíces)','Retratamento de canal':'Retratamiento de canal',
+  'Consulta ortodontia':'Consulta ortodoncia','Colocação de braquetes':'Colocación de brackets',
+  'Ajuste mensal braquetes':'Ajuste mensual brackets','Alinhadores (entrega/ajuste)':'Alineadores (entrega/ajuste)',
+  'Contenção / Retentores':'Retención / Retenedor','Consulta / Planejamento':'Consulta / Planificación',
+  'Cirurgia de implante':'Cirugía de implante','Reabertura / 2ª fase':'Reapertura / 2ª fase',
+  'Colocação de coroa sobre implante':'Colocación de corona sobre implante',
+  'Controle pós-operatório':'Control post-operatorio','Moldagem':'Toma de impresión',
+  'Prova de estrutura':'Prueba de estructura','Entrega de prótese removível':'Entrega de prótesis removible',
+  'Entrega de coroa fixa':'Entrega de corona fija','Ajuste de prótese':'Ajuste de prótesis',
+  'Raspagem supra-gengival':'Raspado supra-gingival','Raspagem sub-gengival (por quadrante)':'Raspado sub-gingival (por cuadrante)',
+  'Cirurgia periodontal':'Cirugía periodontal','Controle periodontal':'Control periodontal',
+  'Clareamento em consultório':'Blanqueamiento en consultorio','Facetas de porcelana (prep)':'Carillas de porcelana (prep)',
+  'Facetas de resina':'Carillas de resina','Harmonização do sorriso':'Armonización de sonrisa',
+  'Consulta pediátrica':'Consulta pediátrica','Selantes':'Sellantes',
+  'Extração de dente de leite':'Extracción diente de leche','Fluoretação niños':'Fluorización niños',
+  'Extração complexa / siso':'Extracción compleja / muela juicio','Frenectomia':'Frenectomía',
+  'Biópsia':'Biopsia','Cirurgia de cisto':'Cirugía de quiste',
+},
+'english':{
+  '🦷 Clínico Geral':'🦷 General Dentistry','🔧 Endodontia':'🔧 Endodontics',
+  '📐 Ortodontia':'📐 Orthodontics','🔩 Implantodontia':'🔩 Implantology',
+  '🦴 Prótese':'🦴 Prosthetics','🩺 Periodontia':'🩺 Periodontics',
+  '✨ Estética':'✨ Cosmetic Dentistry','👶 Odontopediatria':'👶 Pediatric Dentistry',
+  '🔪 Cirurgia':'🔪 Oral Surgery',
+  'Consulta / Avaliação':'Consultation / Evaluation','Limpeza dental (profilaxia)':'Dental Cleaning (Prophylaxis)',
+  'Restauração / Cárie (1 face)':'Filling / Cavity (1 surface)','Restauração / Cárie (2+ faces)':'Filling / Cavity (2+ surfaces)',
+  'Extração simples':'Simple Extraction','Fluoretação':'Fluoride Treatment','Radiografia':'X-Ray',
+  'Canal dente anterior (1 raiz)':'Root Canal – Anterior (1 root)','Canal pré-molar (2 raízes)':'Root Canal – Premolar (2 roots)',
+  'Canal molar (3+ raízes)':'Root Canal – Molar (3+ roots)','Retratamento de canal':'Root Canal Retreatment',
+  'Consulta ortodontia':'Orthodontic Consultation','Colocação de braquetes':'Braces Placement',
+  'Ajuste mensal braquetes':'Monthly Braces Adjustment','Alinhadores (entrega/ajuste)':'Aligners (delivery/adjustment)',
+  'Contenção / Retentores':'Retainers','Consulta / Planejamento':'Consultation / Planning',
+  'Cirurgia de implante':'Implant Surgery','Reabertura / 2ª fase':'Reopening / 2nd Stage',
+  'Colocação de coroa sobre implante':'Implant Crown Placement','Controle pós-operatório':'Post-operative Checkup',
+  'Moldagem':'Impression Taking','Prova de estrutura':'Framework Try-in',
+  'Entrega de prótese removível':'Removable Denture Delivery','Entrega de coroa fixa':'Fixed Crown Delivery',
+  'Ajuste de prótese':'Denture Adjustment','Raspagem supra-gengival':'Supragingival Scaling',
+  'Raspagem sub-gengival (por quadrante)':'Subgingival Scaling (per quadrant)',
+  'Cirurgia periodontal':'Periodontal Surgery','Controle periodontal':'Periodontal Checkup',
+  'Clareamento em consultório':'In-office Whitening','Facetas de porcelana (prep)':'Porcelain Veneers (prep)',
+  'Facetas de resina':'Composite Veneers','Harmonização do sorriso':'Smile Makeover',
+  'Consulta pediátrica':'Pediatric Consultation','Selantes':'Sealants',
+  'Extração de dente de leite':'Baby Tooth Extraction','Fluoretação niños':'Children\'s Fluoride',
+  'Extração complexa / siso':'Complex Extraction / Wisdom Tooth','Frenectomia':'Frenectomy',
+  'Biópsia':'Biopsy','Cirurgia de cisto':'Cyst Surgery',
+},
+};
+function traduzirProc(nome){const t=PROC_TRAD[currentLang];return t&&t[nome]?t[nome]:nome;}
 
 // ══════════════════════════════════
 // ÁREA / DDD POR ESTADO
@@ -924,6 +987,7 @@ const TRADUCOES={
   falta_completar:'Falta completar',
   label_wp_dent:'WhatsApp do Dentista',ph_wp_dent:'(21) 99999-9999',
   slots_gerados:'Slots gerados:',manual_separado:'Escreva os horários separados por vírgula:',
+  info_doc:'Documento:',info_dig:'dígitos',info_tel:'Telefone:',
 },
 'español':{
   page_title:'Iris — Portal Clínica',
@@ -1014,6 +1078,7 @@ const TRADUCOES={
   falta_completar:'Falta completar',
   label_wp_dent:'WhatsApp del Dentista',ph_wp_dent:'11 9999-9999',
   slots_gerados:'Slots generados:',manual_separado:'Escribe los horarios separados por coma:',
+  info_doc:'Documento:',info_dig:'dígitos',info_tel:'Teléfono:',
 },
 'english':{
   page_title:'Iris — Clinic Portal',
@@ -1104,12 +1169,15 @@ const TRADUCOES={
   falta_completar:'Missing',
   label_wp_dent:'Dentist WhatsApp',ph_wp_dent:'555-999-9999',
   slots_gerados:'Generated slots:',manual_separado:'Type schedules separated by comma:',
+  info_doc:'Document:',info_dig:'digits',info_tel:'Phone:',
 },
 };
 let T=TRADUCOES['português'];
+let currentLang='português';
 
 function aplicarTraducoes(lang){
   T=TRADUCOES[lang]||TRADUCOES['português'];
+  currentLang=lang in TRADUCOES?lang:'português';
   const $=(s)=>document.querySelector(s);
   const $$=(s)=>document.querySelectorAll(s);
   const s=(el,v,a='textContent')=>{if(el)el[a]=v;};
@@ -1144,7 +1212,7 @@ function aplicarTraducoes(lang){
   sp('c_nome',T.ph_nome_clinica);sp('c_tel',T.ph_telefone);
   sp('c_end',T.ph_end);sp('c_sala',T.ph_sala);sp('c_bairro',T.ph_bairro);
   sp('c_cidade',T.ph_cidade);sp('c_cep',T.ph_cep);sp('c_referencia',T.ph_ref);
-  sp('c_maps',T.ph_maps);
+  sp('c_maps',T.ph_maps);sp('c_wp',T.ph_wp);
   $('[onclick="saveConfig()"]')&&($('[onclick="saveConfig()"]').textContent=T.btn_salvar);
   // Modulo dentistas
   const dH2=$('#acc-dentistas h2');if(dH2)dH2.textContent=T.mod_dent_h2;
@@ -1301,12 +1369,12 @@ function renderPrecios(precios){
   if(!body)return;
   body.innerHTML=ESPECIALIDADES.map(esp=>`
     <div style="margin-bottom:20px">
-      <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">${esp.nome}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">${traduzirProc(esp.nome)}</div>
       ${esp.procs.map(p=>{
         const key=p.nome.replace(/\s/g,'_');
         const val=precios[key]||'0';
         return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">
-          <span style="flex:1;font-size:13px">${p.nome}</span>
+          <span style="flex:1;font-size:13px">${traduzirProc(p.nome)}</span>
           <div style="display:flex;align-items:center;gap:6px">
             <span style="font-size:13px;color:var(--text3)">$</span>
             <input type="number" id="precio-${key}" value="${val}" min="0" step="100"
@@ -1453,7 +1521,7 @@ function renderDentistas(dents){
       <div class="spec-accordion">
         <div class="spec-header">
           <input type="checkbox" class="spec-cat-check" id="catcheck-${i}-${ei}" onclick="event.stopPropagation();toggleCategory(${i},${ei},this)">
-          <span style="flex:1;cursor:pointer" onclick="toggleSpec(${i},${ei})">${esp.nome}</span>
+          <span style="flex:1;cursor:pointer" onclick="toggleSpec(${i},${ei})">${traduzirProc(esp.nome)}</span>
           <span class="spec-arrow" id="specarr-${i}-${ei}" onclick="toggleSpec(${i},${ei})" style="cursor:pointer">▼</span>
         </div>
         <div class="spec-body" id="specbody-${i}-${ei}">
@@ -1463,7 +1531,7 @@ function renderDentistas(dents){
             const tempo=saved?saved.tempo:p.tempo;
             return `<div class="proc-row">
               <input type="checkbox" class="proc-check" id="pc-${i}-${p.nome.replace(/\s/g,'_')}" ${ativo?'checked':''} onchange="updateCatCheckbox(${i},${ei})">
-              <span class="proc-name">${p.nome}</span>
+              <span class="proc-name">${traduzirProc(p.nome)}</span>
               <div class="proc-time-wrap">
                 <button class="proc-time-btn" onclick="adjTime(this,-5)">−</button>
                 <input type="number" class="proc-time" id="pt-${i}-${p.nome.replace(/\s/g,'_')}" value="${tempo}" min="5" step="5">
