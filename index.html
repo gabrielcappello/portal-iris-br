@@ -312,6 +312,37 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
     <!-- CONFIG -->
     <div class="tab-panel active" id="tab-config">
 
+      <!-- IDIOMA -->
+      <div class="accordion" id="acc-idioma">
+        <div class="accordion-header" onclick="toggleAcc('idioma')">
+          <span class="accordion-icon">🌐</span>
+          <div class="accordion-title"><h2>Idioma</h2><p>Idioma e país da clínica para o agente de atendimento</p></div>
+          <span class="accordion-arrow" id="arr-idioma">▼</span>
+        </div>
+        <div class="accordion-body" id="body-idioma">
+          <div class="accordion-body-inner">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Idioma</label>
+                <select id="c_idioma_lang" onchange="updatePaisOptions(this.value)">
+                  <option value="português">Português</option>
+                  <option value="español">Español</option>
+                  <option value="english">English</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>País</label>
+                <select id="c_idioma_pais"></select>
+              </div>
+            </div>
+          </div>
+          <div class="save-bar">
+            <span class="save-status" id="idioma-status"></span>
+            <button class="btn-save" onclick="saveIdioma()">💾 Salvar Idioma</button>
+          </div>
+        </div>
+      </div>
+
       <!-- CLÍNICA -->
       <div class="accordion" id="acc-clinica">
         <div class="accordion-header" onclick="toggleAcc('clinica')">
@@ -330,18 +361,6 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               <div class="form-group"><label>Cidade</label><input id="c_cidade" placeholder="São Paulo"></div>
               <div class="form-group"><label>CEP</label><input id="c_cep" placeholder="01310-100"></div>
               <div class="form-group"><label>Referência</label><input id="c_referencia" placeholder="Ex: Em frente ao banco, portão azul"></div>
-              <div class="form-group"><label>Idioma do Agente</label>
-                <select id="c_idioma">
-                  <option value="português-br">Português (Brasil)</option>
-                  <option value="português-pt">Português (Portugal)</option>
-                  <option value="español-ar">Español (Argentina)</option>
-                  <option value="español-cl">Español (Chile)</option>
-                  <option value="español-co">Español (Colombia)</option>
-                  <option value="español-mx">Español (México)</option>
-                  <option value="english-us">English (US)</option>
-                  <option value="english-uk">English (UK)</option>
-                </select>
-              </div>
               <div class="form-group full">
                 <label>Instância WhatsApp <span style="font-weight:400;color:var(--text3)">(automático)</span></label>
                 <input id="c_wp" readonly style="background:var(--surface3);color:rgba(226,232,240,0.85);font-weight:300;cursor:default;" placeholder="Gerado automaticamente">
@@ -597,6 +616,33 @@ const ESPECIALIDADES = [
 ];
 
 // ══════════════════════════════════
+// IDIOMA / PAÍS
+// ══════════════════════════════════
+const PAIS_OPTIONS={
+  'português':[{v:'br',l:'Brasil'},{v:'pt',l:'Portugal'}],
+  'español':[{v:'ar',l:'Argentina'},{v:'cl',l:'Chile'},{v:'co',l:'Colombia'},{v:'mx',l:'México'},{v:'uy',l:'Uruguay'},{v:'pe',l:'Peru'},{v:'ec',l:'Ecuador'},{v:'ve',l:'Venezuela'}],
+  'english':[{v:'us',l:'United States'},{v:'uk',l:'United Kingdom'},{v:'au',l:'Australia'},{v:'ca',l:'Canada'}],
+};
+function updatePaisOptions(lang,selected){
+  const sel=document.getElementById('c_idioma_pais');
+  if(!sel)return;
+  const opts=PAIS_OPTIONS[lang]||[];
+  sel.innerHTML=opts.map(o=>`<option value="${o.v}"${o.v===selected?' selected':''}>${o.l}</option>`).join('');
+}
+async function saveIdioma(){
+  const btn=document.querySelector('[onclick="saveIdioma()"]');
+  const st=document.getElementById('idioma-status');
+  btn.disabled=true;st.textContent='Salvando...';st.className='save-status';
+  const idioma=document.getElementById('c_idioma_lang').value+'-'+document.getElementById('c_idioma_pais').value;
+  try{
+    await sb.update('clinicas',currentClinica.id,{idioma});
+    currentClinica.idioma=idioma;
+    st.textContent='✓ Salvo';st.className='save-status ok';toast('Idioma salvo ✓');
+  }catch(e){st.textContent='✗ Erro';st.className='save-status err';toast('Erro ao salvar','err');}
+  btn.disabled=false;
+}
+
+// ══════════════════════════════════
 // STATE
 // ══════════════════════════════════
 let currentClinica=null, currentUsuario=null, allPacientes=[], allAgendamentos=[], obsPatientId=null;
@@ -785,7 +831,12 @@ function loadConfig(){
   document.getElementById('c_cep').value=c.cep||'';
   document.getElementById('c_wp').value=c.nome?`CAPPIA/${c.nome}`:'';
   document.getElementById('c_maps').value=c.maps_link||'';
-  document.getElementById('c_idioma').value=c.idioma||'português-br';
+  const idiomaVal=c.idioma||'português-br';
+  const dashIdx=idiomaVal.lastIndexOf('-');
+  const idiomaLang=dashIdx>0?idiomaVal.substring(0,dashIdx):'português';
+  const idiomaPais=dashIdx>0?idiomaVal.substring(dashIdx+1):'br';
+  const langSel=document.getElementById('c_idioma_lang');
+  if(langSel){langSel.value=idiomaLang;updatePaisOptions(idiomaLang,idiomaPais);}
   renderDentistas(c.dentistas||[]);
   setTimeout(atualizarBadgeDentistas,0);
   renderAuto(c.automatizacoes||{});
@@ -808,7 +859,6 @@ async function saveConfig(){
       cep:document.getElementById('c_cep').value,
       whatsapp_instancia:document.getElementById('c_wp').value,
       maps_link:document.getElementById('c_maps').value,
-      idioma:document.getElementById('c_idioma').value,
     });
     st.textContent='✓ Salvo';st.className='save-status ok';toast('Configuração salva ✓');
   }catch(e){st.textContent='✗ Erro';st.className='save-status err';toast('Erro ao salvar','err');}
