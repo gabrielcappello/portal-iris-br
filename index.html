@@ -405,6 +405,22 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
       </div>
       </div>
 
+      <!-- DADOS DO AGENTE -->
+      <div class="accordion" id="acc-dados">
+        <div class="accordion-header" onclick="toggleAcc('dados')">
+          <span class="accordion-icon">📋</span>
+          <div class="accordion-title"><h2 data-i18n="mod_dados_h2">Dados que o agente solicita</h2><p data-i18n="mod_dados_p">Escolha quais informações o agente irá coletar do paciente</p></div>
+          <span class="accordion-arrow" id="arr-dados">▼</span>
+        </div>
+        <div class="accordion-body" id="body-dados">
+          <div class="accordion-body-inner" id="dados-body"></div>
+          <div class="save-bar">
+            <span class="save-status" id="dados-status"></span>
+            <button class="btn-save" onclick="saveDadosAgente()" data-i18n="btn_salvar_dados">💾 Salvar</button>
+          </div>
+        </div>
+      </div>
+
       <!-- AUTOMAÇÕES -->
       <div class="accordion" id="acc-auto">
         <div class="accordion-header" onclick="toggleAcc('auto')">
@@ -794,6 +810,21 @@ const PROC_TRAD={
 function traduzirProc(nome){const t=PROC_TRAD[currentLang];return t&&t[nome]?t[nome]:nome;}
 
 // ══════════════════════════════════
+// DOCUMENTO POR PAÍS
+// ══════════════════════════════════
+const DOCUMENTO_MAP={
+  'br':'CPF','pt':'NIF','ao':'BI','mz':'BI','cv':'BI','gw':'BI','st':'BI','tl':'BI','gq':'DNI',
+  'mx':'CURP','co':'Cédula','ar':'DNI','es':'DNI','pe':'DNI','ve':'Cédula','cl':'RUT',
+  'ec':'Cédula','gt':'DPI','cu':'CI','bo':'CI','do':'Cédula','hn':'DNI','py':'CI',
+  'sv':'DUI','ni':'Cédula','cr':'Cédula','pa':'CI','uy':'CI','pr':'Pasaporte',
+  'us':'SSN','uk':'NI','au':'TFN','ca':'SIN','ng':'NIN','za':'ID','gh':'Ghana Card',
+  'ke':'ID','ug':'NIN','tz':'NIDA','in':'Aadhaar','pk':'CNIC','ph':'PhilSys',
+  'sg':'NRIC','nz':'IRD','ie':'PPS','jm':'TRN','tt':'ID','bz':'ID','gy':'ID',
+  'bb':'ID','zw':'ID','zm':'NRC','rw':'NID','mt':'ID','cm':'CNI','sl':'ID',
+  'lr':'ID','gm':'ID','bw':'Omang','na':'ID','mw':'NID','ls':'ID','sz':'ID','pg':'ID','fj':'ID',
+};
+
+// ══════════════════════════════════
 // ÁREA / DDD POR ESTADO
 // ══════════════════════════════════
 const ESTADO_DDD={
@@ -989,6 +1020,14 @@ const TRADUCOES={
   slots_gerados:'Slots gerados:',manual_separado:'Escreva os horários separados por vírgula:',
   info_doc:'Documento:',info_dig:'dígitos',info_tel:'Telefone:',dent_numero:'Dentista',
   err_txt:'✗ Erro',salvando:'Salvando...',
+  mod_dados_h2:'Dados que o agente solicita',mod_dados_p:'Escolha quais informações o agente irá coletar do paciente',
+  dados_fixos:'Campos obrigatórios (fixos)',dados_opcionais:'Campos opcionais',
+  dados_obrigatorio:'obrigatório',
+  dados_nome:'Nome',dados_telefone:'Telefone',
+  dados_nascimento:'Data de nascimento',dados_email:'Email',dados_responsavel:'Responsável',
+  dados_atendimento:'Forma de atendimento',dados_atendimento_sub:'Informe se a clínica atende de forma particular ou por convênio',
+  dados_particular:'Particular',dados_convenio:'Convênio',
+  btn_salvar_dados:'💾 Salvar',toast_dados_ok:'Configuração salva ✓',
 },
 'español':{
   page_title:'Iris — Portal Clínica',
@@ -1081,6 +1120,14 @@ const TRADUCOES={
   slots_gerados:'Slots generados:',manual_separado:'Escribe los horarios separados por coma:',
   info_doc:'Documento:',info_dig:'dígitos',info_tel:'Teléfono:',dent_numero:'Dentista',
   err_txt:'✗ Error',salvando:'Guardando...',
+  mod_dados_h2:'Datos que el agente solicita',mod_dados_p:'Elige qué información el agente recopilará del paciente',
+  dados_fixos:'Campos obligatorios (fijos)',dados_opcionais:'Campos opcionales',
+  dados_obrigatorio:'obligatorio',
+  dados_nome:'Nombre',dados_telefone:'Teléfono',
+  dados_nascimento:'Fecha de nacimiento',dados_email:'Email',dados_responsavel:'Responsable',
+  dados_atendimento:'Forma de atención',dados_atendimento_sub:'Indique si la clínica atiende de forma particular u obra social',
+  dados_particular:'Particular',dados_convenio:'Obra social',
+  btn_salvar_dados:'💾 Guardar',toast_dados_ok:'Configuración guardada ✓',
 },
 'english':{
   page_title:'Iris — Clinic Portal',
@@ -1173,6 +1220,14 @@ const TRADUCOES={
   slots_gerados:'Generated slots:',manual_separado:'Type schedules separated by comma:',
   info_doc:'Document:',info_dig:'digits',info_tel:'Phone:',dent_numero:'Dentist',
   err_txt:'✗ Error',salvando:'Saving...',
+  mod_dados_h2:'Data the agent collects',mod_dados_p:'Choose what information the agent will collect from the patient',
+  dados_fixos:'Required fields (fixed)',dados_opcionais:'Optional fields',
+  dados_obrigatorio:'required',
+  dados_nome:'Name',dados_telefone:'Phone',
+  dados_nascimento:'Date of birth',dados_email:'Email',dados_responsavel:'Responsible party',
+  dados_atendimento:'Type of care',dados_atendimento_sub:'Set whether the clinic sees private or insurance patients',
+  dados_particular:'Private',dados_convenio:'Insurance',
+  btn_salvar_dados:'💾 Save',toast_dados_ok:'Settings saved ✓',
 },
 };
 let T=TRADUCOES['português'];
@@ -1251,6 +1306,7 @@ function aplicarTraducoes(lang){
   // Re-renderiza módulos dinâmicos para refletir idioma atualizado
   if(currentClinica){
     renderAuto(currentClinica.automatizacoes||{});
+    renderDadosAgente(currentClinica.automatizacoes||{});
     renderDentistas(currentClinica.dentistas||[]);
     setTimeout(atualizarBadgeDentistas,0);
     renderPrecios(currentClinica.precios||{});
@@ -1458,6 +1514,7 @@ function loadConfig(){
   renderDentistas(c.dentistas||[]);
   setTimeout(atualizarBadgeDentistas,0);
   renderAuto(c.automatizacoes||{});
+  renderDadosAgente(c.automatizacoes||{});
   renderPrecios(c.precios||{});
 }
 
@@ -1809,6 +1866,82 @@ async function saveDentista(i){
 async function saveDentistas(){
   // mantido para compatibilidade mas não usado no UI
   for(let i=0;i<10;i++) await saveDentista(i);
+}
+
+// ══════════════════════════════════
+// DADOS DO AGENTE
+// ══════════════════════════════════
+function renderDadosAgente(a){
+  const body=document.getElementById('dados-body');
+  if(!body)return;
+  const docTipo=DOCUMENTO_MAP[currentClinica?.pais_codigo||'br']||'Documento';
+  const obrig=`<span style="font-size:11px;color:var(--text3);background:var(--surface3);padding:2px 8px;border-radius:99px">${T.dados_obrigatorio}</span>`;
+  const fixedRow=(label)=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span style="font-size:16px">🔒</span>
+      <span style="flex:1;font-size:14px;font-weight:500">${label}</span>
+      ${obrig}
+    </div>`;
+  const optRow=(key,label,val)=>`
+    <div class="auto-item">
+      <div class="auto-info"><div class="auto-title">${label}</div></div>
+      <div class="toggle ${val?'on':''}" id="dados-${key}" onclick="this.classList.toggle('on')"></div>
+    </div>`;
+  body.innerHTML=`
+  <div class="accordion-body-inner" style="padding-top:8px">
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">${T.dados_fixos}</div>
+      ${fixedRow(T.dados_nome)}
+      ${fixedRow(T.dados_telefone)}
+      ${fixedRow(docTipo)}
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">${T.dados_opcionais}</div>
+      ${optRow('solicitar_nascimento',T.dados_nascimento,a.solicitar_nascimento)}
+      ${optRow('solicitar_email',T.dados_email,a.solicitar_email)}
+      ${optRow('solicitar_responsavel',T.dados_responsavel,a.solicitar_responsavel)}
+    </div>
+    <div>
+      <div class="auto-item" style="padding-bottom:8px">
+        <div class="auto-info">
+          <div class="auto-title">${T.dados_atendimento}</div>
+          <div class="auto-sub">${T.dados_atendimento_sub}</div>
+        </div>
+        <div class="toggle ${a.atendimento_ativo?'on':''}" id="dados-atendimento_ativo" onclick="this.classList.toggle('on');toggleAtendimento()"></div>
+      </div>
+      <div id="atendimento-sub" style="${a.atendimento_ativo?'':'display:none'};padding-left:16px;border-left:2px solid var(--border)">
+        ${optRow('atendimento_particular',T.dados_particular,a.atendimento_particular!==false)}
+        ${optRow('atendimento_convenio',T.dados_convenio,a.atendimento_convenio)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleAtendimento(){
+  const sub=document.getElementById('atendimento-sub');
+  const tog=document.getElementById('dados-atendimento_ativo');
+  if(sub)sub.style.display=tog?.classList.contains('on')?'':'none';
+}
+
+async function saveDadosAgente(){
+  const btn=document.querySelector('[onclick="saveDadosAgente()"]');
+  const st=document.getElementById('dados-status');
+  btn.disabled=true;st.textContent=T.salvando||'Salvando...';st.className='save-status';
+  const cur=currentClinica.automatizacoes||{};
+  const data={...cur,
+    solicitar_nascimento:document.getElementById('dados-solicitar_nascimento')?.classList.contains('on')||false,
+    solicitar_email:document.getElementById('dados-solicitar_email')?.classList.contains('on')||false,
+    solicitar_responsavel:document.getElementById('dados-solicitar_responsavel')?.classList.contains('on')||false,
+    atendimento_ativo:document.getElementById('dados-atendimento_ativo')?.classList.contains('on')||false,
+    atendimento_particular:document.getElementById('dados-atendimento_particular')?.classList.contains('on')||false,
+    atendimento_convenio:document.getElementById('dados-atendimento_convenio')?.classList.contains('on')||false,
+  };
+  try{
+    await sb.update('clinicas',currentClinica.id,{automatizacoes:data});
+    currentClinica.automatizacoes=data;
+    st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_dados_ok);
+  }catch(e){st.textContent=T.err_txt;st.className='save-status err';toast(T.err_salvar,'err');}
+  btn.disabled=false;
 }
 
 // ══════════════════════════════════
