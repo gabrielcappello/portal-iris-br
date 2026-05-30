@@ -1025,8 +1025,12 @@ const TRADUCOES={
   dados_obrigatorio:'obrigatório',
   dados_nome:'Nome',dados_telefone:'Telefone',
   dados_nascimento:'Data de nascimento',dados_email:'Email',dados_responsavel:'Responsável',
-  dados_atendimento:'Forma de atendimento',dados_atendimento_sub:'Informe se a clínica atende de forma particular ou por convênio',
+  dados_nascimento_sub:'Quando ativado, o agente sempre solicitará a data de nascimento do paciente.',
+  dados_email_sub:'Quando ativado, o agente sempre solicitará o email do paciente.',
+  dados_responsavel_sub:'Quando ativado, o agente solicitará o nome do responsável (indicado para pacientes menores de idade).',
+  dados_atendimento:'Forma de atendimento',dados_atendimento_sub:'Quando desativado, o agente não perguntará sobre a forma de atendimento.',
   dados_particular:'Particular',dados_convenio:'Convênio',
+  dados_dica:'Solicite apenas o necessário. Quanto menos campos, mais agradável a experiência do paciente.',
   btn_salvar_dados:'💾 Salvar',toast_dados_ok:'Configuração salva ✓',
 },
 'español':{
@@ -1125,8 +1129,12 @@ const TRADUCOES={
   dados_obrigatorio:'obligatorio',
   dados_nome:'Nombre',dados_telefone:'Teléfono',
   dados_nascimento:'Fecha de nacimiento',dados_email:'Email',dados_responsavel:'Responsable',
-  dados_atendimento:'Forma de atención',dados_atendimento_sub:'Indique si la clínica atiende de forma particular u obra social',
+  dados_nascimento_sub:'Cuando está activado, el agente siempre solicitará la fecha de nacimiento del paciente.',
+  dados_email_sub:'Cuando está activado, el agente siempre solicitará el email del paciente.',
+  dados_responsavel_sub:'Cuando está activado, el agente solicitará el nombre del responsable (indicado para pacientes menores de edad).',
+  dados_atendimento:'Forma de atención',dados_atendimento_sub:'Cuando está desactivado, el agente no preguntará sobre la forma de atención.',
   dados_particular:'Particular',dados_convenio:'Obra social',
+  dados_dica:'Solicita solo lo necesario. Cuantos menos campos, más agradable la experiencia del paciente.',
   btn_salvar_dados:'💾 Guardar',toast_dados_ok:'Configuración guardada ✓',
 },
 'english':{
@@ -1225,8 +1233,12 @@ const TRADUCOES={
   dados_obrigatorio:'required',
   dados_nome:'Name',dados_telefone:'Phone',
   dados_nascimento:'Date of birth',dados_email:'Email',dados_responsavel:'Responsible party',
-  dados_atendimento:'Type of care',dados_atendimento_sub:'Set whether the clinic sees private or insurance patients',
+  dados_nascimento_sub:'When enabled, the agent will always ask for the patient\'s date of birth.',
+  dados_email_sub:'When enabled, the agent will always ask for the patient\'s email.',
+  dados_responsavel_sub:'When enabled, the agent will ask for the responsible party\'s name (recommended for minor patients).',
+  dados_atendimento:'Type of care',dados_atendimento_sub:'When disabled, the agent will not ask about the type of care.',
   dados_particular:'Private',dados_convenio:'Insurance',
+  dados_dica:'Ask only what\'s necessary. The fewer fields, the better the patient experience.',
   btn_salvar_dados:'💾 Save',toast_dados_ok:'Settings saved ✓',
 },
 };
@@ -1882,13 +1894,17 @@ function renderDadosAgente(a){
       <span style="flex:1;font-size:14px;font-weight:500">${label}</span>
       ${obrig}
     </div>`;
-  const optRow=(key,label,val)=>`
+  const optRow=(key,label,val,sub='')=>`
     <div class="auto-item">
-      <div class="auto-info"><div class="auto-title">${label}</div></div>
+      <div class="auto-info">
+        <div class="auto-title">${label}</div>
+        ${sub?`<div class="auto-sub">${sub}</div>`:''}
+      </div>
       <div class="toggle ${val?'on':''}" id="dados-${key}" onclick="this.classList.toggle('on')"></div>
     </div>`;
   body.innerHTML=`
   <div class="accordion-body-inner" style="padding-top:8px">
+    <div style="margin-bottom:16px;padding:10px 14px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:var(--radius-sm);font-size:12px;color:var(--text2)">💡 ${T.dados_dica}</div>
     <div style="margin-bottom:20px">
       <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">${T.dados_fixos}</div>
       ${fixedRow(T.dados_nome)}
@@ -1897,9 +1913,9 @@ function renderDadosAgente(a){
     </div>
     <div style="margin-bottom:20px">
       <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">${T.dados_opcionais}</div>
-      ${optRow('solicitar_nascimento',T.dados_nascimento,a.solicitar_nascimento)}
-      ${optRow('solicitar_email',T.dados_email,a.solicitar_email)}
-      ${optRow('solicitar_responsavel',T.dados_responsavel,a.solicitar_responsavel)}
+      ${optRow('solicitar_nascimento',T.dados_nascimento,a.solicitar_nascimento,T.dados_nascimento_sub)}
+      ${optRow('solicitar_email',T.dados_email,a.solicitar_email,T.dados_email_sub)}
+      ${optRow('solicitar_responsavel',T.dados_responsavel,a.solicitar_responsavel,T.dados_responsavel_sub)}
     </div>
     <div>
       <div class="auto-item" style="padding-bottom:8px">
