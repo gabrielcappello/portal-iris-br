@@ -1,0 +1,33 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img"><title>Logo Cappia</title><desc>Logo da empresa Cappia</desc>
+<defs>
+  <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#00b4d8;stop-opacity:1" />
+    <stop offset="100%" style="stop-color:#00c896;stop-opacity:1" />
+  </linearGradient>
+  <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#0096c7;stop-opacity:1" />
+    <stop offset="100%" style="stop-color:#00b4d8;stop-opacity:1" />
+  </linearGradient>
+  <clipPath id="circleClip">
+    <circle cx="200" cy="200" r="168"/>
+  </clipPath>
+</defs>
+<circle cx="200" cy="200" r="175" fill="none" stroke="url(#grad1)" stroke-width="14"/>
+<g clip-path="url(#circleClip)">
+  <line x1="200" y1="38" x2="352" y2="152" stroke="#00c896" stroke-width="2" opacity="0.5"/>
+  <line x1="352" y1="152" x2="352" y2="248" stroke="#00b4d8" stroke-width="2" opacity="0.4"/>
+  <line x1="352" y1="248" x2="200" y2="362" stroke="#00c896" stroke-width="2" opacity="0.4"/>
+  <line x1="200" y1="38" x2="48" y2="152" stroke="#00b4d8" stroke-width="2" opacity="0.4"/>
+  <line x1="48" y1="152" x2="48" y2="248" stroke="#00c896" stroke-width="2" opacity="0.4"/>
+  <line x1="48" y1="248" x2="200" y2="362" stroke="#00b4d8" stroke-width="2" opacity="0.4"/>
+  <circle cx="200" cy="32" r="8" fill="#00b4d8"/>
+  <circle cx="352" cy="150" r="7" fill="#00c896"/>
+  <circle cx="352" cy="250" r="7" fill="#00b4d8"/>
+  <circle cx="200" cy="368" r="8" fill="#00c896"/>
+  <circle cx="48" cy="250" r="7" fill="#00b4d8"/>
+  <circle cx="48" cy="150" r="7" fill="#00c896"/>
+  <rect x="55" y="282" width="290" height="52" fill="white" opacity="0.95"/>
+  <text x="200" y="188" font-family="Georgia, serif" font-size="222" font-weight="900" fill="url(#grad2)" text-anchor="middle" dominant-baseline="middle">C</text>
+  <text x="200" y="320" font-family="Georgia, serif" font-size="50" font-weight="700" fill="#00b4d8" text-anchor="middle" letter-spacing="8">cappia</text>
+</g>
+</svg>
