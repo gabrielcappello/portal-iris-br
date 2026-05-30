@@ -2365,9 +2365,13 @@ document.addEventListener('DOMContentLoaded',function(){
   const pwEl=document.getElementById('login-password');
   if(pwEl)pwEl.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
-  // Novo formato: /d/TOKEN (12 chars alfanuméricos)
+  // /d/TOKEN na URL tem prioridade (novo acesso ou link compartilhado)
   const pathMatch=window.location.pathname.match(/\/d\/([a-z0-9]{12})/i);
   if(pathMatch){autoDentLoginByToken(pathMatch[1]);return;}
+
+  // Token salvo no localStorage (acesso de retorno sem URL)
+  const savedToken=localStorage.getItem('iris_dent_token');
+  if(savedToken){autoDentLoginByToken(savedToken);return;}
 
   // Formato legado: ?c=...&d=...&t=...
   const params=new URLSearchParams(window.location.search);
@@ -2389,6 +2393,7 @@ async function autoDentLoginByToken(token){
     const dentIdx=dents.findIndex(d=>d.token_acesso===token);
     if(dentIdx===-1)return;
     currentDentista={...dents[dentIdx],idx:dentIdx,clinicaId:clinica.id,clinica};
+    localStorage.setItem('iris_dent_token',token);
     // Aplica idioma da clínica antes de mostrar tela
     const idiomaVal=clinica.idioma||'português-br';
     const di=idiomaVal.lastIndexOf('-');
@@ -2462,9 +2467,6 @@ async function autoDentLogin(clinicaId,dentIdx,token){
     const dents=clinica.dentistas||[];
     const dent=dents[dentIdx];
     if(!dent)return;
-    // token = simple hash of senha
-    const expectedToken=btoa(`${clinicaId}:${dentIdx}:${dent.senha||''}`).replace(/=/g,'');
-    if(token!==expectedToken)return;
     currentDentista={...dent,idx:dentIdx,clinicaId,clinica};
     showDentApp();
   }catch(e){console.error(e);}
@@ -2484,6 +2486,7 @@ function showDentApp(){
 
 function dentLogout(){
   currentDentista=null;
+  localStorage.removeItem('iris_dent_token');
   document.getElementById('app-dentista').style.display='none';
   document.getElementById('login-page').style.display='flex';
   // Clear URL params
@@ -2594,25 +2597,34 @@ function openDappObs(id,obs){
 
 function renderDappConfig(){
   const d=currentDentista;
+  const ddi=DDI_MAP[d.clinica?.pais_codigo||'br']||'+55';
   const body=document.getElementById('dapp-config-body');
   body.innerHTML=`
     <div style="margin-top:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
-      <div style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Minha Configuração</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">${T.cal_label||'Minha Configuração'}</div>
       <div class="form-group" style="margin-bottom:16px">
         <label>Calendar ID <span style="font-weight:400;color:var(--text3)">(Google Calendar)</span></label>
         <input id="dc_cal" value="${d.calendar_id||''}" placeholder="xxx@group.calendar.google.com">
-        <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Google Calendar → Configurações → ID da agenda</span>
+        <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">${T.cal_nota||'Google Calendar → Configurações → ID da agenda'}</span>
       </div>
-      <button class="btn-save" style="width:100%" onclick="saveDappConfig()">💾 Salvar</button>
+      <div class="form-group" style="margin-bottom:20px">
+        <label>${T.label_wp_dent||'Telefone / WhatsApp'}</label>
+        <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface2)">
+          <span style="padding:10px 12px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2);white-space:nowrap;display:flex;align-items:center">${ddi}</span>
+          <input id="dc_whatsapp" value="${d.whatsapp||''}" placeholder="${T.ph_wp_dent||'(21) 99999-9999'}" style="flex:1;min-width:0;background:transparent;border:none;border-radius:0;padding:10px 12px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none">
+        </div>
+      </div>
+      <button class="btn-save" style="width:100%" onclick="saveDappConfig()">${T.btn_salvar_cal||'💾 Salvar'}</button>
     </div>`;}
 
 async function saveDappConfig(){
   const d=currentDentista;
   d.calendar_id=document.getElementById('dc_cal').value;
+  d.whatsapp=document.getElementById('dc_whatsapp')?.value||'';
   try{
     const rows=await sb.query('clinicas',`?id=eq.${d.clinicaId}&select=dentistas`);
     const dents=rows[0]?.dentistas||[];
-    dents[d.idx]={...dents[d.idx],calendar_id:d.calendar_id};
+    dents[d.idx]={...dents[d.idx],calendar_id:d.calendar_id,whatsapp:d.whatsapp};
     await sb.update('clinicas',d.clinicaId,{dentistas:dents});
     toast(T.toast_cal_ok);
   }catch(e){toast(T.err_salvar,'err');}
