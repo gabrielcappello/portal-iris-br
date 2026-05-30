@@ -1,0 +1,5 @@
+.vercel
+# Credenciais OAuth — nunca commitar
+client_secret*.json
+google_oauth_credentials.json
+*credentials*.json
