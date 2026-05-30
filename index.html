@@ -336,6 +336,10 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               </div>
             </div>
             <div id="c_pais_info" style="display:none;margin-top:12px;padding:10px 14px;background:var(--surface3);border-radius:var(--radius-sm);font-size:12px;color:var(--text2);display:flex;gap:16px;flex-wrap:wrap"></div>
+            <div class="form-group full" id="c_estado_wrap" style="display:none;margin-top:12px">
+              <label id="c_estado_label">Estado / Província</label>
+              <select id="c_estado" onchange="onEstadoChange(this.value)"><option value="">Selecione...</option></select>
+            </div>
             <div class="form-group full" style="margin-top:14px">
               <label data-i18n="label_fuso">Fuso horário</label>
               <input id="c_fuso" readonly placeholder="Ex: America/Sao_Paulo" style="width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:13px;color:rgba(226,232,240,0.85);outline:none;cursor:default">
@@ -371,10 +375,6 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               <div class="form-group"><label data-i18n="label_sala">Sala</label><input id="c_sala" placeholder="Ex: 3º andar, Sala 302"></div>
               <div class="form-group"><label data-i18n="label_bairro">Bairro</label><input id="c_bairro" placeholder="Centro"></div>
               <div class="form-group"><label data-i18n="label_cidade">Cidade</label><input id="c_cidade" placeholder="São Paulo"></div>
-              <div class="form-group full" id="c_estado_wrap" style="display:none">
-                <label id="c_estado_label">Estado / Província</label>
-                <select id="c_estado" onchange="onEstadoChange(this.value)"><option value="">Selecione...</option></select>
-              </div>
               <div class="form-group"><label data-i18n="label_cep">CEP</label><input id="c_cep" placeholder="01310-100"></div>
               <div class="form-group"><label data-i18n="label_ref">Referência</label><input id="c_referencia" placeholder="Ex: Em frente ao banco, portão azul"></div>
               <div class="form-group full">
@@ -1101,7 +1101,7 @@ const TRADUCOES={
   btn_sair:'Sair',
   tab_config:'⚙️ Configuração',tab_pac:'👤 Pacientes',
   tab_ag:'📅 Agendamentos',tab_precos:'💲 Preços',
-  mod_idioma_h2:'Idioma',mod_idioma_p:'Idioma e país da clínica para o agente de atendimento',
+  mod_idioma_h2:'Idioma & Localização',mod_idioma_p:'Idioma, país, estado e fuso horário da clínica',
   label_idioma:'Idioma',label_pais:'País',label_estado:'Estado / Província',
   select_selecione:'Selecione...',
   btn_salvar_idioma:'💾 Salvar Idioma',toast_idioma_ok:'Idioma salvo ✓',
@@ -1206,7 +1206,7 @@ const TRADUCOES={
   btn_sair:'Salir',
   tab_config:'⚙️ Configuración',tab_pac:'👤 Pacientes',
   tab_ag:'📅 Agendamientos',tab_precos:'💲 Precios',
-  mod_idioma_h2:'Idioma',mod_idioma_p:'Idioma y país de la clínica para el agente de atención',
+  mod_idioma_h2:'Idioma & Localización',mod_idioma_p:'Idioma, país, estado y huso horario de la clínica',
   label_idioma:'Idioma',label_pais:'País',label_estado:'Provincia / Estado',
   select_selecione:'Seleccionar...',
   btn_salvar_idioma:'💾 Guardar Idioma',toast_idioma_ok:'Idioma guardado ✓',
@@ -1311,7 +1311,7 @@ const TRADUCOES={
   btn_sair:'Logout',
   tab_config:'⚙️ Settings',tab_pac:'👤 Patients',
   tab_ag:'📅 Appointments',tab_precos:'💲 Prices',
-  mod_idioma_h2:'Language',mod_idioma_p:'Language and country of the clinic for the attendance agent',
+  mod_idioma_h2:'Language & Location',mod_idioma_p:'Language, country, state and time zone of the clinic',
   label_idioma:'Language',label_pais:'Country',label_estado:'State / Province',
   select_selecione:'Select...',
   btn_salvar_idioma:'💾 Save Language',toast_idioma_ok:'Language saved ✓',
