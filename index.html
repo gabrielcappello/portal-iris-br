@@ -2599,8 +2599,20 @@ async function showQR(i){
   const nome=document.getElementById(`d${i}_nome`)?.value||'';
   const titulo=document.getElementById(`d${i}_titulo`)?.value||'Dr.';
   if(!nome){toast(T.err_preenche_nome_dent,'err');return;}
-  const dentToken=currentClinica.dentistas?.[i]?.token_acesso;
-  if(!dentToken){toast(T.err_salvar+' — salve o dentista primeiro','err');return;}
+
+  // Obtém token_acesso; se não existir, gera e salva automaticamente
+  let dentToken=currentClinica.dentistas?.[i]?.token_acesso;
+  if(!dentToken){
+    dentToken=generateTokenAcesso();
+    const allDents=[...(currentClinica.dentistas||[])];
+    if(!allDents[i])allDents[i]={};
+    allDents[i]={...allDents[i],token_acesso:dentToken};
+    try{
+      await sb.update('clinicas',currentClinica.id,{dentistas:allDents});
+      currentClinica.dentistas=allDents;
+    }catch(e){console.error('Erro ao salvar token_acesso:',e);}
+  }
+
   const url=`https://painel.cappia.app/d/${dentToken}`;
   document.getElementById('qr-dent-name').textContent=`${titulo} ${nome}`;
   document.getElementById('qr-link-text').textContent=url;
