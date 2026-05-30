@@ -330,6 +330,18 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               <div class="form-group"><label>Cidade</label><input id="c_cidade" placeholder="São Paulo"></div>
               <div class="form-group"><label>CEP</label><input id="c_cep" placeholder="01310-100"></div>
               <div class="form-group"><label>Referência</label><input id="c_referencia" placeholder="Ex: Em frente ao banco, portão azul"></div>
+              <div class="form-group"><label>Idioma do Agente</label>
+                <select id="c_idioma">
+                  <option value="português-br">Português (Brasil)</option>
+                  <option value="português-pt">Português (Portugal)</option>
+                  <option value="español-ar">Español (Argentina)</option>
+                  <option value="español-cl">Español (Chile)</option>
+                  <option value="español-co">Español (Colombia)</option>
+                  <option value="español-mx">Español (México)</option>
+                  <option value="english-us">English (US)</option>
+                  <option value="english-uk">English (UK)</option>
+                </select>
+              </div>
               <div class="form-group full">
                 <label>Instância WhatsApp <span style="font-weight:400;color:var(--text3)">(automático)</span></label>
                 <input id="c_wp" readonly style="background:var(--surface3);color:rgba(226,232,240,0.85);font-weight:300;cursor:default;" placeholder="Gerado automaticamente">
@@ -773,6 +785,7 @@ function loadConfig(){
   document.getElementById('c_cep').value=c.cep||'';
   document.getElementById('c_wp').value=c.nome?`CAPPIA/${c.nome}`:'';
   document.getElementById('c_maps').value=c.maps_link||'';
+  document.getElementById('c_idioma').value=c.idioma||'português-br';
   renderDentistas(c.dentistas||[]);
   setTimeout(atualizarBadgeDentistas,0);
   renderAuto(c.automatizacoes||{});
@@ -795,6 +808,7 @@ async function saveConfig(){
       cep:document.getElementById('c_cep').value,
       whatsapp_instancia:document.getElementById('c_wp').value,
       maps_link:document.getElementById('c_maps').value,
+      idioma:document.getElementById('c_idioma').value,
     });
     st.textContent='✓ Salvo';st.className='save-status ok';toast('Configuração salva ✓');
   }catch(e){st.textContent='✗ Erro';st.className='save-status err';toast('Erro ao salvar','err');}
