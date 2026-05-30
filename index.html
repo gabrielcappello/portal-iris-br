@@ -1188,6 +1188,8 @@ const TRADUCOES={
   pwa_dent_step1:'1. Toque em Compartilhar ⬆️',
   pwa_dent_step2:'2. Toque em "Adicionar à Tela de Início" ➕',
   pwa_dent_ios_btn:'✓ Já instalei, continuar',
+  pwa_dent_nao_instalado:'Instale o app primeiro para continuar.',
+  powered_by:'Desenvolvido por',
   toast_salvo:'✓ Salvo',err_salvar:'Erro ao salvar',toast_nao_esquecer:'💾 Não esqueça de salvar as alterações',
   falta_completar:'Falta completar',
   label_wp_dent:'WhatsApp do Dentista',ph_wp_dent:'(21) 99999-9999',
@@ -1305,6 +1307,8 @@ const TRADUCOES={
   pwa_dent_step1:'1. Toca Compartir ⬆️',
   pwa_dent_step2:'2. Toca "Agregar a Pantalla de inicio" ➕',
   pwa_dent_ios_btn:'✓ Ya instalé, continuar',
+  pwa_dent_nao_instalado:'Instala la app primero para continuar.',
+  powered_by:'Desarrollado por',
   toast_salvo:'✓ Guardado',err_salvar:'Error al guardar',toast_nao_esquecer:'💾 No olvides guardar los cambios',
   falta_completar:'Falta completar',
   label_wp_dent:'WhatsApp del Dentista',ph_wp_dent:'11 9999-9999',
@@ -1422,6 +1426,8 @@ const TRADUCOES={
   pwa_dent_step1:'1. Tap Share ⬆️',
   pwa_dent_step2:'2. Tap "Add to Home Screen" ➕',
   pwa_dent_ios_btn:'✓ Already installed, continue',
+  pwa_dent_nao_instalado:'Install the app first to continue.',
+  powered_by:'Powered by',
   toast_salvo:'✓ Saved',err_salvar:'Error saving',toast_nao_esquecer:'💾 Don\'t forget to save changes',
   falta_completar:'Missing',
   label_wp_dent:'Dentist WhatsApp',ph_wp_dent:'555-999-9999',
@@ -2400,6 +2406,8 @@ function showPWAInstallScreen(){
   set('pwa-dent-s1',T.pwa_dent_step1||'1. Toque em Compartilhar ⬆️');
   set('pwa-dent-s2',T.pwa_dent_step2||'2. Toque em "Adicionar à Tela de Início" ➕');
   set('pwa-dent-ios-btn',T.pwa_dent_ios_btn||'✓ Já instalei, continuar');
+  set('pwa-dent-powered',T.powered_by||'Desenvolvido por');
+  const aviso=document.getElementById('pwa-dent-aviso');if(aviso)aviso.style.display='none';
   // Detecta suporte
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
   if(deferredPrompt&&!isIOS){
@@ -2421,6 +2429,13 @@ async function installDentPWA(){
   deferredPrompt=null;
   if(outcome==='accepted'){showDentAppAfterInstall();}
   else if(btn){btn.disabled=false;btn.style.opacity='';}
+}
+
+function confirmarInstalacao(){
+  const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  if(isStandalone){showDentAppAfterInstall();return;}
+  const aviso=document.getElementById('pwa-dent-aviso');
+  if(aviso){aviso.textContent=T.pwa_dent_nao_instalado||'Instale o app primeiro para continuar.';aviso.style.display='';}
 }
 
 function showDentAppAfterInstall(){
@@ -2673,30 +2688,45 @@ function renderQRCode(text,canvas){
 </script>
 
 <!-- TELA DE INSTALAÇÃO PWA PARA DENTISTA -->
-<div id="pwa-dent-install" style="display:none;position:fixed;inset:0;z-index:250;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
-  <div style="margin-bottom:28px">
-    <svg width="64" height="64" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
-      <rect width="44" height="44" rx="12" fill="#0d1117"/>
+<div id="pwa-dent-install" style="display:none;position:fixed;inset:0;z-index:250;background:var(--bg);flex-direction:column">
+  <!-- Conteúdo central -->
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
+    <div style="margin-bottom:28px">
+      <svg width="64" height="64" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+        <rect width="44" height="44" rx="12" fill="#0d1117"/>
+        <circle cx="22" cy="22" r="15" fill="none" stroke="#3b82f6" stroke-width="2"/>
+        <circle cx="22" cy="22" r="9" fill="#3b82f6"/>
+        <circle cx="22" cy="22" r="4" fill="#0d1117"/>
+        <circle cx="26" cy="18" r="2.5" fill="#93c5fd" opacity="0.9"/>
+      </svg>
+      <div style="font-size:22px;font-weight:700;margin-top:12px;letter-spacing:-.3px">Iris</div>
+      <div id="pwa-dent-portal-label" style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace">Portal do Dentista</div>
+    </div>
+    <h2 id="pwa-dent-h2" style="font-size:20px;font-weight:700;margin-bottom:10px">Instale o app Iris</h2>
+    <p id="pwa-dent-p" style="font-size:14px;color:var(--text2);margin-bottom:28px;max-width:300px;line-height:1.6">Para acessar sua agenda, instale o app Iris na tela inicial do seu celular.</p>
+    <div id="pwa-dent-btn-wrap">
+      <button id="pwa-dent-btn" onclick="installDentPWA()" style="background:linear-gradient(135deg,var(--accent),#1d4ed8);color:white;border:none;border-radius:var(--radius-sm);padding:14px 32px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(59,130,246,.35)">📲 Instalar app</button>
+    </div>
+    <div id="pwa-dent-ios" style="display:none;max-width:320px;width:100%">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:left">
+        <p id="pwa-dent-ios-p" style="font-size:13px;color:var(--text2);margin-bottom:14px">Para acessar sua agenda, siga os passos:</p>
+        <div style="font-size:13px;margin-bottom:10px;padding:8px 0;border-bottom:1px solid var(--border)" id="pwa-dent-s1">1. Toque em Compartilhar ⬆️</div>
+        <div style="font-size:13px;margin-bottom:16px;padding:8px 0" id="pwa-dent-s2">2. Toque em "Adicionar à Tela de Início" ➕</div>
+        <div id="pwa-dent-aviso" style="display:none;font-size:12px;color:#f59e0b;margin-bottom:12px;padding:8px 10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:6px"></div>
+        <button onclick="confirmarInstalacao()" id="pwa-dent-ios-btn" style="width:100%;background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;color:white;cursor:pointer">✓ Já instalei, continuar</button>
+      </div>
+    </div>
+  </div>
+  <!-- Rodapé -->
+  <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <svg width="24" height="24" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+      <rect width="44" height="44" rx="8" fill="#0d1117"/>
       <circle cx="22" cy="22" r="15" fill="none" stroke="#3b82f6" stroke-width="2"/>
       <circle cx="22" cy="22" r="9" fill="#3b82f6"/>
       <circle cx="22" cy="22" r="4" fill="#0d1117"/>
       <circle cx="26" cy="18" r="2.5" fill="#93c5fd" opacity="0.9"/>
     </svg>
-    <div style="font-size:22px;font-weight:700;margin-top:12px;letter-spacing:-.3px">Iris</div>
-    <div id="pwa-dent-portal-label" style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace">Portal do Dentista</div>
-  </div>
-  <h2 id="pwa-dent-h2" style="font-size:20px;font-weight:700;margin-bottom:10px">Instale o app Iris</h2>
-  <p id="pwa-dent-p" style="font-size:14px;color:var(--text2);margin-bottom:28px;max-width:300px;line-height:1.6">Para acessar sua agenda, instale o app Iris na tela inicial do seu celular.</p>
-  <div id="pwa-dent-btn-wrap">
-    <button id="pwa-dent-btn" onclick="installDentPWA()" style="background:linear-gradient(135deg,var(--accent),#1d4ed8);color:white;border:none;border-radius:var(--radius-sm);padding:14px 32px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(59,130,246,.35)">📲 Instalar app</button>
-  </div>
-  <div id="pwa-dent-ios" style="display:none;max-width:320px;width:100%">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:left">
-      <p id="pwa-dent-ios-p" style="font-size:13px;color:var(--text2);margin-bottom:14px">Para acessar sua agenda, siga os passos:</p>
-      <div style="font-size:13px;margin-bottom:10px;padding:8px 0;border-bottom:1px solid var(--border)" id="pwa-dent-s1">1. Toque em Compartilhar ⬆️</div>
-      <div style="font-size:13px;margin-bottom:20px;padding:8px 0" id="pwa-dent-s2">2. Toque em "Adicionar à Tela de Início" ➕</div>
-      <button onclick="showDentAppAfterInstall()" id="pwa-dent-ios-btn" style="width:100%;background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;color:white;cursor:pointer">✓ Já instalei, continuar</button>
-    </div>
+    <span style="font-size:11px;color:var(--text3)"><span id="pwa-dent-powered">Desenvolvido por</span> <a href="https://cappia.app" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none;font-weight:600">Cappia</a></span>
   </div>
 </div>
 
