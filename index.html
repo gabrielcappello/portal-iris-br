@@ -332,9 +332,14 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               </div>
               <div class="form-group">
                 <label>País</label>
-                <select id="c_idioma_pais" onchange="updateDDI(this.value)"></select>
+                <select id="c_idioma_pais" onchange="onPaisChange(this.value)"></select>
+              </div>
+              <div class="form-group full" id="c_estado_wrap" style="display:none">
+                <label id="c_estado_label">Estado / Província</label>
+                <input id="c_estado" placeholder="">
               </div>
             </div>
+            <div id="c_pais_info" style="display:none;margin-top:12px;padding:10px 14px;background:var(--surface3);border-radius:var(--radius-sm);font-size:12px;color:var(--text2);display:flex;gap:16px;flex-wrap:wrap"></div>
           </div>
           <div class="save-bar">
             <span class="save-status" id="idioma-status"></span>
@@ -674,16 +679,45 @@ function updatePaisOptions(lang,selected){
   if(!sel)return;
   const opts=PAIS_OPTIONS[lang]||[];
   sel.innerHTML=opts.map(o=>`<option value="${o.v}"${o.v===selected?' selected':''}>${o.l}</option>`).join('');
-  updateDDI(selected||opts[0]?.v||'');
+  onPaisChange(selected||opts[0]?.v||'');
+}
+async function onPaisChange(paisCode){
+  updateDDI(paisCode);
+  try{
+    const rows=await sb.query('paises_config',`?codigo=eq.${paisCode}&select=*`);
+    if(!rows.length)return;
+    const p=rows[0];
+    const info=document.getElementById('c_pais_info');
+    if(info){
+      info.style.display='flex';
+      info.innerHTML=`<span>📄 Documento: <b>${p.tipo_documento}</b> (${p.digitos_documento} dígitos)</span><span>📱 Telefone: <b>${p.digitos_telefone} dígitos</b></span>`;
+    }
+    const wrap=document.getElementById('c_estado_wrap');
+    const label=document.getElementById('c_estado_label');
+    if(wrap)wrap.style.display=p.tem_estado?'':'none';
+    if(label&&p.tem_estado){
+      const labels={'português':'Estado','español':'Provincia / Estado','english':'State / Province'};
+      label.textContent=labels[p.idioma]||'Estado / Província';
+      const estadoEl=document.getElementById('c_estado');
+      if(estadoEl){
+        const ph={'português':'Ex: São Paulo','español':'Ej: Buenos Aires','english':'Ex: California'};
+        estadoEl.placeholder=ph[p.idioma]||'';
+      }
+    }
+  }catch(e){console.error('onPaisChange:',e);}
 }
 async function saveIdioma(){
   const btn=document.querySelector('[onclick="saveIdioma()"]');
   const st=document.getElementById('idioma-status');
   btn.disabled=true;st.textContent='Salvando...';st.className='save-status';
-  const idioma=document.getElementById('c_idioma_lang').value+'-'+document.getElementById('c_idioma_pais').value;
+  const pais_codigo=document.getElementById('c_idioma_pais').value;
+  const idioma=document.getElementById('c_idioma_lang').value+'-'+pais_codigo;
+  const estado=document.getElementById('c_estado')?.value||'';
   try{
-    await sb.update('clinicas',currentClinica.id,{idioma});
+    await sb.update('clinicas',currentClinica.id,{idioma,pais_codigo,estado});
     currentClinica.idioma=idioma;
+    currentClinica.pais_codigo=pais_codigo;
+    currentClinica.estado=estado;
     st.textContent='✓ Salvo';st.className='save-status ok';toast('Idioma salvo ✓');
   }catch(e){st.textContent='✗ Erro';st.className='save-status err';toast('Erro ao salvar','err');}
   btn.disabled=false;
@@ -884,6 +918,8 @@ function loadConfig(){
   const idiomaPais=dashIdx>0?idiomaVal.substring(dashIdx+1):'br';
   const langSel=document.getElementById('c_idioma_lang');
   if(langSel){langSel.value=idiomaLang;updatePaisOptions(idiomaLang,idiomaPais);}
+  const estadoEl=document.getElementById('c_estado');
+  if(estadoEl)estadoEl.value=c.estado||'';
   renderDentistas(c.dentistas||[]);
   setTimeout(atualizarBadgeDentistas,0);
   renderAuto(c.automatizacoes||{});
