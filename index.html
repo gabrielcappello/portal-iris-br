@@ -369,6 +369,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
         <div class="accordion-body" id="body-clinica">
           <div class="accordion-body-inner">
             <div class="form-grid">
+              <div class="form-group"><label data-i18n="label_nome_agente">Nome da secretária virtual</label><input id="c_nome_agente" placeholder="Ex: Sofia, Ana, Iris..." value="Iris"><span data-i18n="nome_agente_nota" style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Este é o nome com que o agente se apresentará aos pacientes.</span></div>
               <div class="form-group"><label data-i18n="label_nome_clinica">Nome da Clínica</label><input id="c_nome" placeholder="Ex: OdontoBR" oninput="updateWpName()"></div>
               <div class="form-group">
                 <label data-i18n="label_telefone">Telefone</label>
@@ -1189,7 +1190,9 @@ const TRADUCOES={
   pwa_dent_step2:'2. Toque em "Adicionar à Tela de Início" ➕',
   pwa_dent_ios_btn:'✓ Já instalei, continuar',
   pwa_dent_nao_instalado:'Instale o app primeiro para continuar.',
-  powered_by:'Desenvolvido por',
+  powered_by:'Desenvolvido por',pwa_dent_produto:'produto',
+  label_nome_agente:'Nome da secretária virtual',ph_nome_agente:'Ex: Sofia, Ana, Iris...',
+  nome_agente_nota:'Este é o nome com que o agente se apresentará aos pacientes.',
   toast_salvo:'✓ Salvo',err_salvar:'Erro ao salvar',toast_nao_esquecer:'💾 Não esqueça de salvar as alterações',
   falta_completar:'Falta completar',
   label_wp_dent:'WhatsApp do Dentista',ph_wp_dent:'(21) 99999-9999',
@@ -1308,7 +1311,9 @@ const TRADUCOES={
   pwa_dent_step2:'2. Toca "Agregar a Pantalla de inicio" ➕',
   pwa_dent_ios_btn:'✓ Ya instalé, continuar',
   pwa_dent_nao_instalado:'Instala la app primero para continuar.',
-  powered_by:'Desarrollado por',
+  powered_by:'Desarrollado por',pwa_dent_produto:'producto',
+  label_nome_agente:'Nombre del asistente virtual',ph_nome_agente:'Ej: Sofía, Ana, Iris...',
+  nome_agente_nota:'Este es el nombre con el que el agente se presentará a los pacientes.',
   toast_salvo:'✓ Guardado',err_salvar:'Error al guardar',toast_nao_esquecer:'💾 No olvides guardar los cambios',
   falta_completar:'Falta completar',
   label_wp_dent:'WhatsApp del Dentista',ph_wp_dent:'11 9999-9999',
@@ -1427,7 +1432,9 @@ const TRADUCOES={
   pwa_dent_step2:'2. Tap "Add to Home Screen" ➕',
   pwa_dent_ios_btn:'✓ Already installed, continue',
   pwa_dent_nao_instalado:'Install the app first to continue.',
-  powered_by:'Powered by',
+  powered_by:'Powered by',pwa_dent_produto:'product',
+  label_nome_agente:'Virtual assistant name',ph_nome_agente:'Ex: Sofia, Ana, Iris...',
+  nome_agente_nota:'This is the name the agent will use to introduce itself to patients.',
   toast_salvo:'✓ Saved',err_salvar:'Error saving',toast_nao_esquecer:'💾 Don\'t forget to save changes',
   falta_completar:'Missing',
   label_wp_dent:'Dentist WhatsApp',ph_wp_dent:'555-999-9999',
@@ -1746,6 +1753,7 @@ function loadConfig(){
   document.getElementById('c_cep').value=c.cep||'';
   document.getElementById('c_wp').value=c.nome?`CAPPIA/${c.nome}`:'';
   document.getElementById('c_maps').value=c.maps_link||'';
+  document.getElementById('c_nome_agente').value=c.nome_agente||'Iris';
   const idiomaVal=c.idioma||'português-br';
   const dashIdx=idiomaVal.lastIndexOf('-');
   const idiomaLang=dashIdx>0?idiomaVal.substring(0,dashIdx):'português';
@@ -1792,6 +1800,7 @@ async function saveConfig(){
       estado:document.getElementById('c_estado')?.value||'',
       whatsapp_instancia:document.getElementById('c_wp').value,
       maps_link:document.getElementById('c_maps').value,
+      nome_agente:document.getElementById('c_nome_agente').value||'Iris',
     });
     st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_config_ok);
   }catch(e){st.textContent=T.err_txt;st.className='save-status err';toast(T.err_salvar,'err');}
@@ -2405,7 +2414,7 @@ function showPWAInstallScreen(){
   set('pwa-dent-ios-p',T.pwa_dent_ios_desc||'Para acessar sua agenda, siga os passos:');
   set('pwa-dent-s1',T.pwa_dent_step1||'1. Toque em Compartilhar ⬆️');
   set('pwa-dent-s2',T.pwa_dent_step2||'2. Toque em "Adicionar à Tela de Início" ➕');
-  set('pwa-dent-powered',T.powered_by||'Desenvolvido por');
+  set('pwa-dent-produto',T.pwa_dent_produto||'produto');
   // Botão "Já instalei" removido — instalação obrigatória, sem bypass
   const iosBtn=document.getElementById('pwa-dent-ios-btn');if(iosBtn)iosBtn.style.display='none';
   const aviso=document.getElementById('pwa-dent-aviso');if(aviso)aviso.style.display='none';
@@ -2718,16 +2727,13 @@ function renderQRCode(text,canvas){
       </div>
     </div>
   </div>
-  <!-- Rodapé -->
-  <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-    <svg width="24" height="24" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
-      <rect width="44" height="44" rx="8" fill="#0d1117"/>
-      <circle cx="22" cy="22" r="15" fill="none" stroke="#3b82f6" stroke-width="2"/>
-      <circle cx="22" cy="22" r="9" fill="#3b82f6"/>
-      <circle cx="22" cy="22" r="4" fill="#0d1117"/>
-      <circle cx="26" cy="18" r="2.5" fill="#93c5fd" opacity="0.9"/>
+  <!-- Rodapé centralizado -->
+  <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0">
+    <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <rect width="24" height="24" rx="6" fill="#1e293b"/>
+      <text x="12" y="17" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="13" font-weight="800" fill="#94a3b8">C</text>
     </svg>
-    <span style="font-size:11px;color:var(--text3)"><span id="pwa-dent-powered">Desenvolvido por</span> <a href="https://cappia.app" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none;font-weight:600">Cappia</a></span>
+    <span style="font-size:11px;color:var(--text3);letter-spacing:.2px">Iris · <span id="pwa-dent-produto">produto</span> <a href="https://cappia.app" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none;font-weight:600">Cappia</a></span>
   </div>
 </div>
 
