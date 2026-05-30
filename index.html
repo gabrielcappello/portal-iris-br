@@ -428,7 +428,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
         <input class="search-input" id="search-pac" placeholder="🔍 Buscar por nome, telefone ou documento..." oninput="filterPacientes()">
       </div>
       <div class="table-wrap" id="pac-table-wrap">
-        <div class="loading"><div class="spinner"></div> Cargando pacientes...</div>
+        <div class="loading"><div class="spinner"></div> Carregando pacientes...</div>
       </div>
     </div>
 
@@ -446,7 +446,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
         </select>
       </div>
       <div class="table-wrap" id="ag-table-wrap" style="margin:0 -4px">
-        <div class="loading"><div class="spinner"></div> Cargando agendamientos...</div>
+        <div class="loading"><div class="spinner"></div> Carregando agendamentos...</div>
       </div>
     </div>
 
@@ -475,7 +475,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
     <textarea id="obs-text" placeholder="Escreva aqui notas sobre este paciente..."></textarea>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeObs()">Cancelar</button>
-      <button class="btn-ok" onclick="saveObs()">Guardar</button>
+      <button class="btn-ok" onclick="saveObs()">Salvar</button>
     </div>
   </div>
 </div>
@@ -1485,9 +1485,9 @@ async function updateStatus(id,status){
     await sb.update('agendamentos',id,{status});
     const idx=allAgendamentos.findIndex(a=>a.id===id);
     if(idx!==-1)allAgendamentos[idx].status=status;
-    toast(`Status actualizado: ${status} ✓`);
+    toast(`Status atualizado: ${status} ✓`);
     filterAgendamentos();
-  }catch(e){toast('Error al actualizar estado','err');}
+  }catch(e){toast('Erro ao atualizar status','err');}
 }
 
 // ══════════════════════════════════
@@ -1610,7 +1610,7 @@ async function dappStatus(id,status,btn){
     if(idx!==-1)dappAgendamentos[idx].status=status;
     renderDappAgenda();
     toast(`${status==='ok'?'✓ Presente':'✗ Faltou'} marcado`);
-  }catch(e){toast('Error','err');}
+  }catch(e){toast('Erro','err');}
 }
 
 async function loadDappPacientes(){
@@ -1724,7 +1724,7 @@ function drawQR(text){
   ctx.fillStyle='#1a1a2e';
   ctx.font='11px monospace';
   ctx.textAlign='center';
-  ctx.fillText('Cargando QR...',size/2,size/2);
+  ctx.fillText('Carregando QR...',size/2,size/2);
   // Load QRCode library dynamically
   if(!window.QRCode){
     const s=document.createElement('script');
