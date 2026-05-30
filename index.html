@@ -334,10 +334,6 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
                 <label>País</label>
                 <select id="c_idioma_pais" onchange="onPaisChange(this.value)"></select>
               </div>
-              <div class="form-group full" id="c_estado_wrap" style="display:none">
-                <label id="c_estado_label">Estado / Província</label>
-                <select id="c_estado"><option value="">Selecione...</option></select>
-              </div>
             </div>
             <div id="c_pais_info" style="display:none;margin-top:12px;padding:10px 14px;background:var(--surface3);border-radius:var(--radius-sm);font-size:12px;color:var(--text2);display:flex;gap:16px;flex-wrap:wrap"></div>
           </div>
@@ -363,6 +359,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
                 <label>Telefone</label>
                 <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface2)" onfocusin="this.style.borderColor='var(--accent)'" onfocusout="this.style.borderColor='var(--border)'">
                   <span id="c_tel_ddi" style="padding:10px 10px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2);white-space:nowrap;display:flex;align-items:center;min-width:48px;justify-content:center">+55</span>
+                  <span id="c_tel_ddd" style="padding:10px 6px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);white-space:nowrap;display:none;align-items:center"></span>
                   <input id="c_tel" placeholder="(21) 99999-9999" style="flex:1;min-width:0;background:transparent;border:none;border-radius:0;padding:10px 10px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none">
                 </div>
               </div>
@@ -370,6 +367,10 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               <div class="form-group"><label><b>Sala</b></label><input id="c_sala" placeholder="Ex: 3º andar, Sala 302"></div>
               <div class="form-group"><label>Bairro</label><input id="c_bairro" placeholder="Centro"></div>
               <div class="form-group"><label>Cidade</label><input id="c_cidade" placeholder="São Paulo"></div>
+              <div class="form-group full" id="c_estado_wrap" style="display:none">
+                <label id="c_estado_label">Estado / Província</label>
+                <select id="c_estado" onchange="onEstadoChange(this.value)"><option value="">Selecione...</option></select>
+              </div>
               <div class="form-group"><label>CEP</label><input id="c_cep" placeholder="01310-100"></div>
               <div class="form-group"><label>Referência</label><input id="c_referencia" placeholder="Ex: Em frente ao banco, portão azul"></div>
               <div class="form-group full">
@@ -702,36 +703,49 @@ async function onPaisChange(paisCode,estadoValue=''){
     const estadoSel=document.getElementById('c_estado');
     if(estadoSel&&p.tem_estado){
       const opts=ESTADOS_MAP[paisCode]||[];
-      estadoSel.innerHTML=`<option value="">Selecione...</option>`+opts.map(s=>`<option value="${s}"${s===estadoValue?' selected':''}>${s}</option>`).join('');
+      estadoSel.innerHTML=`<option value="">${T.select_selecione||'Selecione...'}</option>`+opts.map(s=>`<option value="${s}"${s===estadoValue?' selected':''}>${s}</option>`).join('');
     }else if(estadoSel){
-      estadoSel.innerHTML='<option value="">Selecione...</option>';
+      estadoSel.innerHTML=`<option value="">${T.select_selecione||'Selecione...'}</option>`;
     }
+    onEstadoChange(estadoValue||'');
   }catch(e){console.error('onPaisChange:',e);}
 }
 async function saveIdioma(){
   const lang=document.getElementById('c_idioma_lang').value;
   const pais_codigo=document.getElementById('c_idioma_pais').value;
-  const estadoSel=document.getElementById('c_estado');
-  const estado=estadoSel?.value||'';
-  const estadoVisible=document.getElementById('c_estado_wrap')?.style.display!=='none';
-  const estadoLabel=document.getElementById('c_estado_label')?.textContent||'Estado / Província';
-  if(!lang){toast('Falta completar: Idioma','err');return;}
-  if(!pais_codigo){toast('Falta completar: País','err');return;}
-  if(estadoVisible&&!estado){toast(`Falta completar: ${estadoLabel}`,'err');return;}
+  if(!lang){toast(T.err_falta_idioma,'err');return;}
+  if(!pais_codigo){toast(T.err_falta_pais,'err');return;}
   const btn=document.querySelector('[onclick="saveIdioma()"]');
   const st=document.getElementById('idioma-status');
   btn.disabled=true;st.textContent='Salvando...';st.className='save-status';
   const idioma=lang+'-'+pais_codigo;
   try{
-    await sb.update('clinicas',currentClinica.id,{idioma,pais_codigo,estado});
+    await sb.update('clinicas',currentClinica.id,{idioma,pais_codigo});
     currentClinica.idioma=idioma;
     currentClinica.pais_codigo=pais_codigo;
-    currentClinica.estado=estado;
     st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_idioma_ok);
     aplicarTraducoes(lang);
     checkIdiomaConfigured();
   }catch(e){st.textContent=T.err_txt||'✗ Erro';st.className='save-status err';toast(T.err_salvar,'err');}
   btn.disabled=false;
+}
+
+// ══════════════════════════════════
+// ÁREA / DDD POR ESTADO
+// ══════════════════════════════════
+const ESTADO_DDD={
+  'Acre':'68','Alagoas':'82','Amapá':'96','Amazonas':'92','Bahia':'71',
+  'Ceará':'85','Distrito Federal':'61','Espírito Santo':'27','Goiás':'62',
+  'Maranhão':'98','Mato Grosso':'65','Mato Grosso do Sul':'67','Minas Gerais':'31',
+  'Pará':'91','Paraíba':'83','Paraná':'41','Pernambuco':'81','Piauí':'86',
+  'Rio de Janeiro':'21','Rio Grande do Norte':'84','Rio Grande do Sul':'51',
+  'Rondônia':'69','Roraima':'95','Santa Catarina':'48','São Paulo':'11',
+  'Sergipe':'79','Tocantins':'63',
+};
+function onEstadoChange(estado){
+  const ddd=ESTADO_DDD[estado]||'';
+  const span=document.getElementById('c_tel_ddd');
+  if(span){span.textContent=ddd?`(${ddd})`:'';span.style.display=ddd?'':'none';}
 }
 
 // ══════════════════════════════════
@@ -907,6 +921,9 @@ const TRADUCOES={
   pwa_titulo:'Instalar Iris',pwa_sub:'Adicione o atalho na sua tela inicial',
   btn_agora_nao:'Agora não',btn_instalar:'📲 Adicionar à tela inicial',
   toast_salvo:'✓ Salvo',err_salvar:'Erro ao salvar',toast_nao_esquecer:'💾 Não esqueça de salvar as alterações',
+  falta_completar:'Falta completar',
+  label_wp_dent:'WhatsApp do Dentista',ph_wp_dent:'(21) 99999-9999',
+  slots_gerados:'Slots gerados:',manual_separado:'Escreva os horários separados por vírgula:',
 },
 'español':{
   page_title:'Iris — Portal Clínica',
@@ -994,6 +1011,9 @@ const TRADUCOES={
   pwa_titulo:'Instalar Iris',pwa_sub:'Agrega el acceso directo en tu pantalla de inicio',
   btn_agora_nao:'Ahora no',btn_instalar:'📲 Agregar a inicio',
   toast_salvo:'✓ Guardado',err_salvar:'Error al guardar',toast_nao_esquecer:'💾 No olvides guardar los cambios',
+  falta_completar:'Falta completar',
+  label_wp_dent:'WhatsApp del Dentista',ph_wp_dent:'11 9999-9999',
+  slots_gerados:'Slots generados:',manual_separado:'Escribe los horarios separados por coma:',
 },
 'english':{
   page_title:'Iris — Clinic Portal',
@@ -1081,6 +1101,9 @@ const TRADUCOES={
   pwa_titulo:'Install Iris',pwa_sub:'Add the shortcut to your home screen',
   btn_agora_nao:'Not now',btn_instalar:'📲 Add to home screen',
   toast_salvo:'✓ Saved',err_salvar:'Error saving',toast_nao_esquecer:'💾 Don\'t forget to save changes',
+  falta_completar:'Missing',
+  label_wp_dent:'Dentist WhatsApp',ph_wp_dent:'555-999-9999',
+  slots_gerados:'Generated slots:',manual_separado:'Type schedules separated by comma:',
 },
 };
 let T=TRADUCOES['português'];
@@ -1351,6 +1374,7 @@ function loadConfig(){
   const idiomaPais=dashIdx>0?idiomaVal.substring(dashIdx+1):'br';
   const langSel=document.getElementById('c_idioma_lang');
   if(langSel){langSel.value=idiomaLang;updatePaisOptions(idiomaLang,idiomaPais,c.estado||'');}
+  setTimeout(()=>onEstadoChange(c.estado||''),300);
   aplicarTraducoes(idiomaLang);
   checkIdiomaConfigured();
   renderDentistas(c.dentistas||[]);
@@ -1360,6 +1384,18 @@ function loadConfig(){
 }
 
 async function saveConfig(){
+  const falta=T.falta_completar||'Falta completar';
+  const required=[
+    ['c_nome',T.label_nome_clinica],['c_tel',T.label_telefone],
+    ['c_end',T.label_end],['c_bairro',T.label_bairro],
+    ['c_cidade',T.label_cidade],['c_cep',T.label_cep],
+  ];
+  if(document.getElementById('c_estado_wrap')?.style.display!=='none'){
+    required.push(['c_estado',document.getElementById('c_estado_label')?.textContent||T.label_estado]);
+  }
+  for(const [id,label] of required){
+    if(!document.getElementById(id)?.value?.trim()){toast(`${falta}: ${label}`,'err');return;}
+  }
   const btn=document.querySelector('[onclick="saveConfig()"]');
   const st=document.getElementById('cfg-status');
   btn.disabled=true;st.textContent='Salvando...';st.className='save-status';
@@ -1373,6 +1409,7 @@ async function saveConfig(){
       bairro:document.getElementById('c_bairro').value,
       cidade:document.getElementById('c_cidade').value,
       cep:document.getElementById('c_cep').value,
+      estado:document.getElementById('c_estado')?.value||'',
       whatsapp_instancia:document.getElementById('c_wp').value,
       maps_link:document.getElementById('c_maps').value,
     });
@@ -1459,28 +1496,35 @@ function renderDentistas(dents){
               <input id="d${i}_nome" value="${d.nome||''}" placeholder="Sobrenome e nome" style="flex:1" oninput="updateDentName(${i})">
             </div>
           </div>
-          <div class="form-group full"><label>Calendar ID</label><input id="d${i}_cal" value="${d.calendar_id||''}" placeholder="xxx@group.calendar.google.com"></div>
-          <div class="form-group"><label>Senha de acesso</label><input type="password" id="d${i}_senha" value="${d.senha||''}" placeholder="Senha do dentista"></div>
-          <div class="form-group"><label>Abertura</label><input type="time" id="d${i}_ini" value="${d.inicio||'08:00'}" oninput="updateSlots(${i})"></div>
-          <div class="form-group"><label>Encerramento</label><input type="time" id="d${i}_fim" value="${d.fim||'18:00'}" oninput="updateSlots(${i})"></div>
-          <div class="form-group"><label>Almoço início</label><input type="time" id="d${i}_alm_ini" value="${d.alm_ini||'12:00'}" oninput="updateSlots(${i})"></div>
-          <div class="form-group"><label>Almoço fim</label><input type="time" id="d${i}_alm_fim" value="${d.alm_fim||'13:00'}" oninput="updateSlots(${i})"></div>
+          <div class="form-group full"><label>${T.label_cal}</label><input id="d${i}_cal" value="${d.calendar_id||''}" placeholder="${T.ph_cal}"></div>
+          <div class="form-group"><label>${T.label_senha_dent}</label><input type="password" id="d${i}_senha" value="${d.senha||''}" placeholder="${T.ph_senha_dent}"></div>
+          <div class="form-group">
+            <label>${T.label_wp_dent}</label>
+            <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface2)">
+              <span style="padding:10px 10px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2);white-space:nowrap;display:flex;align-items:center">${DDI_MAP[currentClinica?.pais_codigo||'br']||'+55'}</span>
+              <input id="d${i}_whatsapp" value="${d.whatsapp||''}" placeholder="${T.ph_wp_dent}" style="flex:1;min-width:0;background:transparent;border:none;border-radius:0;padding:10px 10px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none">
+            </div>
+          </div>
+          <div class="form-group"><label>${T.label_abertura}</label><input type="time" id="d${i}_ini" value="${d.inicio||'08:00'}" oninput="updateSlots(${i})"></div>
+          <div class="form-group"><label>${T.label_encerramento}</label><input type="time" id="d${i}_fim" value="${d.fim||'18:00'}" oninput="updateSlots(${i})"></div>
+          <div class="form-group"><label>${T.label_alm_ini}</label><input type="time" id="d${i}_alm_ini" value="${d.alm_ini||'12:00'}" oninput="updateSlots(${i})"></div>
+          <div class="form-group"><label>${T.label_alm_fim}</label><input type="time" id="d${i}_alm_fim" value="${d.alm_fim||'13:00'}" oninput="updateSlots(${i})"></div>
         </div>
 
         <!-- SÁBADO -->
         <div style="margin-bottom:12px">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);">
-            <span style="font-size:13px;font-weight:600;">Atende sábado</span>
+            <span style="font-size:13px;font-weight:600;">${T.label_sabado}</span>
             <select id="d${i}_sab" onchange="toggleSabado(${i})" style="background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:13px;color:var(--text);outline:none;">
-              <option value="no" ${!d.sabado?'selected':''}>Não</option>
-              <option value="sim" ${d.sabado?'selected':''}>Sim</option>
+              <option value="no" ${!d.sabado?'selected':''}>${T.opt_nao}</option>
+              <option value="sim" ${d.sabado?'selected':''}>${T.opt_sim}</option>
             </select>
           </div>
           <div class="sabado-horarios" id="sabado-box-${i}" style="${d.sabado?'':'display:none'}">
-            <div class="sabado-horarios-title">🗓️ Horário do sábado</div>
+            <div class="sabado-horarios-title">${T.sabado_h}</div>
             <div class="form-grid">
-              <div class="form-group"><label>Início sábado</label><input type="time" id="d${i}_sab_ini" value="${d.sab_ini||'08:00'}"></div>
-              <div class="form-group"><label>Fim sábado</label><input type="time" id="d${i}_sab_fim" value="${d.sab_fim||'13:00'}"></div>
+              <div class="form-group"><label>${T.label_sab_ini}</label><input type="time" id="d${i}_sab_ini" value="${d.sab_ini||'08:00'}"></div>
+              <div class="form-group"><label>${T.label_sab_fim}</label><input type="time" id="d${i}_sab_fim" value="${d.sab_fim||'13:00'}"></div>
             </div>
           </div>
         </div>
@@ -1488,37 +1532,37 @@ function renderDentistas(dents){
         <!-- MODO HORARIOS -->
         <div style="margin-bottom:14px">
           <div class="mode-toggle-wrap">
-            <span class="mode-toggle-label">Modo de horários</span>
+            <span class="mode-toggle-label">${T.label_modo}</span>
             <div class="mode-toggle" id="modetog-${i}">
-              <button class="mode-btn ${modo==='auto'?'active':''}" onclick="setModo(${i},'auto')">Automático</button>
-              <button class="mode-btn ${modo==='manual'?'active':''}" onclick="setModo(${i},'manual')">Manual</button>
-              <button class="mode-btn ${modo==='proc'?'active':''}" onclick="setModo(${i},'proc')">Por procedimento</button>
+              <button class="mode-btn ${modo==='auto'?'active':''}" onclick="setModo(${i},'auto')">${T.btn_auto}</button>
+              <button class="mode-btn ${modo==='manual'?'active':''}" onclick="setModo(${i},'manual')">${T.btn_manual}</button>
+              <button class="mode-btn ${modo==='proc'?'active':''}" onclick="setModo(${i},'proc')">${T.btn_proc}</button>
             </div>
           </div>
           <div id="mode-auto-${i}" style="${modo==='auto'?'':'display:none'};margin-top:8px">
-            <div class="form-group" style="max-width:160px;margin-bottom:8px"><label>Duração (min)</label><input type="number" id="d${i}_dur" value="${d.dur||60}" min="5" step="5" oninput="updateSlots(${i})"></div>
-            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Slots gerados:</div>
+            <div class="form-group" style="max-width:160px;margin-bottom:8px"><label>${T.label_dur}</label><input type="number" id="d${i}_dur" value="${d.dur||60}" min="5" step="5" oninput="updateSlots(${i})"></div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${T.slots_gerados}</div>
             <div class="slots-preview" id="slots-preview-${i}">${slotsHtml}</div>
           </div>
           <div id="mode-manual-${i}" style="${modo==='manual'?'':'display:none'};margin-top:8px">
-            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Escreva os horários separados por vírgula:</div>
-            <input id="d${i}_horarios" value="${d.horarios||''}" placeholder="08:00,09:00,10:00,11:00,14:00,15:00" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${T.manual_separado}</div>
+            <input id="d${i}_horarios" value="${d.horarios||''}" placeholder="${T.ph_horarios}" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;">
           </div>
           <div id="mode-proc-${i}" style="${modo==='proc'?'':'display:none'};margin-top:8px">
-            <div style="font-size:11px;color:var(--text3)">Os horários serão calculados conforme a duração de cada procedimento selecionado.</div>
+            <div style="font-size:11px;color:var(--text3)">${T.proc_modo_desc}</div>
           </div>
         </div>
 
         <!-- PROCEDIMENTOS — fechados por padrão -->
         <div>
-          <label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Procedimentos que atende</label>
+          <label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">${T.label_procs}</label>
           <div id="specs-${i}">${specHtml}</div>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
-          <button style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:var(--accent2);border-radius:var(--radius-sm);padding:9px 16px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;" onclick="showQR(${i})">📱 QR Code</button>
+          <button style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:var(--accent2);border-radius:var(--radius-sm);padding:9px 16px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;" onclick="showQR(${i})">${T.btn_qr}</button>
           <div style="display:flex;align-items:center;gap:10px">
             <span class="save-status" id="dent-status-${i}"></span>
-            <button class="btn-save" onclick="saveDentista(${i})">💾 Salvar Dentista ${i+1}</button>
+            <button class="btn-save" onclick="saveDentista(${i})">${T.btn_salvar_dent} ${i+1}</button>
           </div>
         </div>
       </div>
@@ -1663,6 +1707,7 @@ async function saveDentista(i){
     sab_ini:document.getElementById(`d${i}_sab_ini`)?.value||'08:00',
     sab_fim:document.getElementById(`d${i}_sab_fim`)?.value||'13:00',
     horarios,modo,
+    whatsapp:document.getElementById(`d${i}_whatsapp`)?.value||'',
     procedimentos:getProcs(i),
   };
   const allDents=Array.from({length:10},(_,j)=>{
@@ -1696,40 +1741,40 @@ function renderAuto(a){
   <div class="accordion-body-inner" style="padding-top:8px">
     <div class="auto-item">
       <div class="auto-info">
-        <div class="auto-title">🔔 Lembrete 2 horas antes</div>
-        <div class="auto-sub">Envia uma mensagem automática 2 horas antes de cada consulta</div>
+        <div class="auto-title">${T.auto_lem2h}</div>
+        <div class="auto-sub">${T.auto_lem2h_sub}</div>
       </div>
       <div class="toggle ${a.lembrete_2h!==false?'on':''}" id="auto-lembrete_2h" onclick="this.classList.toggle('on')"></div>
     </div>
     <div class="auto-item">
       <div class="auto-info">
-        <div class="auto-title">🔔 Lembrete 24 horas antes</div>
-        <div class="auto-sub">Envia uma mensagem automática 1 dia antes da consulta</div>
+        <div class="auto-title">${T.auto_lem24h}</div>
+        <div class="auto-sub">${T.auto_lem24h_sub}</div>
       </div>
       <div class="toggle ${a.lembrete_24h?'on':''}" id="auto-lembrete_24h" onclick="this.classList.toggle('on')"></div>
     </div>
     <div class="auto-item">
       <div class="auto-info">
-        <div class="auto-title">⭐ Pós-consulta</div>
-        <div class="auto-sub">Pergunta como foi a consulta no dia seguinte</div>
+        <div class="auto-title">${T.auto_pos}</div>
+        <div class="auto-sub">${T.auto_pos_sub}</div>
       </div>
       <div class="toggle ${a.pos_consulta?'on':''}" id="auto-pos_consulta" onclick="this.classList.toggle('on')"></div>
     </div>
     <div class="auto-item">
       <div class="auto-info">
-        <div class="auto-title">🔄 Retorno automático</div>
-        <div class="auto-sub">Lembra o paciente de agendar retorno após X meses</div>
+        <div class="auto-title">${T.auto_ret}</div>
+        <div class="auto-sub">${T.auto_ret_sub}</div>
         <div class="auto-extra">
           <input type="number" id="auto-retorno_meses" value="${a.retorno_meses||6}" min="1" max="24">
-          <label>meses</label>
+          <label>${T.label_meses}</label>
         </div>
       </div>
       <div class="toggle ${a.retorno?'on':''}" id="auto-retorno" onclick="this.classList.toggle('on')"></div>
     </div>
     <div class="auto-item">
       <div class="auto-info">
-        <div class="auto-title">⏳ Lista de espera</div>
-        <div class="auto-sub">Avisa o paciente quando um horário cancelado fica disponível</div>
+        <div class="auto-title">${T.auto_espera}</div>
+        <div class="auto-sub">${T.auto_espera_sub}</div>
       </div>
       <div class="toggle ${a.lista_espera?'on':''}" id="auto-lista_espera" onclick="this.classList.toggle('on')"></div>
     </div>
