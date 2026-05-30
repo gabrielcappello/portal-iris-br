@@ -1909,7 +1909,7 @@ function toggleDentista(i){
 function toggleSabado(i){
   const val=document.getElementById(`d${i}_sab`).value;
   const box=document.getElementById(`sabado-box-${i}`);
-  box.style.display=val==='si'?'':'none';
+  box.style.display=val==='sim'?'':'none';
 }
 
 function toggleSpec(di,ei){
@@ -2010,7 +2010,7 @@ async function saveDentista(i){
     dur:parseInt(document.getElementById(`d${i}_dur`)?.value)||60,
     alm_ini:document.getElementById(`d${i}_alm_ini`)?.value||'12:00',
     alm_fim:document.getElementById(`d${i}_alm_fim`)?.value||'13:00',
-    sabado:document.getElementById(`d${i}_sab`)?.value==='si',
+    sabado:document.getElementById(`d${i}_sab`)?.value==='sim',
     sab_ini:document.getElementById(`d${i}_sab_ini`)?.value||'08:00',
     sab_fim:document.getElementById(`d${i}_sab_fim`)?.value||'13:00',
     horarios,modo,
