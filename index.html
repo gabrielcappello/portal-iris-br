@@ -2624,25 +2624,37 @@ function conectarGoogle(){
 
 async function _listarCalendarios(token){
   try{
-    const resp=await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=writer',{
+    const resp=await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList',{
       headers:{Authorization:`Bearer ${token}`},
     });
     const data=await resp.json();
     if(!data.items?.length){toast('Nenhum calendário encontrado','err');return;}
-    _mostrarSeletorCalendarios(data.items);
+    // Ordena: calendários de grupo (@group.calendar.google.com) primeiro
+    const sorted=[
+      ...data.items.filter(c=>c.id.includes('@group.calendar.google.com')),
+      ...data.items.filter(c=>!c.id.includes('@group.calendar.google.com')),
+    ];
+    _mostrarSeletorCalendarios(sorted);
   }catch(e){toast('Erro ao buscar calendários','err');}
 }
 
 function _mostrarSeletorCalendarios(cals){
   const wrap=document.getElementById('dc-cal-select-wrap');
   if(!wrap)return;
+  // Monta opções mostrando nome + id explícito
+  const opts=cals.map(c=>{
+    const isGroup=c.id.includes('@group.calendar.google.com');
+    const label=`${c.summary||'—'}${isGroup?'':' (principal)'} — ${c.id}`;
+    return `<option value="${c.id}">${label}</option>`;
+  }).join('');
   wrap.innerHTML=`
     <div style="margin-top:10px">
       <label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Selecione o calendário</label>
-      <select id="dc-cal-select" onchange="document.getElementById('dc_cal').value=this.value" style="width:100%;background:var(--surface2);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:10px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none">
+      <select id="dc-cal-select" onchange="document.getElementById('dc_cal').value=this.value;document.getElementById('dc_cal').style.borderColor='var(--green)'" style="width:100%;background:var(--surface2);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text);outline:none">
         <option value="">— escolha um calendário —</option>
-        ${cals.map(c=>`<option value="${c.id}">${c.summary||c.id}</option>`).join('')}
+        ${opts}
       </select>
+      <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">O Calendar ID será o valor após " — " no nome acima.</span>
     </div>`;
 }
 
