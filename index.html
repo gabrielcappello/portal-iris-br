@@ -2415,9 +2415,6 @@ function showPWAInstallScreen(){
   set('pwa-dent-s1',T.pwa_dent_step1||'1. Toque em Compartilhar ⬆️');
   set('pwa-dent-s2',T.pwa_dent_step2||'2. Toque em "Adicionar à Tela de Início" ➕');
   set('pwa-dent-produto',T.pwa_dent_produto||'produto');
-  // Botão "Já instalei" removido — instalação obrigatória, sem bypass
-  const iosBtn=document.getElementById('pwa-dent-ios-btn');if(iosBtn)iosBtn.style.display='none';
-  const aviso=document.getElementById('pwa-dent-aviso');if(aviso)aviso.style.display='none';
   // Detecta suporte
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
   if(deferredPrompt&&!isIOS){
@@ -2714,22 +2711,20 @@ function renderQRCode(text,canvas){
     </div>
     <h2 id="pwa-dent-h2" style="font-size:20px;font-weight:700;margin-bottom:10px">Instale o app Iris</h2>
     <p id="pwa-dent-p" style="font-size:14px;color:var(--text2);margin-bottom:28px;max-width:300px;line-height:1.6">Para acessar sua agenda, instale o app Iris na tela inicial do seu celular.</p>
+    <!-- Botão instalar (Chrome/Android) -->
     <div id="pwa-dent-btn-wrap">
-      <button id="pwa-dent-btn" onclick="installDentPWA()" style="background:linear-gradient(135deg,var(--accent),#1d4ed8);color:white;border:none;border-radius:var(--radius-sm);padding:14px 32px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(59,130,246,.35)">📲 Instalar app</button>
+      <button id="pwa-dent-btn" onclick="installDentPWA()" style="background:linear-gradient(135deg,var(--accent),#1d4ed8);color:white;border:none;border-radius:var(--radius-sm);padding:14px 32px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(59,130,246,.35)">📲 Instalar app Iris</button>
     </div>
-    <div id="pwa-dent-ios" style="display:none;max-width:320px;width:100%">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:left">
-        <p id="pwa-dent-ios-p" style="font-size:13px;color:var(--text2);margin-bottom:14px">Para acessar sua agenda, siga os passos:</p>
-        <div style="font-size:13px;margin-bottom:10px;padding:8px 0;border-bottom:1px solid var(--border)" id="pwa-dent-s1">1. Toque em Compartilhar ⬆️</div>
-        <div style="font-size:13px;margin-bottom:16px;padding:8px 0" id="pwa-dent-s2">2. Toque em "Adicionar à Tela de Início" ➕</div>
-        <div id="pwa-dent-aviso" style="display:none;font-size:12px;color:#f59e0b;margin-bottom:12px;padding:8px 10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:6px"></div>
-        <button onclick="confirmarInstalacao()" id="pwa-dent-ios-btn" style="width:100%;background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;color:white;cursor:pointer">✓ Já instalei, continuar</button>
-      </div>
+    <!-- Instruções iOS — sem botão de pular -->
+    <div id="pwa-dent-ios" style="display:none;max-width:300px;width:100%;margin-top:4px">
+      <p id="pwa-dent-ios-p" style="font-size:13px;color:var(--text2);margin-bottom:12px">Para acessar sua agenda, siga os passos:</p>
+      <div id="pwa-dent-s1" style="font-size:13px;color:var(--text2);padding:8px 0;border-bottom:1px solid var(--border)">1. Toque em Compartilhar ⬆️</div>
+      <div id="pwa-dent-s2" style="font-size:13px;color:var(--text2);padding:8px 0">2. Toque em "Adicionar à Tela de Início" ➕</div>
     </div>
   </div>
   <!-- Rodapé centralizado -->
   <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
-    <img src="logo_cappia.svg" alt="Cappia" height="40" style="opacity:.85">
+    <img src="assets/logo_cappia.svg" alt="Cappia" height="40" style="opacity:.85">
     <span style="font-size:11px;color:var(--text3);letter-spacing:.2px">Iris · <span id="pwa-dent-produto">produto</span> <a href="https://cappia.app" target="_blank" rel="noopener" style="color:var(--text2);text-decoration:none;font-weight:600">Cappia</a></span>
   </div>
 </div>
