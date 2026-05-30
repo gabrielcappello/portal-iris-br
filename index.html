@@ -619,9 +619,34 @@ const ESPECIALIDADES = [
 // IDIOMA / PAÍS
 // ══════════════════════════════════
 const PAIS_OPTIONS={
-  'português':[{v:'br',l:'Brasil'},{v:'pt',l:'Portugal'}],
-  'español':[{v:'ar',l:'Argentina'},{v:'cl',l:'Chile'},{v:'co',l:'Colombia'},{v:'mx',l:'México'},{v:'uy',l:'Uruguay'},{v:'pe',l:'Peru'},{v:'ec',l:'Ecuador'},{v:'ve',l:'Venezuela'}],
-  'english':[{v:'us',l:'United States'},{v:'uk',l:'United Kingdom'},{v:'au',l:'Australia'},{v:'ca',l:'Canada'}],
+  'português':[
+    {v:'br',l:'Brasil'},{v:'pt',l:'Portugal'},{v:'ao',l:'Angola'},
+    {v:'mz',l:'Moçambique'},{v:'cv',l:'Cabo Verde'},{v:'gw',l:'Guiné-Bissau'},
+    {v:'st',l:'São Tomé e Príncipe'},{v:'tl',l:'Timor-Leste'},{v:'gq',l:'Guiné Equatorial'},
+  ],
+  'español':[
+    {v:'mx',l:'México'},{v:'co',l:'Colombia'},{v:'ar',l:'Argentina'},
+    {v:'es',l:'España'},{v:'pe',l:'Perú'},{v:'ve',l:'Venezuela'},
+    {v:'cl',l:'Chile'},{v:'ec',l:'Ecuador'},{v:'gt',l:'Guatemala'},
+    {v:'cu',l:'Cuba'},{v:'bo',l:'Bolivia'},{v:'do',l:'República Dominicana'},
+    {v:'hn',l:'Honduras'},{v:'py',l:'Paraguay'},{v:'sv',l:'El Salvador'},
+    {v:'ni',l:'Nicaragua'},{v:'cr',l:'Costa Rica'},{v:'pa',l:'Panamá'},
+    {v:'uy',l:'Uruguay'},{v:'gq',l:'Guinea Ecuatorial'},{v:'pr',l:'Puerto Rico'},
+  ],
+  'english':[
+    {v:'us',l:'United States'},{v:'uk',l:'United Kingdom'},{v:'au',l:'Australia'},
+    {v:'ca',l:'Canada'},{v:'ng',l:'Nigeria'},{v:'za',l:'South Africa'},
+    {v:'gh',l:'Ghana'},{v:'ke',l:'Kenya'},{v:'ug',l:'Uganda'},
+    {v:'tz',l:'Tanzania'},{v:'in',l:'India'},{v:'pk',l:'Pakistan'},
+    {v:'ph',l:'Philippines'},{v:'sg',l:'Singapore'},{v:'nz',l:'New Zealand'},
+    {v:'ie',l:'Ireland'},{v:'jm',l:'Jamaica'},{v:'tt',l:'Trinidad and Tobago'},
+    {v:'bz',l:'Belize'},{v:'gy',l:'Guyana'},{v:'bb',l:'Barbados'},
+    {v:'zw',l:'Zimbabwe'},{v:'zm',l:'Zambia'},{v:'rw',l:'Rwanda'},
+    {v:'mt',l:'Malta'},{v:'cm',l:'Cameroon'},{v:'sl',l:'Sierra Leone'},
+    {v:'lr',l:'Liberia'},{v:'gm',l:'Gambia'},{v:'bw',l:'Botswana'},
+    {v:'na',l:'Namibia'},{v:'mw',l:'Malawi'},{v:'ls',l:'Lesotho'},
+    {v:'sz',l:'Eswatini'},{v:'pg',l:'Papua New Guinea'},{v:'fj',l:'Fiji'},
+  ],
 };
 function updatePaisOptions(lang,selected){
   const sel=document.getElementById('c_idioma_pais');
