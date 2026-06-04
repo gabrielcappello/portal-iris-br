@@ -716,6 +716,12 @@ const ESPECIALIDADES = [
     {nome:'Biópsia', tempo:35},
     {nome:'Cirurgia de cisto', tempo:75},
   ]},
+  { nome:'🩻 Radiologia', procs:[
+    {nome:'Radiografia periapical', tempo:15},
+    {nome:'Panorâmica', tempo:15},
+    {nome:'Tomografia', tempo:20},
+    {nome:'Radiografia interproximal', tempo:15},
+  ]},
 ];
 
 // ══════════════════════════════════
@@ -899,6 +905,9 @@ const PROC_TRAD={
   'Extração de dente de leite':'Extracción diente de leche','Fluoretação niños':'Fluorización niños',
   'Extração complexa / siso':'Extracción compleja / muela juicio','Frenectomia':'Frenectomía',
   'Biópsia':'Biopsia','Cirurgia de cisto':'Cirugía de quiste',
+  '🩻 Radiologia':'🩻 Radiología',
+  'Radiografia periapical':'Radiografía periapical','Panorâmica':'Panorámica',
+  'Tomografia':'Tomografía','Radiografia interproximal':'Radiografía interproximal',
 },
 'english':{
   '🦷 Clínico Geral':'🦷 General Dentistry','🔧 Endodontia':'🔧 Endodontics',
@@ -927,6 +936,9 @@ const PROC_TRAD={
   'Extração de dente de leite':'Baby Tooth Extraction','Fluoretação niños':'Children\'s Fluoride',
   'Extração complexa / siso':'Complex Extraction / Wisdom Tooth','Frenectomia':'Frenectomy',
   'Biópsia':'Biopsy','Cirurgia de cisto':'Cyst Surgery',
+  '🩻 Radiologia':'🩻 Radiology',
+  'Radiografia periapical':'Periapical X-Ray','Panorâmica':'Panoramic X-Ray',
+  'Tomografia':'CT Scan','Radiografia interproximal':'Bitewing X-Ray',
 },
 };
 function traduzirProc(nome){const t=PROC_TRAD[currentLang];return t&&t[nome]?t[nome]:nome;}
