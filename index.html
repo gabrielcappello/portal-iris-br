@@ -401,7 +401,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               <div class="form-group full">
                 <label><span>Instância WhatsApp</span> <span style="font-weight:400;color:var(--text3)">(automático)</span></label>
                 <input id="c_wp" readonly style="background:var(--surface3);color:rgba(226,232,240,0.85);font-weight:300;cursor:default;" placeholder="Gerado automaticamente">
-                <span style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/[DDD][telefone]</span>
+                <span style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/[telefone]</span>
               </div>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
@@ -814,8 +814,9 @@ async function saveIdioma(){
     currentClinica.estado=estado;
     st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_idioma_ok);
     aplicarTraducoes(lang);
+    closeAcc('idioma');
     checkOnboardingState();
-    if(!isSecretariaConfigured())openAcc('secretaria');
+    if(!isSecretariaConfigured())setTimeout(()=>openAcc('secretaria'),120);
   }catch(e){st.textContent=T.err_txt;st.className='save-status err';toast(T.err_salvar,'err');}
   btn.disabled=false;
 }
@@ -836,8 +837,9 @@ async function saveSecretaria(){
     currentClinica.telefone_agente=tel;
     if(st){st.textContent=T.toast_salvo||'Salvo ✓';st.className='save-status ok';}
     toast('Secretaria salva ✓');
+    closeAcc('secretaria');
     checkOnboardingState();
-    if(!isClinicaConfigured())openAcc('clinica');
+    if(!isClinicaConfigured())setTimeout(()=>openAcc('clinica'),120);
   }catch(e){
     if(st){st.textContent=T.err_txt||'Erro';st.className='save-status err';}
     toast(T.err_salvar,'err');
@@ -1093,7 +1095,6 @@ function onEstadoChange(estado){
   const span=document.getElementById('c_tel_ddd');
   if(span){span.textContent=ddd?`(${ddd})`:'';span.style.display=ddd?'':'none';}
   updateFuso();
-  updateWpName();
 }
 
 // ══════════════════════════════════
@@ -1211,6 +1212,16 @@ function openAcc(id){
   if(!body||!arr)return;
   body.classList.add('open');
   arr.classList.add('open');
+}
+function closeAcc(id){
+  const body=document.getElementById(`body-${id}`);
+  const arr=document.getElementById(`arr-${id}`);
+  if(!body||!arr)return;
+  body.classList.remove('open');
+  arr.classList.remove('open');
+}
+function closeAllAcc(){
+  ['idioma','secretaria','clinica','dentistas','dados','auto'].forEach(closeAcc);
 }
 
 // ══════════════════════════════════
@@ -1857,7 +1868,7 @@ async function savePrecios(){
 // ══════════════════════════════════
 // LOAD ALL
 // ══════════════════════════════════
-async function loadAll(){loadConfig();loadPacientes();loadAgendamentos();}
+async function loadAll(){closeAllAcc();loadConfig();loadPacientes();loadAgendamentos();}
 
 // ══════════════════════════════════
 // CONFIG
@@ -1885,11 +1896,9 @@ function usarGeolocalizacao(){
 
 function updateWpName(){
   const tel=document.getElementById('c_tel')?.value||'';
-  const estado=document.getElementById('c_estado')?.value||'';
-  const ddd=ESTADO_DDD[estado]||'';
   const wp=document.getElementById('c_wp');
   const digits=tel.replace(/\D/g,'');
-  if(wp)wp.value=digits?`CAPPIA/${ddd}${digits}`:'';
+  if(wp)wp.value=digits?`CAPPIA/${digits}`:'';
 }
 
 function loadConfig(){
@@ -1902,8 +1911,7 @@ function loadConfig(){
   document.getElementById('c_bairro').value=c.bairro||'';
   document.getElementById('c_cidade').value=c.cidade||'';
   document.getElementById('c_cep').value=c.cep||'';
-  const _wpDdd=ESTADO_DDD[c.estado||'']||'';
-  document.getElementById('c_wp').value=c.telefone_agente?`CAPPIA/${_wpDdd}${c.telefone_agente.replace(/\D/g,'')}`:'';
+  document.getElementById('c_wp').value=c.telefone_agente?`CAPPIA/${c.telefone_agente.replace(/\D/g,'')}`:'';
   document.getElementById('c_maps').value=c.maps_link||'';
   document.getElementById('c_email_clinica').value=c.email_clinica||'';
   document.getElementById('c_nome_agente').value=c.nome_agente||'Iris';
@@ -1957,6 +1965,7 @@ async function saveConfig(){
     currentClinica.endereco=document.getElementById('c_end').value;
     currentClinica.cidade=document.getElementById('c_cidade').value;
     st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_config_ok);
+    closeAcc('clinica');
     checkOnboardingState();
   }catch(e){st.textContent=T.err_txt;st.className='save-status err';toast(T.err_salvar,'err');}
   btn.disabled=false;
