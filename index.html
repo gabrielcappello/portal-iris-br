@@ -1859,9 +1859,20 @@ function renderPrecios(precios){
   precios=precios||{};
   const body=document.getElementById('precios-body');
   if(!body)return;
-  body.innerHTML=ESPECIALIDADES.map(esp=>`
+  body.innerHTML=ESPECIALIDADES.map((esp,ei)=>{
+    const allAtivo=esp.procs.every(p=>{const s=precios[p.nome.replace(/\s/g,'_')];return typeof s==='object'?s?.ativo!==false:false;});
+    return `
     <div style="margin-bottom:24px">
-      <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">${traduzirProc(esp.nome)}</div>
+      <div style="display:flex;align-items:center;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+        <span style="flex:1;font-size:13px;font-weight:700;color:var(--accent2)">${traduzirProc(esp.nome)}</span>
+        <span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;min-width:70px;text-align:center">Tempo</span>
+        <div style="display:flex;align-items:center;gap:6px;min-width:134px">
+          <span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;flex:1">Valor</span>
+          <button id="esp-toggle-btn-${ei}" onclick="toggleEspPrecios(${ei})"
+            style="font-size:11px;font-weight:600;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:var(--accent2);border-radius:4px;padding:2px 8px;cursor:pointer;white-space:nowrap;transition:all .15s"
+            onmouseover="this.style.background='rgba(59,130,246,.2)'" onmouseout="this.style.background='rgba(59,130,246,.1)'">${allAtivo?'Desativar todos':'Ativar todos'}</button>
+        </div>
+      </div>
       ${esp.procs.map(p=>{
         const key=p.nome.replace(/\s/g,'_');
         const saved=precios[key];
@@ -1887,7 +1898,26 @@ function renderPrecios(precios){
           <div style="font-size:11px;color:var(--text3);padding-left:2px" id="pmsg-${key}">${ativo?'Iris informará o valor ao paciente quando solicitado':'Iris informará que é necessária avaliação para orçamento'}</div>
         </div>`;
       }).join('')}
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+
+function toggleEspPrecios(ei){
+  const esp=ESPECIALIDADES[ei];
+  if(!esp)return;
+  const allAtivo=esp.procs.every(p=>document.getElementById(`ptoggle-${p.nome.replace(/\s/g,'_')}`)?.classList.contains('on'));
+  const newState=!allAtivo;
+  esp.procs.forEach(p=>{
+    const key=p.nome.replace(/\s/g,'_');
+    const tog=document.getElementById(`ptoggle-${key}`);
+    const input=document.getElementById(`precio-${key}`);
+    const msg=document.getElementById(`pmsg-${key}`);
+    if(tog){if(newState)tog.classList.add('on');else tog.classList.remove('on');}
+    if(input){input.disabled=!newState;input.style.opacity=newState?'1':'0.4';}
+    if(msg)msg.textContent=newState?'Iris informará o valor ao paciente quando solicitado':'Iris informará que é necessária avaliação para orçamento';
+  });
+  const btn=document.getElementById(`esp-toggle-btn-${ei}`);
+  if(btn)btn.textContent=newState?'Desativar todos':'Ativar todos';
 }
 
 function togglePrecioAtivo(key,tog){
