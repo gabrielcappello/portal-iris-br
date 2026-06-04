@@ -149,25 +149,30 @@ header{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.85);backdrop-fil
 .slot-chip{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);color:var(--accent2);border-radius:6px;padding:2px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;}
 .slots-empty{font-size:12px;color:var(--text3);}
 
-/* PROCEDIMENTOS */
-.spec-accordion{border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;margin-left:2px;margin-right:2px;}
-.spec-cat-check{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
-.spec-header{padding:11px 14px;background:var(--surface2);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-size:14px;font-weight:600;transition:background .15s;}
-.spec-header:hover{background:var(--surface3);}
-.spec-header .spec-arrow{margin-left:auto;color:var(--text3);font-size:14px;transition:transform .25s;}
-.spec-header .spec-arrow.open{transform:rotate(180deg);}
-.spec-body{display:none;padding:10px 12px;border-top:1px solid var(--border);}
-.spec-body.open{display:block;}
-.proc-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.proc-row:last-child{border-bottom:none;}
-.proc-check{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
-.proc-name{flex:1;font-size:14px;}
-.proc-time-wrap{display:flex;align-items:center;gap:4px;}
-.proc-time{width:44px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 4px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;text-align:center;}
+/* ESPECIALIDADES CARDS */
+.esp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:4px;}
+.esp-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s;}
+.esp-card.open{border-color:var(--accent);}
+.esp-card-header{display:flex;align-items:center;gap:12px;padding:12px 14px;}
+.esp-card-name{font-size:14px;font-weight:700;color:var(--text);flex:1;}
+.esp-card-status{font-size:11px;color:var(--text3);margin-top:2px;}
+.esp-card-info{flex:1;min-width:0;}
+.esp-card-btn{border:none;border-radius:6px;padding:6px 14px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;}
+.esp-card-btn.activate{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);}
+.esp-card-btn.activate:hover{background:rgba(16,185,129,.22);}
+.esp-card-btn.configure{background:rgba(59,130,246,.12);color:var(--accent2);border:1px solid rgba(59,130,246,.25);}
+.esp-card-btn.configure:hover{background:rgba(59,130,246,.22);}
+.esp-body{display:none;padding:0 14px 14px;border-top:1px solid var(--border);animation:fadeUp .2s ease;}
+.esp-body.open{display:block;}
+.proc-chips-wrap{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;}
+.proc-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border2);background:var(--surface3);color:var(--text2);transition:all .15s;user-select:none;}
+.proc-chip:hover{border-color:var(--accent);color:var(--text);}
+.proc-chip.selected{background:rgba(59,130,246,.15);border-color:var(--accent);color:var(--accent2);font-weight:600;}
+.proc-chip-row{display:flex;flex-direction:column;gap:4px;}
+.proc-chip-time{display:flex;align-items:center;gap:4px;padding-left:4px;}
+.proc-time{width:50px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);outline:none;text-align:center;}
 .proc-time:focus{border-color:var(--accent);}
 .proc-time-label{font-size:11px;color:var(--text3);}
-.proc-time-btn{width:28px;height:28px;background:var(--surface3);border:1px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;transition:all .15s;}
-.proc-time-btn:hover{background:var(--accent);color:white;border-color:var(--accent);}
 
 /* AUTOMAÇÕES */
 .auto-item{display:flex;align-items:flex-start;gap:16px;padding:16px 0;border-bottom:1px solid var(--border);}
@@ -2019,31 +2024,45 @@ function renderDentistas(dents){
     }
     const autoSlots=calcSlots(d.inicio||'08:00',d.fim||'18:00',d.dur||60,d.alm_ini||'12:00',d.alm_fim||'13:00');
     const slotsHtml=autoSlots.length?autoSlots.map(s=>`<span class="slot-chip">${s}</span>`).join(''):`<span class="slots-empty">${T.slots_vazio}</span>`;
-    const specHtml=ESPECIALIDADES.map((esp,ei)=>`
-      <div class="spec-accordion">
-        <div class="spec-header">
-          <input type="checkbox" class="spec-cat-check" id="catcheck-${i}-${ei}" onclick="event.stopPropagation();toggleCategory(${i},${ei},this)">
-          <span style="flex:1;cursor:pointer" onclick="toggleSpec(${i},${ei})">${traduzirProc(esp.nome)}</span>
-          <span class="spec-arrow" id="specarr-${i}-${ei}" onclick="toggleSpec(${i},${ei})" style="cursor:pointer">▼</span>
+    const specCards=ESPECIALIDADES.map((esp,ei)=>{
+      const activeProcs=esp.procs.filter(p=>procsMap[p.nome]?.ativo);
+      const activeCount=activeProcs.length;
+      const statusText=activeCount>0?`${activeCount} procedimento${activeCount>1?'s':''} ativo${activeCount>1?'s':''}`:'Não configurada';
+      const btnClass=activeCount>0?'configure':'activate';
+      const btnText=activeCount>0?'Configurar':'Ativar';
+      return `<div class="esp-card" id="espcard-${i}-${ei}">
+        <div class="esp-card-header">
+          <div class="esp-card-info">
+            <div class="esp-card-name">${traduzirProc(esp.nome)}</div>
+            <div class="esp-card-status" id="espstatus-${i}-${ei}">${statusText}</div>
+          </div>
+          <button class="esp-card-btn ${btnClass}" onclick="toggleEspCard(${i},${ei})">${btnText}</button>
         </div>
-        <div class="spec-body" id="specbody-${i}-${ei}">
-          ${esp.procs.map(p=>{
-            const saved=procsMap[p.nome];
-            const ativo=saved?saved.ativo:false;
-            const tempo=saved?saved.tempo:p.tempo;
-            return `<div class="proc-row">
-              <input type="checkbox" class="proc-check" id="pc-${i}-${p.nome.replace(/\s/g,'_')}" ${ativo?'checked':''} onchange="updateCatCheckbox(${i},${ei})">
-              <span class="proc-name">${traduzirProc(p.nome)}</span>
-              <div class="proc-time-wrap">
-                <button class="proc-time-btn" onclick="adjTime(this,-5)">−</button>
-                <input type="number" class="proc-time" id="pt-${i}-${p.nome.replace(/\s/g,'_')}" value="${tempo}" min="5" step="5">
-                <button class="proc-time-btn" onclick="adjTime(this,5)">+</button>
-                <span class="proc-time-label">min</span>
-              </div>
-            </div>`;
-          }).join('')}
+        <div class="esp-body" id="espbody-${i}-${ei}">
+          <div class="proc-chips-wrap">
+            ${esp.procs.map(p=>{
+              const key=p.nome.replace(/\s/g,'_');
+              const saved=procsMap[p.nome];
+              const ativo=saved?saved.ativo:false;
+              const tempo=saved?saved.tempo:p.tempo;
+              return `<div class="proc-chip-row">
+                <div class="proc-chip ${ativo?'selected':''}" id="pchip-${i}-${key}" data-active="${ativo}" onclick="toggleProcChip(${i},${ei},'${key}',this)">
+                  ${traduzirProc(p.nome)}
+                </div>
+                <div class="proc-chip-time" id="pchiptime-${i}-${key}" style="${ativo?'':'display:none'}">
+                  <input type="number" class="proc-time" id="pt-${i}-${key}" value="${tempo}" min="5" step="5">
+                  <span class="proc-time-label">min</span>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:14px">
+            <button class="btn-save" style="font-size:13px;padding:9px 20px" onclick="saveEspCard(${i},${ei})">💾 Salvar</button>
+          </div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
+    const specHtml=`<div class="esp-grid">${specCards}</div>`;
     return `
     <div class="dent-accordion" id="dacc-${i}">
       <div class="dent-accordion-header ${d.ativo?'has-active':''}" onclick="toggleDentAcc(${i})">
@@ -2175,36 +2194,49 @@ function toggleSabado(i){
   box.style.display=val==='sim'?'':'none';
 }
 
-function toggleSpec(di,ei){
-  const b=document.getElementById(`specbody-${di}-${ei}`);
-  const a=document.getElementById(`specarr-${di}-${ei}`);
-  b.classList.toggle('open');
-  a.classList.toggle('open');
-}
-
-function toggleCategory(di,ei,catCb){
-  const esp=ESPECIALIDADES[ei];
-  if(!esp)return;
-  const checked=catCb.checked;
-  esp.procs.forEach(p=>{
-    const key=p.nome.replace(/\s/g,'_');
-    const cb=document.getElementById(`pc-${di}-${key}`);
-    if(cb)cb.checked=checked;
+function toggleEspCard(di,ei){
+  // close all other open cards for this dentist
+  ESPECIALIDADES.forEach((_,j)=>{
+    if(j===ei)return;
+    const b=document.getElementById(`espbody-${di}-${j}`);
+    const c=document.getElementById(`espcard-${di}-${j}`);
+    if(b){b.classList.remove('open');}
+    if(c){c.classList.remove('open');}
   });
+  const body=document.getElementById(`espbody-${di}-${ei}`);
+  const card=document.getElementById(`espcard-${di}-${ei}`);
+  if(!body||!card)return;
+  body.classList.toggle('open');
+  card.classList.toggle('open');
 }
 
-function updateCatCheckbox(di,ei){
+function toggleProcChip(di,ei,key,chip){
+  const isSelected=chip.dataset.active==='true';
+  const newState=!isSelected;
+  chip.dataset.active=String(newState);
+  chip.classList.toggle('selected',newState);
+  const timeWrap=document.getElementById(`pchiptime-${di}-${key}`);
+  if(timeWrap)timeWrap.style.display=newState?'flex':'none';
+}
+
+function saveEspCard(di,ei){
+  const body=document.getElementById(`espbody-${di}-${ei}`);
+  const card=document.getElementById(`espcard-${di}-${ei}`);
+  // update status
   const esp=ESPECIALIDADES[ei];
   if(!esp)return;
-  const catCb=document.getElementById(`catcheck-${di}-${ei}`);
-  if(!catCb)return;
-  const total=esp.procs.length;
-  const checked=esp.procs.filter(p=>{
-    const cb=document.getElementById(`pc-${di}-${p.nome.replace(/\s/g,'_')}`);
-    return cb&&cb.checked;
+  const activeCount=esp.procs.filter(p=>{
+    const key=p.nome.replace(/\s/g,'_');
+    const chip=document.getElementById(`pchip-${di}-${key}`);
+    return chip&&chip.dataset.active==='true';
   }).length;
-  catCb.checked=checked===total;
-  catCb.indeterminate=checked>0&&checked<total;
+  const st=document.getElementById(`espstatus-${di}-${ei}`);
+  const cb=document.getElementById(`espcard-${di}-${ei}`)?.querySelector('.esp-card-btn');
+  if(st)st.textContent=activeCount>0?`${activeCount} procedimento${activeCount>1?'s':''} ativo${activeCount>1?'s':''}`:'Não configurada';
+  if(cb){cb.className='esp-card-btn '+(activeCount>0?'configure':'activate');cb.textContent=activeCount>0?'Configurar':'Ativar';}
+  // close card
+  if(body)body.classList.remove('open');
+  if(card)card.classList.remove('open');
 }
 
 function setModo(i,modo){
@@ -2231,20 +2263,15 @@ function updateSlots(i){
   p.innerHTML=slots.length?slots.map(s=>`<span class="slot-chip">${s}</span>`).join(''):`<span class="slots-empty">${T.slots_vazio}</span>`;
 }
 
-function adjTime(btn,delta){
-  const input=btn.parentElement.querySelector('.proc-time');
-  const v=parseInt(input.value)||5;
-  input.value=Math.max(5,v+delta);
-}
-
 function getProcs(i){
   const procs=[];
   ESPECIALIDADES.forEach(esp=>{
     esp.procs.forEach(p=>{
       const key=p.nome.replace(/\s/g,'_');
-      const cb=document.getElementById(`pc-${i}-${key}`);
+      const chip=document.getElementById(`pchip-${i}-${key}`);
       const ti=document.getElementById(`pt-${i}-${key}`);
-      if(cb)procs.push({nome:p.nome,ativo:cb.checked,tempo:parseInt(ti?.value)||p.tempo});
+      const ativo=chip?chip.dataset.active==='true':false;
+      procs.push({nome:p.nome,ativo,tempo:parseInt(ti?.value)||p.tempo});
     });
   });
   return procs;
