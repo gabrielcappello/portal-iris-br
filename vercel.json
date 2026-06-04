@@ -6,6 +6,7 @@
     { "src": "*.png", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/landing", "dest": "/api/landing" },
     { "src": "/manifest.json", "dest": "/manifest.json" },
     { "src": "/icon-192.png", "dest": "/icon-192.png" },
     { "src": "/icon-512.png", "dest": "/icon-512.png" },
