@@ -184,6 +184,14 @@ header{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.85);backdrop-fil
 .auto-extra input{width:70px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;text-align:center;}
 .auto-extra input:focus{border-color:var(--accent);}
 .auto-extra label{font-size:12px;color:var(--text2);}
+.pos-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px;}
+.pos-card{border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s;background:var(--surface2);user-select:none;}
+.pos-card:hover{border-color:var(--border2);}
+.pos-card.selected{border-color:var(--green);background:rgba(16,185,129,.1);}
+.pos-card-icon{font-size:20px;margin-bottom:4px;}
+.pos-card-label{font-size:12px;font-weight:600;color:var(--text2);line-height:1.3;}
+.pos-card.selected .pos-card-label{color:var(--green);}
+@media(max-width:480px){.pos-cards{grid-template-columns:1fr 1fr;}}
 
 /* TABLE */
 .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
@@ -2436,26 +2444,32 @@ function renderAuto(a){
       <div class="toggle ${a.lembrete_24h?'on':''}" id="auto-lembrete_24h" onclick="this.classList.toggle('on')"></div>
     </div>
     <div class="auto-item" style="flex-direction:column;align-items:stretch;gap:12px;padding-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div class="auto-info">
-          <div class="auto-title">${T.auto_pos}</div>
-          <div class="auto-sub">${T.auto_pos_sub}</div>
-        </div>
+      <div class="auto-info">
+        <div class="auto-title">${T.auto_pos}</div>
+        <div class="auto-sub">${T.auto_pos_sub}</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px;padding-left:4px">
-        ${['nenhum','satisfacao','google','ambos'].map(v=>`
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--text2)">
-          <input type="radio" name="pos_tipo" id="pos_tipo_${v}" value="${v}" ${(a.pos_consulta_tipo||( a.pos_consulta?'satisfacao':'nenhum'))===v?'checked':''} onchange="onPosTipoChange(this.value)" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer">
-          <span>${T['pos_opt_'+v]||v}</span>
-        </label>`).join('')}
+      <div class="pos-cards">
+        ${[
+          {v:'nenhum',    icon:'🚫', lk:'pos_opt_nenhum'},
+          {v:'satisfacao',icon:'⭐', lk:'pos_opt_satisfacao'},
+          {v:'google',    icon:'📊', lk:'pos_opt_google'},
+          {v:'ambos',     icon:'✨', lk:'pos_opt_ambos'},
+        ].map(({v,icon,lk})=>{
+          const tipoAtual=a.pos_consulta_tipo||(a.pos_consulta?'satisfacao':'nenhum');
+          return `<div class="pos-card ${tipoAtual===v?'selected':''}" data-value="${v}" onclick="selectPosCard('${v}')">
+            <div class="pos-card-icon">${icon}</div>
+            <div class="pos-card-label">${T[lk]||v}</div>
+          </div>`;
+        }).join('')}
       </div>
-      <div id="pos-google-wrap" style="display:${['google','ambos'].includes(a.pos_consulta_tipo||( a.pos_consulta?'satisfacao':'nenhum'))?'block':'none'}">
+      <input type="hidden" id="pos_tipo_val" value="${a.pos_consulta_tipo||(a.pos_consulta?'satisfacao':'nenhum')}">
+      <div id="pos-google-wrap" style="display:${['google','ambos'].includes(a.pos_consulta_tipo||(a.pos_consulta?'satisfacao':'nenhum'))?'block':'none'}">
         <div class="form-group full" style="margin-bottom:0;margin-top:4px">
           <label>${T.pos_google_label||'Link Google Review'}</label>
           <input id="pos_google_link" value="${a.pos_consulta_google_link||''}" placeholder="https://g.page/r/...">
         </div>
       </div>
-      <div id="pos-tempo-wrap" style="display:${(a.pos_consulta_tipo||( a.pos_consulta?'satisfacao':'nenhum'))!=='nenhum'?'block':'none'}">
+      <div id="pos-tempo-wrap" style="display:${(a.pos_consulta_tipo||(a.pos_consulta?'satisfacao':'nenhum'))!=='nenhum'?'block':'none'}">
         <div class="form-group" style="margin-bottom:0;margin-top:4px">
           <label>${T.pos_tempo_label||'Enviar após:'}</label>
           <select id="pos_tempo">
@@ -2487,11 +2501,14 @@ function renderAuto(a){
   </div>`;
 }
 
-function onPosTipoChange(v){
+function selectPosCard(v){
+  document.querySelectorAll('.pos-card').forEach(c=>c.classList.toggle('selected',c.dataset.value===v));
+  const hid=document.getElementById('pos_tipo_val');
+  if(hid)hid.value=v;
   const gw=document.getElementById('pos-google-wrap');
   const tw=document.getElementById('pos-tempo-wrap');
   if(gw)gw.style.display=['google','ambos'].includes(v)?'block':'none';
-  if(tw)tw.style.display=v!=='nenhum'?'flex':'none';
+  if(tw)tw.style.display=v!=='nenhum'?'block':'none';
 }
 
 async function saveAuto(){
@@ -2501,7 +2518,7 @@ async function saveAuto(){
   const data={
     lembrete_2h:document.getElementById('auto-lembrete_2h')?.classList.contains('on')||false,
     lembrete_24h:document.getElementById('auto-lembrete_24h')?.classList.contains('on')||false,
-    pos_consulta_tipo:document.querySelector('input[name="pos_tipo"]:checked')?.value||'nenhum',
+    pos_consulta_tipo:document.getElementById('pos_tipo_val')?.value||'nenhum',
     pos_consulta_google_link:document.getElementById('pos_google_link')?.value||'',
     pos_consulta_tempo:document.getElementById('pos_tempo')?.value||'2h',
     retorno:document.getElementById('auto-retorno')?.classList.contains('on')||false,
