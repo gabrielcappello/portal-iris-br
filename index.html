@@ -794,6 +794,11 @@ async function saveIdioma(){
   const pais_codigo=document.getElementById('c_idioma_pais').value;
   if(!lang){toast(T.err_falta_idioma,'err');return;}
   if(!pais_codigo){toast(T.err_falta_pais,'err');return;}
+  const _estadoWrap=document.getElementById('c_estado_wrap');
+  const _estadoVal=document.getElementById('c_estado')?.value||'';
+  if(_estadoWrap&&_estadoWrap.style.display!=='none'&&!_estadoVal){
+    toast(T.err_falta_estado||'Falta completar: Estado / Província','err');return;
+  }
   const btn=document.querySelector('[onclick="saveIdioma()"]');
   const st=document.getElementById('idioma-status');
   btn.disabled=true;st.textContent=T.salvando||'Salvando...';st.className='save-status';
@@ -824,12 +829,10 @@ async function saveSecretaria(){
   try{
     const nome_agente=document.getElementById('c_nome_agente')?.value||'Iris';
     const personalidade=document.getElementById('c_personalidade')?.value||'acolhedora';
-    const whatsapp_instancia=document.getElementById('c_wp')?.value||'';
-    await sb.update('clinicas',currentClinica.id,{nome_agente,personalidade,telefone_agente:tel,whatsapp_instancia});
+    await sb.update('clinicas',currentClinica.id,{nome_agente,personalidade,telefone_agente:tel});
     currentClinica.nome_agente=nome_agente;
     currentClinica.personalidade=personalidade;
     currentClinica.telefone_agente=tel;
-    currentClinica.whatsapp_instancia=whatsapp_instancia;
     if(st){st.textContent=T.toast_salvo||'Salvo ✓';st.className='save-status ok';}
     toast('Secretaria salva ✓');
     checkOnboardingState();
@@ -1235,7 +1238,7 @@ const TRADUCOES={
   label_idioma:'Idioma',label_pais:'País',label_estado:'Estado / Província',
   select_selecione:'Selecione...',
   btn_salvar_idioma:'💾 Salvar Idioma',toast_idioma_ok:'Idioma salvo ✓',
-  err_falta_idioma:'Falta completar: Idioma',err_falta_pais:'Falta completar: País',
+  err_falta_idioma:'Falta completar: Idioma',err_falta_pais:'Falta completar: País',err_falta_estado:'Campo obrigatório: Estado / Província',
   toast_bloqueio_tab:'Configure e salve o Idioma antes de acessar outras seções',
   toast_bloqueio_mod:'Configure e salve o Idioma antes de acessar os demais módulos',
   banner_idioma:'⚠️ <b>Configure o Idioma primeiro.</b> Selecione idioma, país e estado/província, depois clique em "Salvar Idioma" para desbloquear os demais módulos.',
@@ -1363,7 +1366,7 @@ const TRADUCOES={
   label_idioma:'Idioma',label_pais:'País',label_estado:'Provincia / Estado',
   select_selecione:'Seleccionar...',
   btn_salvar_idioma:'💾 Guardar Idioma',toast_idioma_ok:'Idioma guardado ✓',
-  err_falta_idioma:'Falta completar: Idioma',err_falta_pais:'Falta completar: País',
+  err_falta_idioma:'Falta completar: Idioma',err_falta_pais:'Falta completar: País',err_falta_estado:'Campo obligatorio: Provincia / Estado',
   toast_bloqueio_tab:'Configura y guarda el Idioma antes de acceder a otras secciones',
   toast_bloqueio_mod:'Configura y guarda el Idioma antes de acceder a los demás módulos',
   banner_idioma:'⚠️ <b>Configura el Idioma primero.</b> Selecciona idioma, país y provincia/estado, luego haz clic en "Guardar Idioma" para desbloquear los demás módulos.',
@@ -1491,7 +1494,7 @@ const TRADUCOES={
   label_idioma:'Language',label_pais:'Country',label_estado:'State / Province',
   select_selecione:'Select...',
   btn_salvar_idioma:'💾 Save Language',toast_idioma_ok:'Language saved ✓',
-  err_falta_idioma:'Missing: Language',err_falta_pais:'Missing: Country',
+  err_falta_idioma:'Missing: Language',err_falta_pais:'Missing: Country',err_falta_estado:'Required field: State / Province',
   toast_bloqueio_tab:'Set up Language before accessing other sections',
   toast_bloqueio_mod:'Set up Language before accessing other modules',
   banner_idioma:'⚠️ <b>Set up Language first.</b> Select language, country and state/province, then click "Save Language" to unlock the other modules.',
