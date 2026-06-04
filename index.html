@@ -2468,14 +2468,15 @@ function renderAuto(a){
           <label>${T.pos_google_label||'Link Google Review'}</label>
           <div style="display:flex;gap:8px;align-items:stretch">
             <input id="pos_google_link" value="${a.pos_consulta_google_link||''}" placeholder="https://g.page/r/..." style="flex:1">
-            <button type="button" disabled title="Em breve: conexão automática via Google Business Profile"
-              style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text3);cursor:not-allowed;white-space:nowrap;opacity:.6;flex-shrink:0">
+            <button type="button" id="btn-google-business" onclick="conectarGoogleBusiness()"
+              style="display:flex;align-items:center;gap:6px;background:white;border:1px solid #ddd;border-radius:var(--radius-sm);padding:0 14px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;color:#444;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:box-shadow .2s"
+              onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,.15)'" onmouseout="this.style.boxShadow=''">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-              Conectar com Google
-              <span style="font-size:10px;background:var(--amber);color:#000;border-radius:4px;padding:1px 5px;font-weight:700;margin-left:2px">Em breve</span>
+              <span id="btn-gbusiness-text">Conectar com Google</span>
             </button>
           </div>
-          <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Cole o link da página de avaliações da clínica no Google. Ex: https://g.page/r/Abc123/review</span>
+          <div id="gbusiness-loc-wrap" style="display:none;margin-top:8px"></div>
+          <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Conecte com o Google Business Profile para preencher automaticamente, ou cole o link manualmente.</span>
         </div>
       </div>
       <div id="pos-tempo-wrap" style="display:${(a.pos_consulta_tipo||(a.pos_consulta?'satisfacao':'nenhum'))!=='nenhum'?'block':'none'}">
@@ -2891,6 +2892,111 @@ function conectarGoogle(){
     s.onload=_load;
     s.onerror=()=>{if(btn){btn.disabled=false;btn.textContent='🔗 Conectar com Google';}toast('Erro ao carregar Google API','err');};
     document.head.appendChild(s);
+  }
+}
+
+// ── Google Business Profile OAuth ────────────────────────────────
+function conectarGoogleBusiness(){
+  const btn=document.getElementById('btn-google-business');
+  const txt=document.getElementById('btn-gbusiness-text');
+  if(btn)btn.disabled=true;
+  if(txt)txt.textContent='⏳ Conectando...';
+  const _load=()=>{
+    const client=google.accounts.oauth2.initTokenClient({
+      client_id:GOOGLE_CLIENT_ID,
+      scope:'https://www.googleapis.com/auth/business.manage',
+      callback:async(resp)=>{
+        if(btn)btn.disabled=false;
+        if(txt)txt.textContent='Conectar com Google';
+        if(resp.error){toast('Erro ao conectar com Google','err');return;}
+        await _buscarReviewLink(resp.access_token);
+      },
+    });
+    client.requestAccessToken({prompt:'select_account'});
+  };
+  if(window.google?.accounts?.oauth2){_load();}
+  else{
+    const s=document.createElement('script');
+    s.src='https://accounts.google.com/gsi/client';
+    s.onload=_load;
+    s.onerror=()=>{
+      if(btn)btn.disabled=false;
+      if(txt)txt.textContent='Conectar com Google';
+      toast('Erro ao carregar Google API','err');
+    };
+    document.head.appendChild(s);
+  }
+}
+
+async function _buscarReviewLink(token){
+  const wrap=document.getElementById('gbusiness-loc-wrap');
+  try{
+    // 1. Buscar contas do Business Profile
+    const accResp=await fetch('https://mybusinessaccountmanagement.googleapis.com/v1/accounts',{
+      headers:{Authorization:`Bearer ${token}`}
+    });
+    if(!accResp.ok){
+      const err=await accResp.json().catch(()=>({}));
+      const msg=err?.error?.message||accResp.status;
+      toast(`Google Business: ${msg}`,'err');
+      return;
+    }
+    const accData=await accResp.json();
+    if(!accData.accounts?.length){toast('Nenhuma conta Google Business encontrada','err');return;}
+    const accountName=accData.accounts[0].name;
+
+    // 2. Buscar localizações
+    const locResp=await fetch(
+      `https://mybusinessbusinessinformation.googleapis.com/v1/${accountName}/locations?readMask=name,title,metadata`,
+      {headers:{Authorization:`Bearer ${token}`}}
+    );
+    if(!locResp.ok){
+      const err=await locResp.json().catch(()=>({}));
+      toast(`Google Business: ${err?.error?.message||locResp.status}`,'err');
+      return;
+    }
+    const locData=await locResp.json();
+    const locs=locData.locations||[];
+    if(!locs.length){toast('Nenhuma localização encontrada na conta Google Business','err');return;}
+
+    if(locs.length===1){
+      _preencherReviewLink(locs[0]);
+    }else{
+      // Múltiplos locais — exibe seletor inline
+      if(wrap){
+        wrap.style.display='block';
+        wrap.innerHTML=`<label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">Selecione o local:</label>
+          <select id="gbusiness-loc-sel" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none">
+            ${locs.map((l,i)=>`<option value="${i}">${l.title||l.name}</option>`).join('')}
+          </select>
+          <button type="button" onclick="_confirmarLocBusiness()" style="margin-top:8px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 16px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Confirmar</button>`;
+        // guarda lista para o confirmar
+        window._gbLocs=locs;
+      }
+    }
+  }catch(e){
+    console.error(e);
+    toast('Erro ao buscar dados do Google Business','err');
+  }
+}
+
+function _confirmarLocBusiness(){
+  const sel=document.getElementById('gbusiness-loc-sel');
+  const idx=parseInt(sel?.value||'0');
+  const loc=(window._gbLocs||[])[idx];
+  if(loc)_preencherReviewLink(loc);
+  const wrap=document.getElementById('gbusiness-loc-wrap');
+  if(wrap)wrap.style.display='none';
+}
+
+function _preencherReviewLink(loc){
+  const url=loc?.metadata?.newReviewUri||'';
+  if(url){
+    const inp=document.getElementById('pos_google_link');
+    if(inp)inp.value=url;
+    toast(`Link de avaliação obtido: ${loc.title||''} ✓`);
+  }else{
+    toast('Este local não tem link de avaliação disponível','err');
   }
 }
 
