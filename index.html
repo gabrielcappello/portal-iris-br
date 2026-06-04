@@ -1333,6 +1333,7 @@ const TRADUCOES={
   label_wp_admin:'WhatsApp do Administrador',wp_admin_nota:'Número do administrador — usado pela Iris para identificar o gestor.',
   auto_ret:'🔄 Retorno automático',auto_ret_sub:'Lembra o paciente de agendar retorno após X meses',
   label_meses:'meses',auto_espera:'⏳ Lista de espera',auto_espera_sub:'Avisa o paciente quando um horário cancelado fica disponível',
+  auto_aniversario:'Parabéns automático',auto_aniversario_sub:'A Iris envia uma mensagem carinhosa no dia do aniversário do paciente',auto_aniversario_msg:'Feliz aniversário! 🎉 Que seja um dia especial. Estamos aqui para cuidar do seu sorriso 😊',auto_aniversario_nota:'Requer data de nascimento ativada em Dados que o agente solicita',
   btn_salvar_auto:'💾 Salvar Automatizações',toast_auto_ok:'Automatizações salvas ✓',
   mod_precos_h2:'Valores por Procedimento',
   mod_precos_p:'Valores de referência para cada procedimento. O agente pode informar esses preços ao paciente.',
@@ -1461,6 +1462,7 @@ const TRADUCOES={
   label_wp_admin:'WhatsApp del Administrador',wp_admin_nota:'Número del administrador — usado por Iris para identificar al gestor.',
   auto_ret:'🔄 Retorno automático',auto_ret_sub:'Recuerda al paciente agendar retorno después de X meses',
   label_meses:'meses',auto_espera:'⏳ Lista de espera',auto_espera_sub:'Avisa al paciente cuando un horario cancelado queda disponible',
+  auto_aniversario:'Felicitación de cumpleaños',auto_aniversario_sub:'Iris envía un mensaje cariñoso el día del cumpleaños del paciente',auto_aniversario_msg:'¡Feliz cumpleaños! 🎉 Que sea un día especial. Estamos aquí para cuidar tu sonrisa 😊',auto_aniversario_nota:'Requiere fecha de nacimiento activada en Datos que el agente solicita',
   btn_salvar_auto:'💾 Guardar Automatizaciones',toast_auto_ok:'Automatizaciones guardadas ✓',
   mod_precos_h2:'Valores por Procedimiento',
   mod_precos_p:'Valores de referencia para cada procedimiento. El agente puede informar estos precios al paciente.',
@@ -1589,6 +1591,7 @@ const TRADUCOES={
   label_wp_admin:'Administrator WhatsApp',wp_admin_nota:'Administrator number — used by Iris to identify the clinic manager.',
   auto_ret:'🔄 Automatic return',auto_ret_sub:'Reminds the patient to schedule a return after X months',
   label_meses:'months',auto_espera:'⏳ Waiting list',auto_espera_sub:'Notifies the patient when a cancelled slot becomes available',
+  auto_aniversario:'Birthday greeting',auto_aniversario_sub:'Iris sends a warm message on the patient\'s birthday',auto_aniversario_msg:'Happy birthday! 🎉 Hope it\'s a wonderful day. We\'re here to take care of your smile 😊',auto_aniversario_nota:'Requires birth date enabled in Patient data collection',
   btn_salvar_auto:'💾 Save Automations',toast_auto_ok:'Automations saved ✓',
   mod_precos_h2:'Procedure Prices',
   mod_precos_p:'Reference prices for each procedure. The agent can inform these prices to patients.',
@@ -2538,6 +2541,16 @@ function renderAuto(a){
       </div>
       <div class="toggle ${a.lista_espera?'on':''}" id="auto-lista_espera" onclick="this.classList.toggle('on')"></div>
     </div>
+    <div style="display:flex;align-items:center;gap:16px;padding:16px;margin-top:8px;background:linear-gradient(135deg,rgba(251,191,36,.1) 0%,rgba(245,158,11,.06) 100%);border:1px solid rgba(245,158,11,.3);border-radius:12px;">
+      <div style="font-size:36px;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(245,158,11,.3))">🎂</div>
+      <div class="auto-info">
+        <div class="auto-title" style="color:#f59e0b">${T.auto_aniversario||'Parabéns automático'}</div>
+        <div class="auto-sub">${T.auto_aniversario_sub||'A Iris envia uma mensagem carinhosa no dia do aniversário do paciente'}</div>
+        <div style="margin-top:6px;padding:8px 12px;background:rgba(245,158,11,.08);border-left:2px solid rgba(245,158,11,.4);border-radius:0 6px 6px 0;font-size:12px;color:var(--text2);font-style:italic">"${T.auto_aniversario_msg||'Feliz aniversário! 🎉 Que seja um dia especial. Estamos aqui para cuidar do seu sorriso 😊'}"</div>
+        <div style="margin-top:6px;font-size:11px;color:var(--text3)">⚠️ ${T.auto_aniversario_nota||'Requer data de nascimento do paciente ativada em Dados que o agente solicita'}</div>
+      </div>
+      <div class="toggle ${a.aniversario?'on':''}" id="auto-aniversario" onclick="this.classList.toggle('on')" style="flex-shrink:0"></div>
+    </div>
   </div>`;
 }
 
@@ -2564,6 +2577,7 @@ async function saveAuto(){
     retorno:document.getElementById('auto-retorno')?.classList.contains('on')||false,
     retorno_meses:parseInt(document.getElementById('auto-retorno_meses')?.value)||6,
     lista_espera:document.getElementById('auto-lista_espera')?.classList.contains('on')||false,
+    aniversario:document.getElementById('auto-aniversario')?.classList.contains('on')||false,
   };
   try{
     await sb.update('clinicas',currentClinica.id,{automatizacoes:data});
