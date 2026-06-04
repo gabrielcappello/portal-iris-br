@@ -794,10 +794,11 @@ async function saveIdioma(){
   const pais_codigo=document.getElementById('c_idioma_pais').value;
   if(!lang){toast(T.err_falta_idioma,'err');return;}
   if(!pais_codigo){toast(T.err_falta_pais,'err');return;}
-  const _estadoWrap=document.getElementById('c_estado_wrap');
   const _estadoVal=document.getElementById('c_estado')?.value||'';
-  if(_estadoWrap&&_estadoWrap.style.display!=='none'&&!_estadoVal){
-    toast(T.err_falta_estado||'Falta completar: Estado / Província','err');return;
+  const _temEstados=(ESTADOS_MAP[pais_codigo]||[]).length>0;
+  const _estadoWrapVisible=document.getElementById('c_estado_wrap')?.style.display!=='none';
+  if((_temEstados||_estadoWrapVisible)&&!_estadoVal){
+    toast(T.err_falta_estado||'Campo obrigatório: Estado / Província','err');return;
   }
   const btn=document.querySelector('[onclick="saveIdioma()"]');
   const st=document.getElementById('idioma-status');
