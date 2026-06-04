@@ -1937,9 +1937,14 @@ async function saveConfig(){
   const falta=T.falta_completar||'Falta completar';
   const required=[
     ['c_nome',T.label_nome_clinica],
-    ['c_end',T.label_end],['c_bairro',T.label_bairro],
-    ['c_cidade',T.label_cidade],['c_cep',T.label_cep],
+    ['c_end',T.label_end],
+    ['c_bairro',T.label_bairro],
+    ['c_cidade',T.label_cidade],
+    ['c_cep',T.label_cep],
+    ['c_referencia',T.label_ref||'Referência'],
     ['c_maps',T.label_maps],
+    ['c_email_clinica','Email da Clínica'],
+    ['c_whatsapp_admin',T.label_wp_admin||'WhatsApp do Administrador'],
   ];
   for(const [id,label] of required){
     if(!document.getElementById(id)?.value?.trim()){toast(`${falta}: ${label}`,'err');return;}
