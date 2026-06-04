@@ -825,10 +825,10 @@ async function saveSecretaria(){
     const nome_agente=document.getElementById('c_nome_agente')?.value||'Iris';
     const personalidade=document.getElementById('c_personalidade')?.value||'acolhedora';
     const whatsapp_instancia=document.getElementById('c_wp')?.value||'';
-    await sb.update('clinicas',currentClinica.id,{nome_agente,personalidade,telefone:tel,whatsapp_instancia});
+    await sb.update('clinicas',currentClinica.id,{nome_agente,personalidade,telefone_agente:tel,whatsapp_instancia});
     currentClinica.nome_agente=nome_agente;
     currentClinica.personalidade=personalidade;
-    currentClinica.telefone=tel;
+    currentClinica.telefone_agente=tel;
     currentClinica.whatsapp_instancia=whatsapp_instancia;
     if(st){st.textContent=T.toast_salvo||'Salvo ✓';st.className='save-status ok';}
     toast('Secretaria salva ✓');
@@ -1156,7 +1156,7 @@ function isIdiomaConfigured(){
   return !!(currentClinica?.idioma&&currentClinica?.pais_codigo);
 }
 function isSecretariaConfigured(){
-  return !!(currentClinica?.nome_agente&&currentClinica?.telefone);
+  return !!(currentClinica?.nome_agente&&currentClinica?.telefone_agente);
 }
 function isClinicaConfigured(){
   return !!(currentClinica?.nome&&currentClinica?.endereco&&currentClinica?.cidade);
@@ -1891,7 +1891,7 @@ function updateWpName(){
 function loadConfig(){
   const c=currentClinica;
   document.getElementById('c_nome').value=c.nome||'';
-  document.getElementById('c_tel').value=c.telefone||'';
+  document.getElementById('c_tel').value=c.telefone_agente||'';
   document.getElementById('c_end').value=c.endereco||'';
   document.getElementById('c_sala').value=c.sala||'';
   document.getElementById('c_referencia').value=c.referencia||'';
@@ -1899,7 +1899,7 @@ function loadConfig(){
   document.getElementById('c_cidade').value=c.cidade||'';
   document.getElementById('c_cep').value=c.cep||'';
   const _wpDdd=ESTADO_DDD[c.estado||'']||'';
-  document.getElementById('c_wp').value=c.telefone?`CAPPIA/${_wpDdd}${c.telefone.replace(/\D/g,'')}`:'';
+  document.getElementById('c_wp').value=c.telefone_agente?`CAPPIA/${_wpDdd}${c.telefone_agente.replace(/\D/g,'')}`:'';
   document.getElementById('c_maps').value=c.maps_link||'';
   document.getElementById('c_email_clinica').value=c.email_clinica||'';
   document.getElementById('c_nome_agente').value=c.nome_agente||'Iris';
