@@ -333,7 +333,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
     <button class="tab-btn active" onclick="showTab('config',this)">⚙️ Configuração</button>
     <button class="tab-btn" onclick="showTab('pacientes',this)">👤 Pacientes <span class="tab-badge" id="badge-pac">0</span></button>
     <button class="tab-btn" onclick="showTab('agendamentos',this)">📅 Agendamentos <span class="tab-badge" id="badge-ag">0</span></button>
-    <button class="tab-btn" onclick="showTab('precios',this)">💲 Preços</button>
+    <button class="tab-btn" onclick="showTab('precios',this)">🗂️ Procedimentos</button>
   </div>
 
   <div class="main">
@@ -545,13 +545,13 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
     <div class="tab-panel" id="tab-precios">
       <div class="accordion" id="acc-precios-wrap">
         <div class="card-header" style="padding:18px 24px;background:var(--surface2);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
-          <span>💲</span>
-          <div><h2 style="font-size:15px;font-weight:600">Valores por Procedimento</h2><p style="font-size:12px;color:var(--text2);margin-top:2px">Valores de referência para cada procedimento. O agente pode informar esses preços ao paciente.</p></div>
+          <span>🗂️</span>
+          <div><h2 style="font-size:15px;font-weight:600">Procedimentos</h2><p style="font-size:12px;color:var(--text2);margin-top:2px">Configure o tempo e o preço de cada procedimento. A Iris usará essas informações com os pacientes.</p></div>
         </div>
         <div style="padding:20px" id="precios-body"></div>
         <div class="save-bar">
           <span class="save-status" id="precios-status"></span>
-          <button class="btn-save" onclick="savePrecios()">💾 Salvar Valores</button>
+          <button class="btn-save" onclick="savePrecios()">💾 Salvar Procedimentos</button>
         </div>
       </div>
     </div>
@@ -1274,7 +1274,7 @@ const TRADUCOES={
   toast_senha_ok:'Senha atualizada com sucesso!',
   btn_sair:'Sair',
   tab_config:'⚙️ Configuração',tab_pac:'👤 Pacientes',
-  tab_ag:'📅 Agendamentos',tab_precos:'💲 Preços',
+  tab_ag:'📅 Agendamentos',tab_precos:'🗂️ Procedimentos',
   mod_idioma_h2:'Idioma & Localização',mod_idioma_p:'Idioma, país, estado e fuso horário da clínica',
   label_idioma:'Idioma',label_pais:'País',label_estado:'Estado / Província',
   select_selecione:'Selecione...',
@@ -1310,7 +1310,7 @@ const TRADUCOES={
   label_dur:'Duração (min)',slots_vazio:'Preencha os campos de horário',
   ph_horarios:'08:00,09:00,10:00,11:00,14:00,15:00',
   proc_modo_desc:'Os horários serão calculados conforme a duração de cada procedimento selecionado.',
-  label_procs:'Procedimentos que atende',
+  label_procs:'Especialidades do Profissional',
   btn_qr:'📱 QR Code',btn_salvar_dent:'💾 Salvar Dentista',
   toast_dent_ok:'Dentista {n} salvo ✓',toast_limite_dent:'Limite de {n} dentista(s) ativo(s) atingido',
   err_preenche_nome_dent:'Preenche o nome do dentista primeiro',
@@ -1328,7 +1328,7 @@ const TRADUCOES={
   btn_salvar_auto:'💾 Salvar Automatizações',toast_auto_ok:'Automatizações salvas ✓',
   mod_precos_h2:'Valores por Procedimento',
   mod_precos_p:'Valores de referência para cada procedimento. O agente pode informar esses preços ao paciente.',
-  btn_salvar_precos:'💾 Salvar Valores',toast_precos_ok:'Preços salvos ✓',
+  btn_salvar_precos:'💾 Salvar Procedimentos',toast_precos_ok:'Procedimentos salvos ✓',
   ph_buscar_pac:'🔍 Buscar por nome, telefone ou documento...',
   loading_pac:'Carregando pacientes...',vazio_pac:'Nenhum paciente registrado ainda',err_pac:'Erro ao carregar pacientes',
   col_nome:'Nome',col_tel:'Telefone',col_doc:'Documento',col_ult:'Última Consulta',col_total:'Total',col_proc:'Procedimento',col_obs:'Obs.',btn_notas:'Notas',
@@ -1402,7 +1402,7 @@ const TRADUCOES={
   toast_senha_ok:'¡Contraseña actualizada!',
   btn_sair:'Salir',
   tab_config:'⚙️ Configuración',tab_pac:'👤 Pacientes',
-  tab_ag:'📅 Agendamientos',tab_precos:'💲 Precios',
+  tab_ag:'📅 Agendamientos',tab_precos:'🗂️ Procedimientos',
   mod_idioma_h2:'Idioma & Localización',mod_idioma_p:'Idioma, país, estado y huso horario de la clínica',
   label_idioma:'Idioma',label_pais:'País',label_estado:'Provincia / Estado',
   select_selecione:'Seleccionar...',
@@ -1438,7 +1438,7 @@ const TRADUCOES={
   label_dur:'Duración (min)',slots_vazio:'Completa los campos de horario',
   ph_horarios:'08:00,09:00,10:00,11:00,14:00,15:00',
   proc_modo_desc:'Los horarios se calcularán según la duración de cada procedimiento seleccionado.',
-  label_procs:'Procedimientos que atiende',
+  label_procs:'Especialidades del Profesional',
   btn_qr:'📱 QR Code',btn_salvar_dent:'💾 Guardar Dentista',
   toast_dent_ok:'Dentista {n} guardado ✓',toast_limite_dent:'Límite de {n} dentista(s) activo(s) alcanzado',
   err_preenche_nome_dent:'Completa el nombre del dentista primero',
@@ -1456,7 +1456,7 @@ const TRADUCOES={
   btn_salvar_auto:'💾 Guardar Automatizaciones',toast_auto_ok:'Automatizaciones guardadas ✓',
   mod_precos_h2:'Valores por Procedimiento',
   mod_precos_p:'Valores de referencia para cada procedimiento. El agente puede informar estos precios al paciente.',
-  btn_salvar_precos:'💾 Guardar Valores',toast_precos_ok:'Precios guardados ✓',
+  btn_salvar_precos:'💾 Guardar Procedimientos',toast_precos_ok:'Procedimientos guardados ✓',
   ph_buscar_pac:'🔍 Buscar por nombre, teléfono o documento...',
   loading_pac:'Cargando pacientes...',vazio_pac:'No hay pacientes registrados aún',err_pac:'Error al cargar pacientes',
   col_nome:'Nombre',col_tel:'Teléfono',col_doc:'Documento',col_ult:'Última Consulta',col_total:'Total',col_proc:'Procedimiento',col_obs:'Obs.',btn_notas:'Notas',
@@ -1566,7 +1566,7 @@ const TRADUCOES={
   label_dur:'Duration (min)',slots_vazio:'Fill in the schedule fields',
   ph_horarios:'08:00,09:00,10:00,11:00,14:00,15:00',
   proc_modo_desc:'Schedules will be calculated based on the duration of each selected procedure.',
-  label_procs:'Procedures offered',
+  label_procs:'Professional Specialties',
   btn_qr:'📱 QR Code',btn_salvar_dent:'💾 Save Dentist',
   toast_dent_ok:'Dentist {n} saved ✓',toast_limite_dent:'Limit of {n} active dentist(s) reached',
   err_preenche_nome_dent:'Fill in the dentist name first',
@@ -1584,7 +1584,7 @@ const TRADUCOES={
   btn_salvar_auto:'💾 Save Automations',toast_auto_ok:'Automations saved ✓',
   mod_precos_h2:'Procedure Prices',
   mod_precos_p:'Reference prices for each procedure. The agent can inform these prices to patients.',
-  btn_salvar_precos:'💾 Save Prices',toast_precos_ok:'Prices saved ✓',
+  btn_salvar_precos:'💾 Save Procedures',toast_precos_ok:'Procedures saved ✓',
   ph_buscar_pac:'🔍 Search by name, phone or document...',
   loading_pac:'Loading patients...',vazio_pac:'No patients registered yet',err_pac:'Error loading patients',
   col_nome:'Name',col_tel:'Phone',col_doc:'Document',col_ult:'Last Visit',col_total:'Total',col_proc:'Procedure',col_obs:'Notes',btn_notas:'Notes',
@@ -1852,22 +1852,42 @@ function renderPrecios(precios){
   const body=document.getElementById('precios-body');
   if(!body)return;
   body.innerHTML=ESPECIALIDADES.map(esp=>`
-    <div style="margin-bottom:20px">
+    <div style="margin-bottom:24px">
       <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">${traduzirProc(esp.nome)}</div>
       ${esp.procs.map(p=>{
         const key=p.nome.replace(/\s/g,'_');
-        const val=precios[key]||'0';
-        return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">
-          <span style="flex:1;font-size:13px">${traduzirProc(p.nome)}</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:13px;color:var(--text3)">$</span>
-            <input type="number" id="precio-${key}" value="${val}" min="0" step="100"
-              style="width:90px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;text-align:right"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)';if(this.value)this.value=parseInt(this.value)||0;" oninput="if(this.value.length>1&&this.value[0]==='0')this.value=this.value.replace(/^0+/,'')">
+        const saved=precios[key];
+        const tempo=parseInt(typeof saved==='object'?saved?.tempo:null)||p.tempo;
+        const preco=typeof saved==='object'?saved?.preco||'0':(typeof saved==='string'?saved:'0');
+        const ativo=typeof saved==='object'?saved?.ativo!==false:false;
+        return `<div style="display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="flex:1;font-size:13px;font-weight:500">${traduzirProc(p.nome)}</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+              <span style="font-size:11px;color:var(--text3)">min</span>
+              <input type="number" id="ptempo-${key}" value="${tempo}" min="5" step="5"
+                style="width:54px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 6px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;text-align:center"
+                onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <div class="toggle ${ativo?'on':''}" id="ptoggle-${key}" onclick="togglePrecioAtivo('${key}',this)" style="width:36px;height:20px;min-width:36px"></div>
+              <input type="number" id="precio-${key}" value="${preco}" min="0" step="1" ${ativo?'':'disabled'}
+                style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 7px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;text-align:right;${ativo?'':'opacity:.4'}"
+                onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
           </div>
+          <div style="font-size:11px;color:var(--text3);padding-left:2px" id="pmsg-${key}">${ativo?'Iris informará o valor ao paciente quando solicitado':'Iris informará que é necessária avaliação para orçamento'}</div>
         </div>`;
       }).join('')}
     </div>`).join('');
+}
+
+function togglePrecioAtivo(key,tog){
+  const isOn=tog.classList.toggle('on');
+  const input=document.getElementById(`precio-${key}`);
+  const msg=document.getElementById(`pmsg-${key}`);
+  if(input){input.disabled=!isOn;input.style.opacity=isOn?'1':'0.4';}
+  if(msg)msg.textContent=isOn?'Iris informará o valor ao paciente quando solicitado':'Iris informará que é necessária avaliação para orçamento';
 }
 
 async function savePrecios(){
@@ -1878,8 +1898,10 @@ async function savePrecios(){
   ESPECIALIDADES.forEach(esp=>{
     esp.procs.forEach(p=>{
       const key=p.nome.replace(/\s/g,'_');
-      const el=document.getElementById(`precio-${key}`);
-      if(el)precios[key]=el.value||'0';
+      const tempo=parseInt(document.getElementById(`ptempo-${key}`)?.value)||p.tempo;
+      const preco=document.getElementById(`precio-${key}`)?.value||'0';
+      const ativo=document.getElementById(`ptoggle-${key}`)?.classList.contains('on')||false;
+      precios[key]={tempo,preco,ativo};
     });
   });
   try{
@@ -2056,15 +2078,8 @@ function renderDentistas(dents){
               const key=p.nome.replace(/\s/g,'_');
               const saved=procsMap[p.nome];
               const ativo=saved?saved.ativo:false;
-              const tempo=saved?saved.tempo:p.tempo;
-              return `<div class="proc-chip-row">
-                <div class="proc-chip ${ativo?'selected':''}" id="pchip-${i}-${key}" data-active="${ativo}" onclick="toggleProcChip(${i},${ei},'${key}',this)">
-                  ${traduzirProc(p.nome)}
-                </div>
-                <div class="proc-chip-time" id="pchiptime-${i}-${key}" style="${ativo?'':'display:none'}">
-                  <input type="number" class="proc-time" id="pt-${i}-${key}" value="${tempo}" min="5" step="5">
-                  <span class="proc-time-label">min</span>
-                </div>
+              return `<div class="proc-chip ${ativo?'selected':''}" id="pchip-${i}-${key}" data-active="${ativo}" onclick="toggleProcChip(${i},${ei},'${key}',this)">
+                ${traduzirProc(p.nome)}
               </div>`;
             }).join('')}
           </div>
@@ -2223,12 +2238,9 @@ function toggleEspCard(di,ei){
 }
 
 function toggleProcChip(di,ei,key,chip){
-  const isSelected=chip.dataset.active==='true';
-  const newState=!isSelected;
+  const newState=chip.dataset.active!=='true';
   chip.dataset.active=String(newState);
   chip.classList.toggle('selected',newState);
-  const timeWrap=document.getElementById(`pchiptime-${di}-${key}`);
-  if(timeWrap)timeWrap.style.display=newState?'flex':'none';
 }
 
 function saveEspCard(di,ei){
@@ -2276,14 +2288,16 @@ function updateSlots(i){
 }
 
 function getProcs(i){
+  const precios=currentClinica?.precios||{};
   const procs=[];
   ESPECIALIDADES.forEach(esp=>{
     esp.procs.forEach(p=>{
       const key=p.nome.replace(/\s/g,'_');
       const chip=document.getElementById(`pchip-${i}-${key}`);
-      const ti=document.getElementById(`pt-${i}-${key}`);
       const ativo=chip?chip.dataset.active==='true':false;
-      procs.push({nome:p.nome,ativo,tempo:parseInt(ti?.value)||p.tempo});
+      const saved=precios[key];
+      const tempo=parseInt(typeof saved==='object'?saved?.tempo:null)||p.tempo;
+      procs.push({nome:p.nome,ativo,tempo});
     });
   });
   return procs;
