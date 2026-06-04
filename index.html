@@ -20,6 +20,17 @@
   --text:#e2e8f0; --text2:#94a3b8; --text3:#475569;
   --radius:14px; --radius-sm:8px;
 }
+body.light-theme{
+  --bg:#f8fafc; --surface:#ffffff; --surface2:#f1f5f9; --surface3:#e2e8f0;
+  --border:#cbd5e1; --border2:#94a3b8;
+  --text:#0f172a; --text2:#475569; --text3:#94a3b8;
+}
+body.light-theme header,body.light-theme .dapp-header{background:rgba(248,250,252,.92);}
+body.light-theme::before{opacity:0.3;}
+body.light-theme .login-card{box-shadow:0 32px 80px rgba(0,0,0,.12),0 0 0 1px rgba(59,130,246,.08);}
+.theme-toggle{display:flex;gap:2px;background:var(--surface3);border-radius:8px;padding:3px;border:1px solid var(--border);}
+.theme-btn{background:transparent;border:none;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--text2);transition:all .15s;font-family:'Outfit',sans-serif;white-space:nowrap;}
+.theme-btn.active{background:var(--accent);color:#fff;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(59,130,246,.12) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 110%,rgba(16,185,129,.06) 0%,transparent 60%);pointer-events:none;z-index:0;}
@@ -80,6 +91,8 @@ header{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.85);backdrop-fil
 .accordion-body{display:none;border-top:1px solid var(--border);}
 .accordion-body.open{display:block;}
 .accordion-body-inner{padding:24px;}
+.accordion-header.acc-locked{opacity:0.4;cursor:not-allowed !important;pointer-events:none;}
+.acc-lock-icon{font-size:13px;margin-right:4px;}
 
 /* SAVE BAR */
 .save-bar{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:16px 24px;border-top:1px solid var(--border);background:var(--surface2);}
@@ -303,6 +316,10 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
 </svg></div>Iris Portal</div>
     <div class="header-clinic">
       <div class="header-clinic-name" id="header-clinic-name">—</div>
+      <div class="theme-toggle">
+        <button class="theme-btn active" id="btn-theme-dark" onclick="applyTheme('dark')">🌙 Escuro</button>
+        <button class="theme-btn" id="btn-theme-light" onclick="applyTheme('light')">☀️ Claro</button>
+      </div>
       <button class="btn-logout" onclick="doLogout()">Sair</button>
     </div>
   </header>
@@ -324,6 +341,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
         <div class="accordion-header" onclick="toggleAcc('idioma')">
           <span class="accordion-icon">🌐</span>
           <div class="accordion-title"><h2>Idioma</h2><p>Idioma e país da clínica para o agente de atendimento</p></div>
+          <span class="acc-lock-icon" id="lock-idioma"></span>
           <span class="accordion-arrow" id="arr-idioma">▼</span>
         </div>
         <div class="accordion-body" id="body-idioma">
@@ -359,38 +377,59 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
         </div>
       </div>
 
-      <!-- CLÍNICA -->
-      <div class="accordion" id="acc-clinica">
-        <div class="accordion-header" onclick="toggleAcc('clinica')">
-          <span class="accordion-icon">🏥</span>
-          <div class="accordion-title"><h2>Dados da Clínica</h2><p>Informações usadas pelo agente nas conversas</p></div>
-          <span class="accordion-arrow" id="arr-clinica">▼</span>
+      <!-- SECRETARIA -->
+      <div class="accordion" id="acc-secretaria">
+        <div class="accordion-header" onclick="toggleAcc('secretaria')">
+          <span class="accordion-icon">🤖</span>
+          <div class="accordion-title"><h2>Dados da Secretaria</h2><p>Identidade e configurações da Iris</p></div>
+          <span class="acc-lock-icon" id="lock-secretaria"></span>
+          <span class="accordion-arrow" id="arr-secretaria">▼</span>
         </div>
-        <div class="accordion-body" id="body-clinica">
+        <div class="accordion-body" id="body-secretaria">
           <div class="accordion-body-inner">
             <div class="form-grid">
-              <div class="form-group"><label data-i18n="label_nome_agente">Nome da secretária virtual</label><input id="c_nome_agente" placeholder="Ex: Sofia, Ana, Iris..." value="Iris"><span data-i18n="nome_agente_nota" style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Este é o nome com que o agente se apresentará aos pacientes.</span></div>
-              <div class="form-group"><label data-i18n="label_personalidade">Personalidade da Iris</label><select id="c_personalidade"><option value="acolhedora" data-i18n-opt="pers_acolhedora">Acolhedora — calorosa e empática</option><option value="executiva" data-i18n-opt="pers_executiva">Executiva — formal e precisa</option><option value="moderna" data-i18n-opt="pers_moderna">Moderna — descontraída e jovial</option><option value="premium" data-i18n-opt="pers_premium">Premium — sofisticada e exclusiva</option><option value="objetiva" data-i18n-opt="pers_objetiva">Objetiva — direta e eficiente</option></select><span data-i18n="personalidade_nota" style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Define o tom e o estilo de comunicação da Iris com os pacientes.</span></div>
-              <div class="form-group"><label data-i18n="label_nome_clinica">Nome da Clínica</label><input id="c_nome" placeholder="Ex: OdontoBR"></div>
+              <div class="form-group"><label>Nome da Secretária</label><input id="c_nome_agente" placeholder="Ex: Sofia, Ana, Iris..." value="Iris"><span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Nome com que a Iris se apresentará aos pacientes.</span></div>
+              <div class="form-group"><label>Personalidade da Iris</label><select id="c_personalidade"><option value="acolhedora">Acolhedora — calorosa e empática</option><option value="executiva">Executiva — formal e precisa</option><option value="moderna">Moderna — descontraída e jovial</option><option value="premium">Premium — sofisticada e exclusiva</option><option value="objetiva">Objetiva — direta e eficiente</option></select><span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Define o tom e estilo de comunicação da Iris com os pacientes.</span></div>
               <div class="form-group">
-                <label data-i18n="label_telefone">Telefone</label>
+                <label>Telefone WhatsApp</label>
                 <div style="display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface2)" onfocusin="this.style.borderColor='var(--accent)'" onfocusout="this.style.borderColor='var(--border)'">
                   <span id="c_tel_ddi" style="padding:10px 10px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent2);white-space:nowrap;display:flex;align-items:center;min-width:48px;justify-content:center">+55</span>
                   <span id="c_tel_ddd" style="padding:10px 6px;background:var(--surface3);border-right:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);white-space:nowrap;display:none;align-items:center"></span>
                   <input id="c_tel" placeholder="(21) 99999-9999" style="flex:1;min-width:0;background:transparent;border:none;border-radius:0;padding:10px 10px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none" oninput="updateWpName()">
                 </div>
               </div>
+              <div class="form-group full">
+                <label><span>Instância WhatsApp</span> <span style="font-weight:400;color:var(--text3)">(automático)</span></label>
+                <input id="c_wp" readonly style="background:var(--surface3);color:rgba(226,232,240,0.85);font-weight:300;cursor:default;" placeholder="Gerado automaticamente">
+                <span style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/[DDD][telefone]</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <span class="save-status" id="secretaria-status"></span>
+              <button class="btn-save" onclick="saveSecretaria()">💾 Salvar Secretaria</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLÍNICA -->
+      <div class="accordion" id="acc-clinica">
+        <div class="accordion-header" onclick="toggleAcc('clinica')">
+          <span class="accordion-icon">🏥</span>
+          <div class="accordion-title"><h2>Dados da Clínica</h2><p>Informações usadas pelo agente nas conversas</p></div>
+          <span class="acc-lock-icon" id="lock-clinica"></span>
+          <span class="accordion-arrow" id="arr-clinica">▼</span>
+        </div>
+        <div class="accordion-body" id="body-clinica">
+          <div class="accordion-body-inner">
+            <div class="form-grid">
+              <div class="form-group"><label data-i18n="label_nome_clinica">Nome da Clínica</label><input id="c_nome" placeholder="Ex: OdontoBR"></div>
               <div class="form-group"><label><span data-i18n="label_end">Endereço</span> <span data-i18n="end_sub" style="font-weight:400;color:var(--text3)">(Rua e número)</span></label><input id="c_end" placeholder="Ex: Av. Paulista, 1234"></div>
               <div class="form-group"><label data-i18n="label_sala">Sala</label><input id="c_sala" placeholder="Ex: 3º andar, Sala 302"></div>
               <div class="form-group"><label data-i18n="label_bairro">Bairro</label><input id="c_bairro" placeholder="Centro"></div>
               <div class="form-group"><label data-i18n="label_cidade">Cidade</label><input id="c_cidade" placeholder="São Paulo"></div>
               <div class="form-group"><label data-i18n="label_cep">CEP</label><input id="c_cep" placeholder="01310-100"></div>
               <div class="form-group"><label data-i18n="label_ref">Referência</label><input id="c_referencia" placeholder="Ex: Em frente ao banco, portão azul"></div>
-              <div class="form-group full">
-                <label><span data-i18n="label_wp">Instância WhatsApp</span> <span data-i18n="wp_sub" style="font-weight:400;color:var(--text3)">(automático)</span></label>
-                <input id="c_wp" readonly style="background:var(--surface3);color:rgba(226,232,240,0.85);font-weight:300;cursor:default;" placeholder="Gerado automaticamente">
-                <span data-i18n="wp_formato" style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/[DDD][telefone]</span>
-              </div>
               <div class="form-group"><label>Email da Clínica</label><input id="c_email_clinica" type="email" placeholder="clinica@exemplo.com"><span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Email de contato da clínica (usado pelo agente quando solicitado).</span></div>
               <div class="form-group"><label data-i18n="label_wp_admin">WhatsApp do Administrador</label><input id="c_whatsapp_admin" placeholder="Ex: 11999999999" type="tel"><span data-i18n="wp_admin_nota" style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Número do administrador. Usado pela Iris para identificar o gestor da clínica.</span></div>
               <div class="form-group full">
@@ -417,6 +456,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
           <span class="accordion-icon">👨‍⚕️</span>
           <div class="accordion-title"><h2>Dentistas</h2><p>Até 10 profissionais com agendas, horários e procedimentos independentes</p></div>
           <span class="tab-badge" id="badge-dentistas-ativos" style="margin-right:8px">0/0</span>
+          <span class="acc-lock-icon" id="lock-dentistas"></span>
           <span class="accordion-arrow" id="arr-dentistas">▼</span>
         </div>
         <div class="accordion-body" id="body-dentistas">
@@ -429,6 +469,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
         <div class="accordion-header" onclick="toggleAcc('dados')">
           <span class="accordion-icon">📋</span>
           <div class="accordion-title"><h2 data-i18n="mod_dados_h2">Dados que o agente solicita</h2><p data-i18n="mod_dados_p">Escolha quais informações o agente irá coletar do paciente</p></div>
+          <span class="acc-lock-icon" id="lock-dados"></span>
           <span class="accordion-arrow" id="arr-dados">▼</span>
         </div>
         <div class="accordion-body" id="body-dados">
@@ -445,6 +486,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
         <div class="accordion-header" onclick="toggleAcc('auto')">
           <span class="accordion-icon">⚡</span>
           <div class="accordion-title"><h2>Automatizações</h2><p>Mensagens automáticas para pacientes</p></div>
+          <span class="acc-lock-icon" id="lock-auto"></span>
           <span class="accordion-arrow" id="arr-auto">▼</span>
         </div>
         <div class="accordion-body" id="body-auto">
@@ -758,15 +800,52 @@ async function saveIdioma(){
   const idioma=lang+'-'+pais_codigo;
   try{
     const fuso_horario=document.getElementById('c_fuso')?.value||'';
-    await sb.update('clinicas',currentClinica.id,{idioma,pais_codigo,fuso_horario});
+    const estado=document.getElementById('c_estado')?.value||'';
+    await sb.update('clinicas',currentClinica.id,{idioma,pais_codigo,fuso_horario,estado});
     currentClinica.idioma=idioma;
     currentClinica.pais_codigo=pais_codigo;
     currentClinica.fuso_horario=fuso_horario;
+    currentClinica.estado=estado;
     st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_idioma_ok);
     aplicarTraducoes(lang);
-    checkIdiomaConfigured();
+    checkOnboardingState();
+    if(!isSecretariaConfigured())openAcc('secretaria');
   }catch(e){st.textContent=T.err_txt;st.className='save-status err';toast(T.err_salvar,'err');}
   btn.disabled=false;
+}
+
+async function saveSecretaria(){
+  const tel=document.getElementById('c_tel')?.value||'';
+  if(!tel.trim()){toast((T.falta_completar||'Falta completar')+': Telefone','err');return;}
+  const btn=document.querySelector('[onclick="saveSecretaria()"]');
+  const st=document.getElementById('secretaria-status');
+  if(btn)btn.disabled=true;
+  if(st){st.textContent=T.salvando||'Salvando...';st.className='save-status';}
+  try{
+    const nome_agente=document.getElementById('c_nome_agente')?.value||'Iris';
+    const personalidade=document.getElementById('c_personalidade')?.value||'acolhedora';
+    const whatsapp_instancia=document.getElementById('c_wp')?.value||'';
+    await sb.update('clinicas',currentClinica.id,{nome_agente,personalidade,telefone:tel,whatsapp_instancia});
+    currentClinica.nome_agente=nome_agente;
+    currentClinica.personalidade=personalidade;
+    currentClinica.telefone=tel;
+    currentClinica.whatsapp_instancia=whatsapp_instancia;
+    if(st){st.textContent=T.toast_salvo||'Salvo ✓';st.className='save-status ok';}
+    toast('Secretaria salva ✓');
+    checkOnboardingState();
+    if(!isClinicaConfigured())openAcc('clinica');
+  }catch(e){
+    if(st){st.textContent=T.err_txt||'Erro';st.className='save-status err';}
+    toast(T.err_salvar,'err');
+  }
+  if(btn)btn.disabled=false;
+}
+
+function applyTheme(t){
+  document.body.classList.toggle('light-theme',t==='light');
+  document.getElementById('btn-theme-dark')?.classList.toggle('active',t==='dark');
+  document.getElementById('btn-theme-light')?.classList.toggle('active',t==='light');
+  localStorage.setItem('iris-theme',t);
 }
 
 // ══════════════════════════════════
@@ -1076,11 +1155,22 @@ const ESTADOS_MAP={
 function isIdiomaConfigured(){
   return !!(currentClinica?.idioma&&currentClinica?.pais_codigo);
 }
+function isSecretariaConfigured(){
+  return !!(currentClinica?.nome_agente&&currentClinica?.telefone);
+}
+function isClinicaConfigured(){
+  return !!(currentClinica?.nome&&currentClinica?.endereco&&currentClinica?.cidade);
+}
 function checkIdiomaConfigured(){
-  const configured=isIdiomaConfigured();
+  // kept for backward compat — delegates to new onboarding state
+  checkOnboardingState();
+}
+function checkOnboardingState(){
+  const idOk=isIdiomaConfigured(), secOk=isSecretariaConfigured(), clOk=isClinicaConfigured();
+  const allOk=idOk&&secOk&&clOk;
+  // banner logic (keep backward compat)
   const banner=document.getElementById('idioma-banner');
-  const tabs=document.querySelectorAll('.tab-btn:not(:first-child)');
-  if(!configured){
+  if(!idOk){
     if(!banner){
       const b=document.createElement('div');
       b.id='idioma-banner';
@@ -1089,11 +1179,34 @@ function checkIdiomaConfigured(){
       const cfg=document.getElementById('tab-config');
       if(cfg)cfg.insertBefore(b,cfg.firstChild);
     }
-    tabs.forEach(t=>{t.style.opacity='0.4';t.style.pointerEvents='none';});
   }else{
     if(banner)banner.remove();
-    tabs.forEach(t=>{t.style.opacity='';t.style.pointerEvents='';});
   }
+  // lock visual state for each accordion
+  [
+    {id:'idioma',   openable:true,    done:idOk},
+    {id:'secretaria',openable:idOk,   done:secOk},
+    {id:'clinica',  openable:secOk,   done:clOk},
+    {id:'dentistas',openable:allOk,   done:null},
+    {id:'dados',    openable:allOk,   done:null},
+    {id:'auto',     openable:allOk,   done:null},
+  ].forEach(({id,openable,done})=>{
+    const hdr=document.querySelector(`#acc-${id} .accordion-header`);
+    const lk=document.getElementById(`lock-${id}`);
+    if(!hdr)return;
+    if(!openable){hdr.classList.add('acc-locked');}else{hdr.classList.remove('acc-locked');}
+    if(lk)lk.textContent=!openable?'🔒':(done?'✅':'');
+  });
+  // tabs
+  const tabs=document.querySelectorAll('.tab-btn:not(:first-child)');
+  tabs.forEach(t=>{t.style.opacity=allOk?'':'0.4';t.style.pointerEvents=allOk?'':'none';});
+}
+function openAcc(id){
+  const body=document.getElementById(`body-${id}`);
+  const arr=document.getElementById(`arr-${id}`);
+  if(!body||!arr)return;
+  body.classList.add('open');
+  arr.classList.add('open');
 }
 
 // ══════════════════════════════════
@@ -1204,6 +1317,9 @@ const TRADUCOES={
   nome_agente_nota:'Este é o nome com que o agente se apresentará aos pacientes.',
   toast_salvo:'✓ Salvo',err_salvar:'Erro ao salvar',toast_nao_esquecer:'💾 Não esqueça de salvar as alterações',
   falta_completar:'Falta completar',
+  toast_bloqueio_idioma:'Configure o idioma primeiro',
+  toast_bloqueio_secretaria:'Configure a secretaria primeiro',
+  toast_bloqueio_clinica:'Configure os dados da clínica primeiro',
   label_wp_dent:'Telefone / WhatsApp',ph_wp_dent:'(21) 99999-9999',
   slots_gerados:'Slots gerados:',manual_separado:'Escreva os horários separados por vírgula:',
   info_doc:'Documento:',info_dig:'dígitos',info_tel:'Telefone:',dent_numero:'Dentista',
@@ -1329,6 +1445,9 @@ const TRADUCOES={
   nome_agente_nota:'Este es el nombre con el que el agente se presentará a los pacientes.',
   toast_salvo:'✓ Guardado',err_salvar:'Error al guardar',toast_nao_esquecer:'💾 No olvides guardar los cambios',
   falta_completar:'Falta completar',
+  toast_bloqueio_idioma:'Configura el idioma primero',
+  toast_bloqueio_secretaria:'Configura la secretaria primero',
+  toast_bloqueio_clinica:'Configura los datos de la clínica primero',
   label_wp_dent:'Teléfono / WhatsApp',ph_wp_dent:'11 9999-9999',
   slots_gerados:'Slots generados:',manual_separado:'Escribe los horarios separados por coma:',
   info_doc:'Documento:',info_dig:'dígitos',info_tel:'Teléfono:',dent_numero:'Dentista',
@@ -1454,6 +1573,9 @@ const TRADUCOES={
   nome_agente_nota:'This is the name the agent will use to introduce itself to patients.',
   toast_salvo:'✓ Saved',err_salvar:'Error saving',toast_nao_esquecer:'💾 Don\'t forget to save changes',
   falta_completar:'Missing',
+  toast_bloqueio_idioma:'Set up Language first',
+  toast_bloqueio_secretaria:'Set up Receptionist first',
+  toast_bloqueio_clinica:'Set up Clinic details first',
   label_wp_dent:'Phone / WhatsApp',ph_wp_dent:'555-999-9999',
   slots_gerados:'Generated slots:',manual_separado:'Type schedules separated by comma:',
   info_doc:'Document:',info_dig:'digits',info_tel:'Phone:',dent_numero:'Dentist',
@@ -1651,9 +1773,14 @@ function showTab(name,btn){
 // ACCORDION
 // ══════════════════════════════════
 function toggleAcc(id){
-  if(id!=='idioma'&&!isIdiomaConfigured()){toast(T.toast_bloqueio_mod,'err');return;}
+  const idOk=isIdiomaConfigured(), secOk=isSecretariaConfigured(), clOk=isClinicaConfigured();
+  if(id==='idioma'){}
+  else if(id==='secretaria'&&!idOk){toast(T.toast_bloqueio_idioma||'Configure o idioma primeiro','err');return;}
+  else if(id==='clinica'&&!secOk){toast(T.toast_bloqueio_secretaria||'Configure a secretaria primeiro','err');return;}
+  else if(!clOk&&!['idioma','secretaria','clinica'].includes(id)){toast(T.toast_bloqueio_clinica||'Configure os dados da clínica primeiro','err');return;}
   const body=document.getElementById(`body-${id}`);
   const arr=document.getElementById(`arr-${id}`);
+  if(!body||!arr)return;
   const wasOpen=body.classList.contains('open');
   body.classList.toggle('open');
   arr.classList.toggle('open');
@@ -1786,7 +1913,7 @@ function loadConfig(){
   if(langSel){langSel.value=idiomaLang;updatePaisOptions(idiomaLang,idiomaPais,c.estado||'');}
   setTimeout(()=>{onEstadoChange(c.estado||'');const fe=document.getElementById('c_fuso');if(fe&&c.fuso_horario)fe.value=c.fuso_horario;else if(fe)updateFuso();},300);
   aplicarTraducoes(idiomaLang);
-  checkIdiomaConfigured();
+  checkOnboardingState();
   renderDentistas(c.dentistas||[]);
   setTimeout(atualizarBadgeDentistas,0);
   renderAuto(c.automatizacoes||{});
@@ -1797,14 +1924,11 @@ function loadConfig(){
 async function saveConfig(){
   const falta=T.falta_completar||'Falta completar';
   const required=[
-    ['c_nome',T.label_nome_clinica],['c_tel',T.label_telefone],
+    ['c_nome',T.label_nome_clinica],
     ['c_end',T.label_end],['c_bairro',T.label_bairro],
     ['c_cidade',T.label_cidade],['c_cep',T.label_cep],
     ['c_maps',T.label_maps],
   ];
-  if(document.getElementById('c_estado_wrap')?.style.display!=='none'){
-    required.push(['c_estado',document.getElementById('c_estado_label')?.textContent||T.label_estado]);
-  }
   for(const [id,label] of required){
     if(!document.getElementById(id)?.value?.trim()){toast(`${falta}: ${label}`,'err');return;}
   }
@@ -1814,7 +1938,6 @@ async function saveConfig(){
   try{
     await sb.update('clinicas',currentClinica.id,{
       nome:document.getElementById('c_nome').value,
-      telefone:document.getElementById('c_tel').value,
       endereco:document.getElementById('c_end').value,
       sala:document.getElementById('c_sala').value,
       referencia:document.getElementById('c_referencia').value,
@@ -1822,14 +1945,15 @@ async function saveConfig(){
       cidade:document.getElementById('c_cidade').value,
       cep:document.getElementById('c_cep').value,
       estado:document.getElementById('c_estado')?.value||'',
-      whatsapp_instancia:document.getElementById('c_wp').value,
       maps_link:document.getElementById('c_maps').value,
       email_clinica:document.getElementById('c_email_clinica').value||'',
-      nome_agente:document.getElementById('c_nome_agente').value||'Iris',
-      personalidade:document.getElementById('c_personalidade')?.value||'acolhedora',
       whatsapp_admin:document.getElementById('c_whatsapp_admin')?.value||'',
     });
+    currentClinica.nome=document.getElementById('c_nome').value;
+    currentClinica.endereco=document.getElementById('c_end').value;
+    currentClinica.cidade=document.getElementById('c_cidade').value;
     st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_config_ok);
+    checkOnboardingState();
   }catch(e){st.textContent=T.err_txt;st.className='save-status err';toast(T.err_salvar,'err');}
   btn.disabled=false;
 }
@@ -2396,6 +2520,8 @@ function generateTokenAcesso(){
 
 // Auto-login from URL params
 document.addEventListener('DOMContentLoaded',function(){
+  const savedTheme=localStorage.getItem('iris-theme')||'dark';
+  applyTheme(savedTheme);
   const pwEl=document.getElementById('login-password');
   if(pwEl)pwEl.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
