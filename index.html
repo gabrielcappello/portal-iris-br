@@ -814,7 +814,7 @@ async function saveIdioma(){
     currentClinica.estado=estado;
     st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_idioma_ok);
     aplicarTraducoes(lang);
-    closeAcc('idioma');
+    closeAllAcc();
     checkOnboardingState();
     if(!isSecretariaConfigured())setTimeout(()=>openAcc('secretaria'),120);
   }catch(e){st.textContent=T.err_txt;st.className='save-status err';toast(T.err_salvar,'err');}
@@ -837,7 +837,7 @@ async function saveSecretaria(){
     currentClinica.telefone_agente=tel;
     if(st){st.textContent=T.toast_salvo||'Salvo ✓';st.className='save-status ok';}
     toast('Secretaria salva ✓');
-    closeAcc('secretaria');
+    closeAllAcc();
     checkOnboardingState();
     if(!isClinicaConfigured())setTimeout(()=>openAcc('clinica'),120);
   }catch(e){
@@ -1256,7 +1256,7 @@ const TRADUCOES={
   banner_idioma:'⚠️ <b>Configure o Idioma primeiro.</b> Selecione idioma, país e estado/província, depois clique em "Salvar Idioma" para desbloquear os demais módulos.',
   mod_clinica_h2:'Dados da Clínica',mod_clinica_p:'Informações usadas pelo agente nas conversas',
   label_nome_clinica:'Nome da Clínica',ph_nome_clinica:'Ex: OdontoBR',
-  label_telefone:'Telefone',ph_telefone:'(21) 99999-9999',
+  label_telefone:'Telefone',ph_telefone:'99999-9999',
   label_end:'Endereço',end_sub:'(Rua e número)',ph_end:'Ex: Av. Paulista, 1234',
   label_sala:'Sala',ph_sala:'Ex: 3º andar, Sala 302',
   label_bairro:'Bairro',ph_bairro:'Centro',
@@ -1384,7 +1384,7 @@ const TRADUCOES={
   banner_idioma:'⚠️ <b>Configura el Idioma primero.</b> Selecciona idioma, país y provincia/estado, luego haz clic en "Guardar Idioma" para desbloquear los demás módulos.',
   mod_clinica_h2:'Datos de la Clínica',mod_clinica_p:'Información usada por el agente en las conversaciones',
   label_nome_clinica:'Nombre de la Clínica',ph_nome_clinica:'Ej: OdontoAR',
-  label_telefone:'Teléfono',ph_telefone:'11 9999-9999',
+  label_telefone:'Teléfono',ph_telefone:'9999-9999',
   label_end:'Dirección',end_sub:'(Calle y número)',ph_end:'Ej: Av. Corrientes 1234',
   label_sala:'Sala / Piso',ph_sala:'Ej: Piso 3, Oficina 302',
   label_bairro:'Barrio',ph_bairro:'Centro',
@@ -1512,7 +1512,7 @@ const TRADUCOES={
   banner_idioma:'⚠️ <b>Set up Language first.</b> Select language, country and state/province, then click "Save Language" to unlock the other modules.',
   mod_clinica_h2:'Clinic Details',mod_clinica_p:'Information used by the agent in conversations',
   label_nome_clinica:'Clinic Name',ph_nome_clinica:'Ex: Smile Clinic',
-  label_telefone:'Phone',ph_telefone:'555-9999-9999',
+  label_telefone:'Phone',ph_telefone:'9999-9999',
   label_end:'Address',end_sub:'(Street and number)',ph_end:'Ex: 123 Main St',
   label_sala:'Suite / Floor',ph_sala:'Ex: Floor 3, Suite 302',
   label_bairro:'Neighborhood',ph_bairro:'Downtown',
@@ -1965,7 +1965,7 @@ async function saveConfig(){
     currentClinica.endereco=document.getElementById('c_end').value;
     currentClinica.cidade=document.getElementById('c_cidade').value;
     st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_config_ok);
-    closeAcc('clinica');
+    closeAllAcc();
     checkOnboardingState();
   }catch(e){st.textContent=T.err_txt;st.className='save-status err';toast(T.err_salvar,'err');}
   btn.disabled=false;
