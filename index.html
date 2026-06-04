@@ -370,6 +370,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
           <div class="accordion-body-inner">
             <div class="form-grid">
               <div class="form-group"><label data-i18n="label_nome_agente">Nome da secretária virtual</label><input id="c_nome_agente" placeholder="Ex: Sofia, Ana, Iris..." value="Iris"><span data-i18n="nome_agente_nota" style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Este é o nome com que o agente se apresentará aos pacientes.</span></div>
+              <div class="form-group"><label data-i18n="label_personalidade">Personalidade da Iris</label><select id="c_personalidade"><option value="acolhedora" data-i18n-opt="pers_acolhedora">Acolhedora — calorosa e empática</option><option value="executiva" data-i18n-opt="pers_executiva">Executiva — formal e precisa</option><option value="moderna" data-i18n-opt="pers_moderna">Moderna — descontraída e jovial</option><option value="premium" data-i18n-opt="pers_premium">Premium — sofisticada e exclusiva</option><option value="objetiva" data-i18n-opt="pers_objetiva">Objetiva — direta e eficiente</option></select><span data-i18n="personalidade_nota" style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Define o tom e o estilo de comunicação da Iris com os pacientes.</span></div>
               <div class="form-group"><label data-i18n="label_nome_clinica">Nome da Clínica</label><input id="c_nome" placeholder="Ex: OdontoBR"></div>
               <div class="form-group">
                 <label data-i18n="label_telefone">Telefone</label>
@@ -388,9 +389,10 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               <div class="form-group full">
                 <label><span data-i18n="label_wp">Instância WhatsApp</span> <span data-i18n="wp_sub" style="font-weight:400;color:var(--text3)">(automático)</span></label>
                 <input id="c_wp" readonly style="background:var(--surface3);color:rgba(226,232,240,0.85);font-weight:300;cursor:default;" placeholder="Gerado automaticamente">
-                <span data-i18n="wp_formato" style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/[telefone da clínica]</span>
+                <span data-i18n="wp_formato" style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/[DDD][telefone]</span>
               </div>
               <div class="form-group"><label>Email da Clínica</label><input id="c_email_clinica" type="email" placeholder="clinica@exemplo.com"><span style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Email de contato da clínica (usado pelo agente quando solicitado).</span></div>
+              <div class="form-group"><label data-i18n="label_wp_admin">WhatsApp do Administrador</label><input id="c_whatsapp_admin" placeholder="Ex: 11999999999" type="tel"><span data-i18n="wp_admin_nota" style="font-size:11px;color:var(--text3);margin-top:4px;display:block">Número do administrador. Usado pela Iris para identificar o gestor da clínica.</span></div>
               <div class="form-group full">
                 <label><span data-i18n="label_maps">Link de Localização</span> <span data-i18n="maps_sub" style="font-weight:400;color:var(--text3)">(Google Maps)</span></label>
                 <div style="display:flex;gap:8px;align-items:stretch">
@@ -1008,6 +1010,7 @@ function onEstadoChange(estado){
   const span=document.getElementById('c_tel_ddd');
   if(span){span.textContent=ddd?`(${ddd})`:'';span.style.display=ddd?'':'none';}
   updateFuso();
+  updateWpName();
 }
 
 // ══════════════════════════════════
@@ -1158,7 +1161,11 @@ const TRADUCOES={
   mod_auto_h2:'Automatizações',mod_auto_p:'Mensagens automáticas para pacientes',
   auto_lem2h:'🔔 Lembrete 2 horas antes',auto_lem2h_sub:'Envia uma mensagem automática 2 horas antes de cada consulta',
   auto_lem24h:'🔔 Lembrete 24 horas antes',auto_lem24h_sub:'Envia uma mensagem automática 1 dia antes da consulta',
-  auto_pos:'⭐ Pós-consulta',auto_pos_sub:'Pergunta como foi a consulta no dia seguinte',
+  auto_pos:'⭐ Pós-consulta',auto_pos_sub:'Envio automático após a consulta',
+  pos_opt_nenhum:'Nenhum',pos_opt_satisfacao:'Apenas satisfação',pos_opt_google:'Apenas avaliação Google',pos_opt_ambos:'Satisfação + Google',
+  pos_google_label:'Link Google Review',pos_tempo_label:'Enviar após:',
+  label_personalidade:'Personalidade da Iris',personalidade_nota:'Define o tom e estilo de comunicação da Iris com os pacientes.',
+  label_wp_admin:'WhatsApp do Administrador',wp_admin_nota:'Número do administrador — usado pela Iris para identificar o gestor.',
   auto_ret:'🔄 Retorno automático',auto_ret_sub:'Lembra o paciente de agendar retorno após X meses',
   label_meses:'meses',auto_espera:'⏳ Lista de espera',auto_espera_sub:'Avisa o paciente quando um horário cancelado fica disponível',
   btn_salvar_auto:'💾 Salvar Automatizações',toast_auto_ok:'Automatizações salvas ✓',
@@ -1172,7 +1179,7 @@ const TRADUCOES={
   opt_todos:'Todos',opt_confirmado:'Confirmado',opt_remarcado:'Remarcado',opt_cancelado:'Cancelado',opt_ok:'OK',opt_falto:'Falto',
   loading_ag:'Carregando agendamentos...',vazio_ag:'Nenhum agendamento registrado ainda',err_ag:'Erro ao carregar agendamentos',
   col_data:'Data',col_hora:'Hora',col_pac:'Paciente',col_dent:'Dentista',col_status:'Status',col_acao:'Ação',
-  opt_alterar:'Alterar...',opt_ok2:'✓ OK',opt_faltou:'✗ Faltou',
+  opt_alterar:'Confirmado',opt_ok2:'✓ OK',opt_faltou:'✗ Faltou',
   toast_status_ok:'Status atualizado: {s} ✓',err_status:'Erro ao atualizar status',
   obs_h3:'📝 Observações do Paciente',ph_obs:'Escreva aqui notas sobre este paciente...',btn_cancelar:'Cancelar',btn_salvar_obs:'Salvar',toast_obs_ok:'Observação salva ✓',
   qr_h3:'📱 Acesso do Dentista',qr_sub:'Escaneie o QR para acessar',btn_fechar:'Fechar',loading_qr:'Carregando QR...',
@@ -1279,7 +1286,11 @@ const TRADUCOES={
   mod_auto_h2:'Automatizaciones',mod_auto_p:'Mensajes automáticos para pacientes',
   auto_lem2h:'🔔 Recordatorio 2 horas antes',auto_lem2h_sub:'Envía un mensaje automático 2 horas antes de cada consulta',
   auto_lem24h:'🔔 Recordatorio 24 horas antes',auto_lem24h_sub:'Envía un mensaje automático 1 día antes de la consulta',
-  auto_pos:'⭐ Post-consulta',auto_pos_sub:'Pregunta cómo fue la consulta al día siguiente',
+  auto_pos:'⭐ Post-consulta',auto_pos_sub:'Envío automático después de la consulta',
+  pos_opt_nenhum:'Ninguno',pos_opt_satisfacao:'Solo satisfacción',pos_opt_google:'Solo reseña Google',pos_opt_ambos:'Satisfacción + Google',
+  pos_google_label:'Enlace Google Review',pos_tempo_label:'Enviar después de:',
+  label_personalidade:'Personalidad de Iris',personalidade_nota:'Define el tono y estilo de comunicación de Iris con los pacientes.',
+  label_wp_admin:'WhatsApp del Administrador',wp_admin_nota:'Número del administrador — usado por Iris para identificar al gestor.',
   auto_ret:'🔄 Retorno automático',auto_ret_sub:'Recuerda al paciente agendar retorno después de X meses',
   label_meses:'meses',auto_espera:'⏳ Lista de espera',auto_espera_sub:'Avisa al paciente cuando un horario cancelado queda disponible',
   btn_salvar_auto:'💾 Guardar Automatizaciones',toast_auto_ok:'Automatizaciones guardadas ✓',
@@ -1293,7 +1304,7 @@ const TRADUCOES={
   opt_todos:'Todos',opt_confirmado:'Confirmado',opt_remarcado:'Remarcado',opt_cancelado:'Cancelado',opt_ok:'OK',opt_falto:'Falto',
   loading_ag:'Cargando agendamientos...',vazio_ag:'No hay agendamientos registrados aún',err_ag:'Error al cargar agendamientos',
   col_data:'Fecha',col_hora:'Hora',col_pac:'Paciente',col_dent:'Dentista',col_status:'Estado',col_acao:'Acción',
-  opt_alterar:'Cambiar...',opt_ok2:'✓ OK',opt_faltou:'✗ Faltó',
+  opt_alterar:'Confirmado',opt_ok2:'✓ OK',opt_faltou:'✗ Faltó',
   toast_status_ok:'Estado actualizado: {s} ✓',err_status:'Error al actualizar estado',
   obs_h3:'📝 Observaciones del Paciente',ph_obs:'Escribe aquí notas sobre este paciente...',btn_cancelar:'Cancelar',btn_salvar_obs:'Guardar',toast_obs_ok:'Observación guardada ✓',
   qr_h3:'📱 Acceso del Dentista',qr_sub:'Escanea el QR para acceder',btn_fechar:'Cerrar',loading_qr:'Cargando QR...',
@@ -1400,7 +1411,11 @@ const TRADUCOES={
   mod_auto_h2:'Automations',mod_auto_p:'Automatic messages for patients',
   auto_lem2h:'🔔 Reminder 2 hours before',auto_lem2h_sub:'Sends an automatic message 2 hours before each appointment',
   auto_lem24h:'🔔 Reminder 24 hours before',auto_lem24h_sub:'Sends an automatic message 1 day before the appointment',
-  auto_pos:'⭐ Post-appointment',auto_pos_sub:'Asks how the appointment went the next day',
+  auto_pos:'⭐ Post-appointment',auto_pos_sub:'Automatic message after the appointment',
+  pos_opt_nenhum:'None',pos_opt_satisfacao:'Satisfaction only',pos_opt_google:'Google review only',pos_opt_ambos:'Satisfaction + Google',
+  pos_google_label:'Google Review Link',pos_tempo_label:'Send after:',
+  label_personalidade:'Iris Personality',personalidade_nota:'Defines the tone and communication style of Iris with patients.',
+  label_wp_admin:'Administrator WhatsApp',wp_admin_nota:'Administrator number — used by Iris to identify the clinic manager.',
   auto_ret:'🔄 Automatic return',auto_ret_sub:'Reminds the patient to schedule a return after X months',
   label_meses:'months',auto_espera:'⏳ Waiting list',auto_espera_sub:'Notifies the patient when a cancelled slot becomes available',
   btn_salvar_auto:'💾 Save Automations',toast_auto_ok:'Automations saved ✓',
@@ -1414,7 +1429,7 @@ const TRADUCOES={
   opt_todos:'All',opt_confirmado:'Confirmed',opt_remarcado:'Rescheduled',opt_cancelado:'Cancelled',opt_ok:'OK',opt_falto:'No-show',
   loading_ag:'Loading appointments...',vazio_ag:'No appointments registered yet',err_ag:'Error loading appointments',
   col_data:'Date',col_hora:'Time',col_pac:'Patient',col_dent:'Dentist',col_status:'Status',col_acao:'Action',
-  opt_alterar:'Change...',opt_ok2:'✓ OK',opt_faltou:'✗ No-show',
+  opt_alterar:'Confirmed',opt_ok2:'✓ OK',opt_faltou:'✗ No-show',
   toast_status_ok:'Status updated: {s} ✓',err_status:'Error updating status',
   obs_h3:'📝 Patient Notes',ph_obs:'Write notes about this patient here...',btn_cancelar:'Cancel',btn_salvar_obs:'Save',toast_obs_ok:'Note saved ✓',
   qr_h3:'📱 Dentist Access',qr_sub:'Scan QR to access',btn_fechar:'Close',loading_qr:'Loading QR...',
@@ -1739,8 +1754,11 @@ function usarGeolocalizacao(){
 
 function updateWpName(){
   const tel=document.getElementById('c_tel')?.value||'';
+  const estado=document.getElementById('c_estado')?.value||'';
+  const ddd=ESTADO_DDD[estado]||'';
   const wp=document.getElementById('c_wp');
-  if(wp)wp.value=tel?`CAPPIA/${tel.replace(/\D/g,'')}`:'' ;
+  const digits=tel.replace(/\D/g,'');
+  if(wp)wp.value=digits?`CAPPIA/${ddd}${digits}`:'';
 }
 
 function loadConfig(){
@@ -1753,10 +1771,13 @@ function loadConfig(){
   document.getElementById('c_bairro').value=c.bairro||'';
   document.getElementById('c_cidade').value=c.cidade||'';
   document.getElementById('c_cep').value=c.cep||'';
-  document.getElementById('c_wp').value=c.telefone?`CAPPIA/${c.telefone.replace(/\D/g,'')}`:'';
+  const _wpDdd=ESTADO_DDD[c.estado||'']||'';
+  document.getElementById('c_wp').value=c.telefone?`CAPPIA/${_wpDdd}${c.telefone.replace(/\D/g,'')}`:'';
   document.getElementById('c_maps').value=c.maps_link||'';
   document.getElementById('c_email_clinica').value=c.email_clinica||'';
   document.getElementById('c_nome_agente').value=c.nome_agente||'Iris';
+  const persEl=document.getElementById('c_personalidade');if(persEl)persEl.value=c.personalidade||'acolhedora';
+  const wpAdminEl=document.getElementById('c_whatsapp_admin');if(wpAdminEl)wpAdminEl.value=c.whatsapp_admin||'';
   const idiomaVal=c.idioma||'português-br';
   const dashIdx=idiomaVal.lastIndexOf('-');
   const idiomaLang=dashIdx>0?idiomaVal.substring(0,dashIdx):'português';
@@ -1805,6 +1826,8 @@ async function saveConfig(){
       maps_link:document.getElementById('c_maps').value,
       email_clinica:document.getElementById('c_email_clinica').value||'',
       nome_agente:document.getElementById('c_nome_agente').value||'Iris',
+      personalidade:document.getElementById('c_personalidade')?.value||'acolhedora',
+      whatsapp_admin:document.getElementById('c_whatsapp_admin')?.value||'',
     });
     st.textContent=T.toast_salvo;st.className='save-status ok';toast(T.toast_config_ok);
   }catch(e){st.textContent=T.err_txt;st.className='save-status err';toast(T.err_salvar,'err');}
@@ -2205,12 +2228,32 @@ function renderAuto(a){
       </div>
       <div class="toggle ${a.lembrete_24h?'on':''}" id="auto-lembrete_24h" onclick="this.classList.toggle('on')"></div>
     </div>
-    <div class="auto-item">
-      <div class="auto-info">
-        <div class="auto-title">${T.auto_pos}</div>
-        <div class="auto-sub">${T.auto_pos_sub}</div>
+    <div class="auto-item" style="flex-direction:column;align-items:stretch;gap:12px;padding-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="auto-info">
+          <div class="auto-title">${T.auto_pos}</div>
+          <div class="auto-sub">${T.auto_pos_sub}</div>
+        </div>
       </div>
-      <div class="toggle ${a.pos_consulta?'on':''}" id="auto-pos_consulta" onclick="this.classList.toggle('on')"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding-left:4px">
+        ${['nenhum','satisfacao','google','ambos'].map(v=>`
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--text2)">
+          <input type="radio" name="pos_tipo" id="pos_tipo_${v}" value="${v}" ${(a.pos_consulta_tipo||( a.pos_consulta?'satisfacao':'nenhum'))===v?'checked':''} onchange="onPosTipoChange(this.value)" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer">
+          <span>${T['pos_opt_'+v]||v}</span>
+        </label>`).join('')}
+      </div>
+      <div id="pos-google-wrap" style="display:${['google','ambos'].includes(a.pos_consulta_tipo||( a.pos_consulta?'satisfacao':'nenhum'))?'block':'none'};padding-left:4px">
+        <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px">${T.pos_google_label||'Link Google Review'}</label>
+        <input id="pos_google_link" value="${a.pos_consulta_google_link||''}" placeholder="https://g.page/r/..." style="width:100%">
+      </div>
+      <div id="pos-tempo-wrap" style="display:${(a.pos_consulta_tipo||( a.pos_consulta?'satisfacao':'nenhum'))!=='nenhum'?'flex':'none'};align-items:center;gap:10px;padding-left:4px">
+        <label style="font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap">${T.pos_tempo_label||'Enviar após:'}</label>
+        <select id="pos_tempo" style="flex:1">
+          <option value="2h" ${ (a.pos_consulta_tempo||'2h')==='2h'?'selected':''}>2 horas</option>
+          <option value="4h" ${ (a.pos_consulta_tempo||'2h')==='4h'?'selected':''}>4 horas</option>
+          <option value="24h">${(a.pos_consulta_tempo||'2h')==='24h'?'selected':''}>24 horas</option>
+        </select>
+      </div>
     </div>
     <div class="auto-item">
       <div class="auto-info">
@@ -2233,6 +2276,13 @@ function renderAuto(a){
   </div>`;
 }
 
+function onPosTipoChange(v){
+  const gw=document.getElementById('pos-google-wrap');
+  const tw=document.getElementById('pos-tempo-wrap');
+  if(gw)gw.style.display=['google','ambos'].includes(v)?'block':'none';
+  if(tw)tw.style.display=v!=='nenhum'?'flex':'none';
+}
+
 async function saveAuto(){
   const btn=document.querySelector('[onclick="saveAuto()"]');
   const st=document.getElementById('auto-status');
@@ -2240,7 +2290,9 @@ async function saveAuto(){
   const data={
     lembrete_2h:document.getElementById('auto-lembrete_2h')?.classList.contains('on')||false,
     lembrete_24h:document.getElementById('auto-lembrete_24h')?.classList.contains('on')||false,
-    pos_consulta:document.getElementById('auto-pos_consulta')?.classList.contains('on')||false,
+    pos_consulta_tipo:document.querySelector('input[name="pos_tipo"]:checked')?.value||'nenhum',
+    pos_consulta_google_link:document.getElementById('pos_google_link')?.value||'',
+    pos_consulta_tempo:document.getElementById('pos_tempo')?.value||'2h',
     retorno:document.getElementById('auto-retorno')?.classList.contains('on')||false,
     retorno_meses:parseInt(document.getElementById('auto-retorno_meses')?.value)||6,
     lista_espera:document.getElementById('auto-lista_espera')?.classList.contains('on')||false,
