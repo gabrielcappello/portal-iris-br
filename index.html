@@ -414,7 +414,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               <div class="form-group full">
                 <label><span>Instância WhatsApp</span> <span style="font-weight:400;color:var(--text3)">(automático)</span></label>
                 <input id="c_wp" readonly style="background:var(--surface3);color:rgba(226,232,240,0.85);font-weight:300;cursor:default;" placeholder="Gerado automaticamente">
-                <span style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/[telefone]</span>
+                <span style="font-size:11px;color:var(--text3);margin-top:4px">Formato: CAPPIA/IRIS/[telefone]</span>
               </div>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
@@ -1990,7 +1990,7 @@ function updateWpName(){
   const tel=document.getElementById('c_tel')?.value||'';
   const wp=document.getElementById('c_wp');
   const digits=tel.replace(/\D/g,'');
-  if(wp)wp.value=digits?`CAPPIA/${digits}`:'';
+  if(wp)wp.value=digits?`CAPPIA/IRIS/${digits}`:'';
 }
 
 function loadConfig(){
@@ -2003,7 +2003,7 @@ function loadConfig(){
   document.getElementById('c_bairro').value=c.bairro||'';
   document.getElementById('c_cidade').value=c.cidade||'';
   document.getElementById('c_cep').value=c.cep||'';
-  document.getElementById('c_wp').value=c.telefone_agente?`CAPPIA/${c.telefone_agente.replace(/\D/g,'')}`:'';
+  document.getElementById('c_wp').value=c.telefone_agente?`CAPPIA/IRIS/${c.telefone_agente.replace(/\D/g,'')}`:'';
   document.getElementById('c_maps').value=c.maps_link||'';
   document.getElementById('c_email_clinica').value=c.email_clinica||'';
   document.getElementById('c_nome_agente').value=c.nome_agente||'Iris';
