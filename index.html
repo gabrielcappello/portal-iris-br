@@ -579,6 +579,26 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
   </div>
 </div>
 
+<!-- MODAL DETALHES DO PACIENTE -->
+<div class="modal-bg" id="paciente-modal" style="display:none;z-index:300">
+  <div class="modal" style="max-width:640px;max-height:85vh;overflow-y:auto">
+    <h3 id="pm-nome">👤 Paciente</h3>
+    <div class="form-grid" style="margin-bottom:24px">
+      <div class="form-group"><label>Telefone</label><div id="pm-telefone" style="font-family:'JetBrains Mono',monospace;font-size:14px"></div></div>
+      <div class="form-group"><label>Documento</label><div id="pm-documento" style="font-family:'JetBrains Mono',monospace;font-size:14px"></div></div>
+      <div class="form-group"><label>Data de Nascimento</label><div id="pm-nascimento" style="font-size:14px"></div></div>
+      <div class="form-group"><label>Total de Consultas</label><div id="pm-total" style="font-size:14px"></div></div>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">📅 Histórico de Agendamentos</div>
+    <div id="pm-historico" style="margin-bottom:24px;display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto"></div>
+    <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)">🦷 Odontograma</div>
+    <div style="background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--radius-sm);padding:28px;text-align:center;color:var(--text2);font-size:13px">Espaço reservado para odontograma — integração futura</div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closePacienteModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL QR CODE -->
 <div class="modal-bg" id="qr-modal">
   <div class="qr-modal">
@@ -1740,7 +1760,7 @@ function aplicarTraducoes(lang){
 // ══════════════════════════════════
 // STATE
 // ══════════════════════════════════
-let currentClinica=null, currentUsuario=null, allPacientes=[], allAgendamentos=[], obsPatientId=null;
+let currentClinica=null, currentUsuario=null, allPacientes=[], allAgendamentos=[], obsPatientId=null, autoRefreshTimer=null;
 const dentModo=['auto','auto','auto','auto','auto'];
 
 // ══════════════════════════════════
@@ -1811,7 +1831,7 @@ document.addEventListener('DOMContentLoaded', function(){
   const pwEl = document.getElementById('login-password');
   if(pwEl) pwEl.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 });
-function doLogout(){currentClinica=null;currentUsuario=null;document.getElementById('login-page').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('login-email').value='';document.getElementById('login-password').value='';}
+function doLogout(){if(autoRefreshTimer){clearInterval(autoRefreshTimer);autoRefreshTimer=null;}currentClinica=null;currentUsuario=null;document.getElementById('login-page').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('login-email').value='';document.getElementById('login-password').value='';}
 
 // ══════════════════════════════════
 // TABS
@@ -1960,7 +1980,20 @@ async function savePrecios(){
 // ══════════════════════════════════
 // LOAD ALL
 // ══════════════════════════════════
-async function loadAll(){closeAllAcc();loadConfig();loadPacientes();loadAgendamentos();}
+async function loadAll(){
+  closeAllAcc();loadConfig();
+  // carrega agendamentos antes de pacientes para que o cálculo de
+  // total/última consulta (pacienteStats) já tenha o histórico disponível
+  await loadAgendamentos();
+  await loadPacientes();
+  if(autoRefreshTimer)clearInterval(autoRefreshTimer);
+  autoRefreshTimer=setInterval(async()=>{
+    await loadPacientes();
+    await loadAgendamentos();
+    filterPacientes();
+    filterAgendamentos();
+  },60000);
+}
 
 // ══════════════════════════════════
 // CONFIG
@@ -2588,23 +2621,60 @@ async function loadPacientes(){
     renderPacientes(allPacientes);
   }catch(e){document.getElementById('pac-table-wrap').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar pacientes</p></div>';}
 }
+// Calcula total de consultas e data da última consulta a partir do
+// histórico de agendamentos vinculado ao paciente (paciente_id), já que
+// os campos total_consultas/ultima_consulta nunca são preenchidos no banco.
+function pacienteStats(pacienteId){
+  const hoje=new Date().toISOString().slice(0,10);
+  const validos=allAgendamentos.filter(a=>a.paciente_id===pacienteId&&a.status!=='cancelado'&&a.status!=='remarcado');
+  const passadas=validos.filter(a=>a.data&&a.data<=hoje).map(a=>a.data).sort();
+  return{total:validos.length,ultima:passadas.length?passadas[passadas.length-1]:null};
+}
 function renderPacientes(list){
   const wrap=document.getElementById('pac-table-wrap');
   if(!list.length){wrap.innerHTML=`<div class="empty"><div class="empty-icon">👤</div><p>${T.vazio_pac}</p></div>`;return;}
-  wrap.innerHTML=`<table><thead><tr><th>${T.col_nome}</th><th>${T.col_tel}</th><th>${T.col_doc}</th><th>${T.col_ult}</th><th>${T.col_total}</th><th>${T.col_proc}</th><th>${T.col_obs}</th></tr></thead><tbody>${list.map(p=>`<tr>
+  wrap.innerHTML=`<table><thead><tr><th>${T.col_nome}</th><th>${T.col_tel}</th><th>${T.col_doc}</th><th>${T.col_ult}</th><th>${T.col_total}</th><th>${T.col_proc}</th><th>${T.col_obs}</th></tr></thead><tbody>${list.map(p=>{
+    const st=pacienteStats(p.id);
+    return `<tr style="cursor:pointer" onclick="openPacienteModal('${p.id}')">
     <td><b>${p.nome||'—'}</b></td>
     <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${p.telefone||'—'}</td>
     <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${p.documento||'—'}</td>
-    <td>${p.ultima_consulta||'—'}</td>
-    <td><span class="badge confirmado">${p.total_consultas||0}</span></td>
+    <td>${st.ultima?st.ultima.split('-').reverse().join('/'):'—'}</td>
+    <td><span class="badge confirmado">${st.total}</span></td>
     <td>${p.procedimento||'—'}</td>
-    <td><button class="obs-btn" onclick="openObs('${p.id}','${(p.observacoes||'').replace(/'/g,"\\'")}')">
+    <td><button class="obs-btn" onclick="event.stopPropagation();openObs('${p.id}','${(p.observacoes||'').replace(/'/g,"\\'")}')">
       ${p.observacoes?'📝':'➕'} Notas</button></td>
-  </tr>`).join('')}</tbody></table>`;
+  </tr>`;
+  }).join('')}</tbody></table>`;
 }
 function filterPacientes(){
   const q=document.getElementById('search-pac').value.toLowerCase();
   renderPacientes(allPacientes.filter(p=>(p.nome||'').toLowerCase().includes(q)||(p.telefone||'').includes(q)||(p.documento||'').includes(q)));
+}
+
+function openPacienteModal(id){
+  const p=allPacientes.find(x=>x.id===id);
+  if(!p)return;
+  document.getElementById('pm-nome').textContent=`👤 ${p.nome||'—'}`;
+  document.getElementById('pm-telefone').textContent=p.telefone||'—';
+  document.getElementById('pm-documento').textContent=p.documento||'—';
+  document.getElementById('pm-nascimento').textContent=p.data_nascimento?p.data_nascimento.split('-').reverse().join('/'):'—';
+  const st=pacienteStats(p.id);
+  document.getElementById('pm-total').textContent=st.total;
+  // allAgendamentos já vem ordenado por data/horario decrescente (loadAgendamentos)
+  const hist=allAgendamentos.filter(a=>a.paciente_id===p.id);
+  const histBody=document.getElementById('pm-historico');
+  histBody.innerHTML=hist.length?hist.map(a=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);min-width:110px">${a.data||'—'} ${a.horario||''}</div>
+      <div style="flex:1;font-size:13px">${a.procedimento||'—'}<br><span style="color:var(--text2);font-size:11px">${a.dentista_nome||'—'}</span></div>
+      <span class="badge ${a.status||'confirmado'}">${a.status||'confirmado'}</span>
+    </div>`).join(''):`<div style="color:var(--text2);font-size:13px;padding:8px 0">${T.vazio_ag_dent||'Nenhum agendamento'}</div>`;
+  const m=document.getElementById('paciente-modal');
+  m.style.display='flex';m.classList.add('open');
+}
+function closePacienteModal(){
+  const m=document.getElementById('paciente-modal');
+  m.style.display='none';m.classList.remove('open');
 }
 
 // ══════════════════════════════════
@@ -2613,6 +2683,7 @@ function filterPacientes(){
 async function loadAgendamentos(){
   try{
     allAgendamentos=await sb.query('agendamentos',`?clinica_id=eq.${currentClinica.id}`);
+    allAgendamentos.sort((a,b)=>`${b.data||''} ${b.horario||''}`.localeCompare(`${a.data||''} ${a.horario||''}`));
     document.getElementById('badge-ag').textContent=allAgendamentos.length;
     renderAgendamentos(allAgendamentos);
   }catch(e){document.getElementById('ag-table-wrap').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>Erro ao carregar agendamentos</p></div>';}
@@ -2620,12 +2691,13 @@ async function loadAgendamentos(){
 function renderAgendamentos(list){
   const wrap=document.getElementById('ag-table-wrap');
   if(!list.length){wrap.innerHTML=`<div class="empty"><div class="empty-icon">📅</div><p>${T.vazio_ag}</p></div>`;return;}
-  wrap.innerHTML=`<table><thead><tr><th>${T.col_data}</th><th>${T.col_hora}</th><th>${T.col_pac}</th><th>${T.col_proc}</th><th>${T.col_dent}</th><th>${T.col_status}</th><th>${T.col_acao}</th></tr></thead><tbody>${list.map(a=>`<tr>
-    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${(a['horario']||'').substring(0,10)||'—'}</td>
-    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${(a['horario']||'').substring(11,16)||'—'}</td>
+  wrap.innerHTML=`<table><thead><tr><th>${T.col_data}</th><th>${T.col_hora}</th><th>${T.col_pac}</th><th>${T.col_doc}</th><th>${T.col_proc}</th><th>${T.col_dent}</th><th>${T.col_status}</th><th>${T.col_acao}</th></tr></thead><tbody>${list.map(a=>`<tr>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${a.data||'—'}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${a.horario||'—'}</td>
     <td><b>${a.nome||'—'}</b><br><span style="color:var(--text2);font-size:11px">${a.telefone||''}</span></td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${a.documento||'—'}</td>
     <td>${a.procedimento||'—'}</td>
-    <td>${a.dentista||'—'}</td>
+    <td>${a.dentista_nome||'—'}</td>
     <td><span class="badge ${a.status||'confirmado'}">${a.status||'confirmado'}</span></td>
     <td><select class="status-select" onchange="updateStatus('${a.id}',this.value)">
       <option value="">${T.opt_alterar}</option>
@@ -2640,7 +2712,7 @@ function renderAgendamentos(list){
 function filterAgendamentos(){
   const q=document.getElementById('search-ag').value.toLowerCase();
   const st=document.getElementById('filter-status').value;
-  renderAgendamentos(allAgendamentos.filter(a=>(!q||(a.nome||'').toLowerCase().includes(q)||(a.data||'').includes(q)||(a.dentista||'').toLowerCase().includes(q))&&(!st||a.status===st)));
+  renderAgendamentos(allAgendamentos.filter(a=>(!q||(a.nome||'').toLowerCase().includes(q)||(a.data||'').includes(q)||(a.dentista_nome||'').toLowerCase().includes(q))&&(!st||a.status===st)));
 }
 async function updateStatus(id,status){
   if(!status)return;
